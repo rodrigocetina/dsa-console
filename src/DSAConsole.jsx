@@ -45,10 +45,11 @@ const matrix1A = [
 
   { platform: 'Pinterest', category: 'Art. 16 Notice & Action', risk: 'Spread of illegal content, lack of redress', mitigation: 'User Reporting Pipelines', status: 'Active' },
 
-  { platform: 'YouTube', category: 'Art. 34.1(a) Illegal Content', risk: 'CSAM, terror, hate speech via video', mitigation: 'Automated ML Classifiers & hash-matching', status: 'Active' },
-  { platform: 'YouTube', category: 'Art. 34.1(b) Fundamental Rights', risk: 'Over-enforcement, monetization risks', mitigation: 'Appeals & YPP guidelines', status: 'Active' },
-  { platform: 'YouTube', category: 'Art. 34.1(c) Civic Discourse', risk: 'Deepfakes, election interference', mitigation: 'The 4 Rs (Remove, Raise, Reduce, Reward) & AI Labels', status: 'Active' },
-  { platform: 'YouTube', category: 'Art. 34.1(d) Minors & Health', risk: 'Eating disorders, screen time', mitigation: 'Restricted Mode, disabled autoplay for teens', status: 'Active' },
+  // YouTube — enriched from primary 2023–2025 SRAs and EY GIL Audit Implementation Reports
+  { platform: 'YouTube', category: 'Art. 34.1(a) Illegal Content — CSAM & Terror', risk: 'CSAM; Terror; Hate Speech. VVR Q1 2025: ~0.1% (54.67% removed before first view; 27.28% at 1–10 views). Q1 2025: 192,000 videos and 7M comments removed for hate speech. CSAI Match (proprietary CSAM tool, licensed free to industry). GIFCT founding member (2.2M hashes, 36 companies).', mitigation: 'Automated ML classifiers (96% proactive detection Q1 2025 vs. 95% Q2 2024; 99%+ for comments). CSAI Match + hash-matching. GIFCT hash-sharing. Priority Flagger Program (300+ gov/NGO partners, 0.62% of removed videos Q1 2025). Three-Strike System with optional training pathway (2024).', status: 'Active — VVR stable ~0.1%; Arts. 22.1 & HSC 2.2 NEGATIVE (Trusted Flaggers, remediated Mar 2025)' },
+  { platform: 'YouTube', category: 'Art. 34.1(b) Fundamental Rights — Over-Enforcement & Expression', risk: 'Over-moderation suppressing legitimate expression; monetization/demonetization risks for creators; egregious harm standard creates borderline content zone where harmful-but-non-violating content is unreachable; notice mechanism gaps for users without channels', mitigation: 'Three-Strike System with optional training pathway (2024); appeals mechanisms; EDSA exception (Educational, Documentary, Scientific, Artistic); YPP monetization guidelines; Art. 16.1 notice mechanism via Help Center webform for channelless users', status: 'Active — Art. 25(1) Positive w/ Comments (Year 1 & 2); Art. 16.1 Positive w/ Comments (Year 2); no dark patterns NEGATIVE' },
+  { platform: 'YouTube', category: 'Art. 34.1(c) Civic Discourse / AIGC / Elections', risk: 'Misleading information elevated residual risk (all 3 SRA cycles); Civic Discourse elevated residual risk (all 3 cycles); deepfakes; election interference; algorithmic amplification of borderline civic content; no voluntary AIGC labeling by bad actors', mitigation: 'The 4 Rs framework (Remove, Raise, Reduce, Reward); SynthID watermarks on all Veo-generated content; mandatory GenAI labeling tool (pre-2024 EU elections); AI Privacy Complaint Process; information panels (Wikipedia, health authorities, UN); Breaking News Shelf (42 countries, 16 EU MS); voter suppression / impersonation / hate speech / incitement policies', status: 'Active — Civic Discourse elevated residual risk all 3 cycles; Arts. 34.1/35.1 AUDITED (Positive w/ Comments, unlike TikTok/Meta)' },
+  { platform: 'YouTube', category: 'Art. 34.1(d) Minors / Addictive Design / GenAI', risk: 'Addictive behavior elevated residual risk (2023 & 2024 SRAs — "state of research remains unsettled" per YouTube); SSIED and body image risks for minors; algorithmic rabbit holes on video-native platform; min livestream age previously 13', mitigation: 'YouTube Kids (separate app); Supervised Experience for tweens; Family Center hub (2025); min livestream age raised 13→16 (2025); autoplay off by default for under-18s; disabled profiled ads to minors; expanded March 2025 safeguards (financial advice, delinquency, body image comparisons); likeness management technology; Dream Screen / Dream Track with disclosure', status: 'Active — Addictive behavior elevated 2023–2024 (not flagged 2025); Art. 28.x AUDITED (no NEGATIVE); no EC proceedings unlike TikTok/Meta' },
 ];
 
 // Matrix 1B: Audit findings
@@ -100,7 +101,13 @@ const matrix1B = [
   { platform: 'X', conclusion: 'Positive w/ Comments', criticism: 'Help Center mistakenly directed Trusted Flaggers to wrong URL', remediation: 'Updated Help Center URL' },
   { platform: 'X', conclusion: 'Positive / Unverifiable', criticism: 'Trusted Flaggers: Queues built but untested', remediation: 'Maintains queue' },
   { platform: 'Pinterest', conclusion: 'Procedural Flaw', criticism: 'Auditor accepted definition of undue delay for receipt as "when a final decision is made"', remediation: 'None' },
-  { platform: 'YouTube', conclusion: '[UNAVAILABLE]', criticism: '[Audit Report Missing from Corpus]', remediation: '[UNAVAILABLE]' },
+  { platform: 'YouTube', conclusion: 'NEGATIVE (Year 1 — 2024)', criticism: 'Art. 24(1) — Transparency Reporting: Transparency Report did not include suspensions for manifestly unfounded complaints on a per-VLOP basis. GIL reported aggregate data across all 4 VLOPs rather than disaggregated per-service figures as required. Structural gap in accountability architecture.', remediation: 'Remediated in February 2025 Transparency Report. Per-VLOP suspension data now included. Confirmed by Year 2 audit.' },
+  { platform: 'YouTube', conclusion: 'NEGATIVE (Year 1 — 2024)', criticism: 'Art. 24(5) — Statement of Reasons (SOR) Timeliness: 14% of SORs not submitted to DSA Transparency Database within the 4-day benchmark. Root cause: technical error in reporting pipeline. Affected YouTube specifically.', remediation: 'Auto-remediated by technical fix. No manual remediation steps required. Year 2 audit found no recurrence.' },
+  { platform: 'YouTube', conclusion: 'NEGATIVE (Year 2 — 2025)', criticism: 'Art. 14.6 — Terms & Conditions in EU Languages: Terms of Service not available in all 24 EU official languages. Of 33 in-scope terms, 24 deficient across multiple languages. Basic transparency obligation unmet across the EU language space.', remediation: 'YouTube committed to phased remediation. Specific timeline not confirmed in Year 2 audit implementation report.' },
+  { platform: 'YouTube', conclusion: 'NEGATIVE (Year 2 — 2025)', criticism: 'Art. 22.1 — Trusted Flagger Processing: 3 out of 10 sampled Trusted Flagger notices not processed without undue delay. Infrastructure gap in TF prioritisation queue. Finding linked to same infrastructure failure as HSC Commitment 2.2 (hate speech TF notices also affected).', remediation: 'Updated internal guidance and escalation processes. Implemented March 2025, confirmed by YouTube.' },
+  { platform: 'YouTube', conclusion: 'NEGATIVE (Year 2 — 2025 / HSC)', criticism: 'EU Hate Speech Code Commitment 2.2 — Trusted Flagger Hate Speech Notices: 2 Trusted Flagger notices alleging illegal hate speech not processed without undue delay. Same infrastructure failure as Art. 22.1 — dual-capture finding: single systemic gap triggers both DSA and HSC NEGATIVEs simultaneously. Unique in corpus.', remediation: 'Updated internal guidance and escalation processes. Implemented March 2025. YouTube is the ONLY GIL service subject to HSC obligations (integrated into DSA framework 20 Jan 2025).' },
+  { platform: 'YouTube', conclusion: 'Positive w/ Comments (Year 2 — 2025 / HSC)', criticism: 'Art. 16.1 & HSC Commitment 2.1 — Notice Mechanism Accessibility: In-product notice dropdown inoperable for (a) signed-out users and (b) signed-in users without a YouTube channel. Primary reporting path defaults to Help Center webform — a secondary, higher-friction mechanism. Channelless users face structural access barrier.', remediation: 'YouTube to determine remediation approach and timeline by 31 December 2025. Not yet implemented as of audit close.' },
+  { platform: 'YouTube', conclusion: 'Positive w/ Comments (Years 1 & 2 — AUDITED)', criticism: 'Arts. 34.1, 34.2, 35.1 — SRA Obligations Independently Verified: UNIQUE IN CORPUS. Unlike TikTok and all Meta platforms where these core articles are unauditable due to EC proceedings, YouTube\'s risk assessment (Art. 34.1), risk factor evaluation (Art. 34.2), and mitigation adequacy (Art. 35.1) were independently audited by EY in both Year 1 and Year 2. Recommendations covered: scoring rationale documentation, off-cycle SRA template, risk statement wording, mitigation tracking, factor evaluation at risk statement level.', remediation: 'Year 2 Recs 1 (scoring rationale) and 3 (risk statement wording) implemented Aug 2025. Rec 2 (off-cycle template) by Feb 2026. Art. 42.2 (Positive w/ Comments): adapt per-MS-language reporting by 27 Feb 2026.' },
 ];
 
 // Thematic synthesis (cross-platform)
@@ -149,9 +156,11 @@ const disconnect = [
   { platform: 'X', category: 'Civic Discourse', claim: 'Community Notes', auditor: 'Verified feature exists', ec: 'Questions if crowdsourcing outpaces algorithmic virality.' },
   { platform: 'X', category: 'Data Access', claim: 'Compliance with Data Access', auditor: 'Policy Verification', ec: 'Formal proceedings cite shortcomings in researcher access.' },
   { platform: 'Pinterest', category: 'Notice & Action', claim: 'User Reporting Pipelines', auditor: 'Accepted delayed receipt definition', ec: 'Acknowledging complaint after investigation subverts effective remedy.' },
-  { platform: 'YouTube', category: 'Illegal Content', claim: 'ML Classifiers & hash-matching', auditor: '[UNAVAILABLE]', ec: 'Warns over-reliance on AI leaves blindspots for novel harms.' },
-  { platform: 'YouTube', category: 'Civic Discourse', claim: 'Raise authoritative voices, labels', auditor: '[UNAVAILABLE]', ec: 'Bad actors will not voluntarily label deepfakes; algorithms amplify.' },
-  { platform: 'YouTube', category: 'Minors & Health', claim: 'Restricted Mode, Bedtime reminders', auditor: '[UNAVAILABLE]', ec: 'Video recommenders are primary vectors for rabbit hole loops.' },
+  // YouTube — revised from primary documents (GIL Audit Implementation Reports, Year 1 & Year 2)
+  { platform: 'YouTube', category: 'Illegal Content & Trusted Flaggers [REVISED]', claim: 'VVR ~0.1% stable; 96% proactive ML detection Q1 2025; CSAI Match (CSAM tool licensed free to industry); GIFCT founding member (2.2M hashes, 36 companies); Priority Flagger Program (300+ gov/NGO partners)', auditor: 'Art. 22.1 NEGATIVE (Year 2): 3/10 sampled TF notices not processed without undue delay. HSC Commitment 2.2 NEGATIVE (Year 2): same infrastructure failure triggers DSA + hate speech code NEGATIVEs simultaneously — dual-capture finding unique in corpus. Art. 14.6 NEGATIVE (Year 2): 24/33 terms deficient across EU languages.', ec: 'Over-reliance on automation leaves blindspots for novel and contextual harms. TF infrastructure failure is analytically significant: unlike TikTok (CIAPC certified with zero volume), YouTube\'s TF queues operated but failed on timeliness — a different failure mode. Δ No standalone YouTube audit report exists; findings extracted from GIL combined Audit Implementation Reports.' },
+  { platform: 'YouTube', category: 'Civic Discourse & AIGC [REVISED]', claim: 'The 4 Rs framework (Remove, Raise, Reduce, Reward); SynthID watermarks on all Veo-generated content; mandatory GenAI labeling tool (pre-2024 EU elections); information panels (Wikipedia, health authorities, UN); Breaking News Shelf (42 countries, 16 EU MS); voter suppression / impersonation policies', auditor: 'Arts. 34.1, 34.2, 35.1 — AUDITED in both Year 1 and Year 2 (Positive w/ Comments). UNIQUE IN CORPUS: unlike TikTok and all Meta platforms, YouTube\'s SRA and mitigation adequacy were independently verified. Civic Discourse remains elevated residual risk across all 3 SRA cycles (2023, 2024, 2025).', ec: 'Bad actors will not voluntarily apply AIGC labels; algorithms amplify regardless of labeling. The 4 Rs are a curatorial architecture — EC\'s concern is whether the recommender engine itself can be reconfigured to de-prioritise civic harm vectors. Δ YouTube\'s SRA auditability is the corpus-wide outlier: EC cannot make the unverifiability argument it does against TikTok and Meta.' },
+  { platform: 'YouTube', category: 'Minors & Addictive Design [REVISED]', claim: 'YouTube Kids (separate app); Supervised Experience for tweens; Family Center hub (2025); min livestream age raised 13→16 (2025); autoplay off by default for under-18s; disabled profiled ads to minors; expanded March 2025 safeguards (financial advice, delinquency, body image); likeness management technology', auditor: 'Addictive behavior elevated residual risk in 2023 and 2024 SRAs ("state of research remains unsettled" per YouTube). Downgraded from elevated in 2025 SRA. Art. 28.x provisions audited — no NEGATIVE conclusion. No EC proceedings (unlike TikTok Art. 28.1 and Meta Arts. 28.1).', ec: 'Video-native platform recommenders are primary vectors for rabbit-hole loops. Min livestream age increase and autoplay defaults are UI friction, not architectural change. EC\'s concern on an engagement-maximisation engine is whether the default reward function can be altered. Δ Absence of EC proceedings makes YouTube the cleanest minor-protection profile among video-category VLOPs.' },
+  { platform: 'YouTube', category: 'Notice Mechanism Access & Terms [REVISED]', claim: 'In-product notice dropdown for illegal content reporting; Help Center webform as alternative path; Terms of Service linked from platform surfaces; compliance with Art. 14.1 service descriptions', auditor: 'Art. 16.1 & HSC Commitment 2.1 Positive w/ Comments (Year 2): in-product dropdown inoperable for signed-out users and signed-in users without a channel — primary path unavailable to large user segment. Art. 14.6 NEGATIVE (Year 2): 24/33 terms not in all 24 EU official languages. Remediation by 31 Dec 2025 (Art. 16.1) and phased TBC (Art. 14.6).', ec: 'Effective notice-and-action requires accessible primary mechanisms. Channelless users face structural access barrier to the principal complaint pathway. H2 2026 implementation window for terms is a multi-year gap. Δ Unlike Meta\'s deliberate definitional refusals, YouTube\'s failures are capability/implementation gaps — different regulatory posture.' },
 ];
 
 // ==========================================
@@ -259,19 +268,19 @@ const auditBenchmarks = [
   },
   {
     platform: 'YouTube',
-    auditCycles: '[Pending — documents in folder]',
-    auditor: '[Pending]',
-    latestOpinion: '[UNAVAILABLE from dataset]',
-    gitcStatus: '[To be assessed from primary documents]',
-    recommenderAudited: 'No — Audit data unavailable for Civic Discourse and Minors & Health.',
-    unauditableArticles: '[To be assessed]',
-    metricInterrogation: '[To be assessed]',
-    enforcementStatus: 'None on record (from dataset)',
-    trustedFlaggerValidity: '[To be assessed]',
-    cclStatus: '[To be assessed]',
-    platformSelfRevision: '[To be assessed]',
-    primaryDocStatus: 'Pending — documents available in folder',
-    benchmarkNotes: 'Largest video platform with least audit scrutiny on record. Recommender system risk for minors and civic discourse is the EC\'s primary concern.',
+    auditCycles: '2 DSA cycles (Year 1: Aug 2023–May 2024; Year 2: Jun 2024–May 2025) + 1 HSC cycle (YouTube only: Jan–May 2025). Note: No standalone YouTube audit report — findings embedded in GIL combined Audit Implementation Reports.',
+    auditor: 'Ernst & Young LLP (EY) — single combined GIL engagement covering 4 VLOPs (YouTube, Maps, Play, Shopping) + 1 VLOSE (Search)',
+    latestOpinion: 'Positive w/ Comments (overall Year 2) — 5 NEGATIVE individual conclusions across 2 cycles: Art. 24(1) NEGATIVE Year 1 (remediated); Art. 24(5) NEGATIVE Year 1 (auto-remediated); Art. 14.6 NEGATIVE Year 2; Art. 22.1 NEGATIVE Year 2 (remediated Mar 2025); HSC Commitment 2.2 NEGATIVE Year 2 (remediated Mar 2025).',
+    gitcStatus: 'Not applicable — EY (not KPMG) methodology. No recurring GITC failure. Audits proceeded on evidence basis across both cycles without systemic IT controls breakdown.',
+    recommenderAudited: 'Partially. Arts. 34.1, 34.2, 35.1 AUDITED (Positive w/ Comments) in BOTH Year 1 and Year 2 — unique in corpus. TikTok and all Meta platforms have these articles as unauditable due to EC proceedings. Recommender architecture contribution to Civic Discourse and Addictive Behavior risks assessed within the audited SRA framework.',
+    unauditableArticles: 'None reported as unauditable due to EC proceedings (unlike TikTok and Meta). Some obligations listed as non-auditable in scope tables but without the same EC-proceedings blocking rationale. Section D of both Audit Implementation Reports lists non-auditable obligations by article.',
+    metricInterrogation: 'Partial. VVR (~0.1%) and proactive detection rates (96%) accepted without sequencing analysis. EY Year 2 audited SRA scoring rationale and recommended documentation improvements (Positive w/ Comments). Art. 24(5) 14% SOR lateness interrogated — root cause identified as technical error.',
+    enforcementStatus: 'None confirmed — no formal EC proceedings against YouTube/GIL. EC has issued RFIs and indicated concerns about recommender systems and minor safety but no proceedings equivalent to TikTok (Art. 28.1) or Meta (14 articles blocked).',
+    trustedFlaggerValidity: 'NEGATIVE (Year 2): 3/10 sampled TF notices not processed without undue delay. HSC Commitment 2.2 NEGATIVE: same infrastructure failure — dual-capture (DSA Art. 22.1 + EU Hate Speech Code Commitment 2.2 both triggered by identical systemic gap). Remediated March 2025. Unlike TikTok (CIAPC certified with zero operational volume), YouTube\'s TF queues operated — failure was on timeliness, not existence.',
+    cclStatus: 'Art. 26.2 Positive w/ Comments (Year 1 & 2): recommendations to expand Studio Mobile App for commercial declarations on YouTube Videos. Art. 42.2 Positive w/ Comments (Year 2): adapt Transparency Report accuracy indicators by member state language by 27 Feb 2026. No NEGATIVE on ad transparency.',
+    platformSelfRevision: 'Yes — 2025 SRA: Addictive behavior downgraded from elevated residual risk (was elevated in 2023 and 2024 SRAs; "state of research remains unsettled" per earlier SRAs). Min livestream age raised from 13 to 16 (2025). March 2025 expanded minor safeguards (financial advice, delinquency content, body image comparisons). SynthID watermarks rolled out on all Veo-generated content.',
+    primaryDocStatus: 'Fully reviewed — GIL combined corpus: 2 SRAs (2024, 2025), 2 Audit Implementation Reports (Year 1, Year 2), 2 mis-filed Audit Reports (titled "Independent Audit on Google Maps" — not YouTube-specific)',
+    benchmarkNotes: 'Defining corpus-wide distinction: Arts. 34.1, 34.2, 35.1 independently audited and verified — the ONLY VLOP where the core SRA and mitigation adequacy framework has been audited. TikTok and all Meta platforms have these unverifiable. Dual-capture finding (Art. 22.1 + HSC 2.2) from single infrastructure gap is unique regulatory structure. No EC proceedings = cleanest enforcement profile among video-category VLOPs. Structural anomaly: no standalone YouTube audit report; all findings require extraction from GIL combined documents.',
   },
 ];
 
@@ -327,6 +336,7 @@ export default function DSAConsole() {
   const isTikTokRow = (row) => row.platform === 'TikTok';
   const isInstagramRow = (row) => row.platform === 'Instagram';
   const isFacebookRow = (row) => row.platform === 'Facebook';
+  const isYouTubeRow = (row) => row.platform === 'YouTube';
 
   const renderRows = (data, keys) => (
     <tbody className="divide-y divide-slate-200 bg-white">
@@ -340,6 +350,8 @@ export default function DSAConsole() {
               ? 'bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-400'
               : isFacebookRow(row)
               ? 'bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-400'
+              : isYouTubeRow(row)
+              ? 'bg-green-50 hover:bg-teal-50 border-l-4 border-green-500'
               : 'hover:bg-slate-50'
           }`}
         >
@@ -353,6 +365,8 @@ export default function DSAConsole() {
                     ? 'bg-purple-200 text-purple-900'
                     : row[key] === 'Facebook'
                     ? 'bg-amber-200 text-amber-900'
+                    : row[key] === 'YouTube'
+                    ? 'bg-green-200 text-green-900'
                     : 'bg-slate-100 text-slate-900'
                 }`}>{row[key]}</span>
               ) : key === 'conclusion' || key === 'theme' ? (
@@ -401,12 +415,14 @@ export default function DSAConsole() {
                 ? 'bg-purple-50 text-purple-900 border-purple-300 hover:bg-purple-100'
                 : b.platform === 'Facebook' && b.primaryDocStatus?.startsWith('Fully')
                 ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+                : b.platform === 'YouTube' && b.primaryDocStatus?.startsWith('Fully')
+                ? 'bg-green-50 text-green-900 border-green-300 hover:bg-green-100'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
             }`}
           >
             {b.platform}
             {b.primaryDocStatus?.startsWith('Fully') && (
-              <span className={`ml-2 text-xs text-white px-1.5 py-0.5 rounded-full ${b.platform === 'Instagram' ? 'bg-purple-500' : b.platform === 'Facebook' ? 'bg-amber-500' : 'bg-pink-400'}`}>✓ Analyzed</span>
+              <span className={`ml-2 text-xs text-white px-1.5 py-0.5 rounded-full ${b.platform === 'Instagram' ? 'bg-purple-500' : b.platform === 'Facebook' ? 'bg-amber-500' : b.platform === 'YouTube' ? 'bg-green-600' : 'bg-pink-400'}`}>✓ Analyzed</span>
             )}
           </button>
         ))}
@@ -512,7 +528,7 @@ export default function DSAConsole() {
         <div>
           <h1 className="text-xl font-extrabold tracking-tight">DSA Compliance Console</h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            QDA Analysis of VLOP SRAs & Audits · TikTok, Instagram & Facebook primary docs integrated (2023–2025)
+            QDA Analysis of VLOP SRAs & Audits · TikTok, Instagram, Facebook & YouTube primary docs integrated (2023–2025)
           </p>
         </div>
         <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-700">
