@@ -29,10 +29,14 @@ const matrix1A = [
   { platform: 'Instagram', category: 'Art. 27.1 Recommender Systems', risk: 'Explore feature lacked documentation on non-profiled option; Architecture driving SSIED and body image risk', mitigation: 'Non-profiled RS option available (Art. 38.1); Explore parameters documented; Reels and Feed algorithmic options', status: 'Positive w/ Comments — Arts. 34.1/35.1 (adequacy) UNAUDITABLE' },
   { platform: 'Instagram', category: 'Art. 34.1(b) Fundamental Rights', risk: 'Fundamental Rights Tier 1→Tier 2 (worse); increased false positives from content moderation complexity', mitigation: 'Appeals; YPP-equivalent demonetization rules; human review; Three Lines of Defence model', status: 'Active — Art. 25.1 (dark patterns) UNAUDITABLE (EC proceedings)' },
 
-  { platform: 'Meta', category: 'Art. 34.1(a) Child Safety', risk: 'Child exploitation, account takeovers', mitigation: 'Playbooks & Epsilon Checkpoint', status: 'Active' },
-  { platform: 'Meta', category: 'Art. 34.1(b) Fundamental Rights', risk: 'Threats to life/safety', mitigation: 'Quick Promotions (QPs) to escalate threats', status: 'Active' },
-  { platform: 'Meta', category: 'Art. 34.1(c) Civic Discourse', risk: 'Election disinformation', mitigation: 'Elections Readiness, War Rooms', status: 'Active' },
-  { platform: 'Meta', category: 'Art. 34.1(d) Minors & Health', risk: 'Delayed response to severe reports', mitigation: 'Internal SLAs for Turnaround Times', status: 'Active' },
+  // Facebook — enriched from primary 2024–2025 SRAs and EY Audit Reports
+  { platform: 'Facebook', category: 'Art. 15.1 Transparency Reporting', risk: 'Failure to report per-VLOP moderation metrics; consolidated Facebook+Instagram data violates individual-platform reporting obligation across two cycles', mitigation: 'Transparency Center; DSA Transparency Reports; Community Standards linked from Terms of Use', status: 'NEGATIVE (2024 & 2025) — persistent cross-cycle failure; Meta corporate-level non-compliance mirroring Instagram' },
+  { platform: 'Facebook', category: 'Art. 38.1 Dating Recommender Systems', risk: 'Facebook Dating users had no non-profiling recommender option for 6+ months; algorithmic dating recommendations operated without DSA-compliant alternative', mitigation: 'Non-profiling RS option eventually implemented; Dating recommender documentation revised post-audit', status: 'NEGATIVE (2024) — 6+ month absence of legally required non-profiling option on high-intimacy feature' },
+  { platform: 'Facebook', category: 'Art. 26.2 Commercial Content Labels (Reels)', risk: '~90% of Facebook Reels on Android missing commercial disclosure labels for ~9 months; technical implementation gap on primary short-video product', mitigation: 'Label deployment completed by 2025 audit cycle; Android implementation fix confirmed', status: 'NEGATIVE (2025) — 9-month labeling failure affecting majority of Reels impressions on Android' },
+  { platform: 'Facebook', category: 'Art. 34.1(d) Protection of Minors', risk: 'Protection of Minors at Tier 3 residual risk (2025 SRA); same Tier 3 classification as Instagram — confirmed Meta-wide pattern; Teen Account system deployed but not yet validated', mitigation: 'Teen Accounts (default restricted settings); disabled profiled ads for <18; age assurance; parental supervision tools', status: 'Tier 3 residual risk — Arts. 34.1/35.1/28.1 UNAUDITABLE (EC proceedings)' },
+  { platform: 'Facebook', category: 'Art. 34.1(c) Civic Discourse / AIGC', risk: 'Election integrity risks; AI-generated content labeling gaps; algorithmic amplification of disinformation; Arts. 34.1/35.1 formally unverified', mitigation: 'Elections Readiness; War Rooms; 11 IFCN fact-checkers; C2PA AI content labels; Community Notes piloting; HSC Commitments', status: 'Active — Arts. 34.1/35.1 UNAUDITABLE (EC proceedings)' },
+  { platform: 'Facebook', category: 'Art. 20.4 Complaint Handling', risk: 'Appeals not processed within 7-day benchmark; non-discriminatory, diligent, non-arbitrary handling requirements not met', mitigation: 'Internal complaint pipelines; appeals dashboard; Q4 2025 implementation planned', status: 'NEGATIVE (2025) — same bilateral complaint-handling failure pattern as Instagram' },
+
 
   { platform: 'X', category: 'Art. 34.1(a) Illegal Content', risk: 'Delayed processing of expert notices', mitigation: 'Trusted Flagger Intake Case Group', status: 'Active' },
   { platform: 'X', category: 'Art. 34.1(b) Fundamental Rights', risk: 'Lack of ad transparency', mitigation: 'Prominent Markings based on user declarations', status: 'Active' },
@@ -82,8 +86,17 @@ const matrix1B = [
   { platform: 'Instagram', conclusion: 'Positive w/ Comments (2025)', criticism: 'Art. 12.1 — SPOC: Single Point of Contact form was not responding to users from October 2, 2024 to January 24, 2025 due to broken link (service glitch undetected for ~113 days).', remediation: 'Fixed January 24, 2025. Dashboard with real-time alerting implemented.' },
   { platform: 'Instagram', conclusion: 'UNAUDITABLE (2024 & 2025)', criticism: '14 sub-articles unauditable in both cycles due to EC governmental investigations: Arts. 14.1, 16.1, 16.5, 16.6, 17.1, 20.1, 20.3, 24.5, 25.1, 28.1, 34.1, 34.2, 35.1, 40.12. Includes core SRA (Art. 34.1), mitigation adequacy (Art. 35.1), minor protection (Art. 28.1), dark patterns (Art. 25.1), and researcher access (Art. 40.12).', remediation: 'N/A — pending resolution of EC proceedings. Identical black hole pattern to TikTok.' },
 
-  { platform: 'Meta', conclusion: 'Positive w/ Comments', criticism: 'Missed internal 7-day SLA on 1 of 25 tickets due to surge', remediation: 'Implemented dynamic staffing governance' },
-  { platform: 'Meta', conclusion: 'Observation', criticism: 'Undefined regulatory terms (rapidly, undue delay)', remediation: 'Reliance on future guidance' },
+  // Facebook — enriched from EY Audit Reports and Implementation Reports (2024, 2025)
+  { platform: 'Facebook', conclusion: 'NEGATIVE (2024 & 2025)', criticism: 'Art. 15.1 — Transparency Reporting: NEGATIVE in BOTH cycles. 2024: 5 distinct non-compliances including consolidated Facebook+Instagram metrics (violates per-VLOP requirement), monetization restriction categorization, violation type/detection method, accuracy indicators. 2025: 3 new non-compliances (account suspension categorization, "other related restrictions" metrics, complaint basis for monetization restrictions). Meta corporate-level failure — identical structural pattern to Instagram.', remediation: '2024 remediation targets partially met by 2025 cycle. Reporting framework restructuring planned Q1 2026. Consolidated metrics issue requires disaggregation across Meta VLOP entities.' },
+  { platform: 'Facebook', conclusion: 'NEGATIVE (2024)', criticism: 'Art. 38.1 — Recommender System (Facebook Dating): no non-profiling recommender option available to Facebook Dating users for 6+ months. Dating feature operates as intimacy-context recommender; absence of DSA-compliant alternative more serious than equivalent Explore gap on Instagram.', remediation: 'Non-profiling option implemented during evaluation period. Positive conclusion reached in 2025 audit cycle after fix confirmed.' },
+  { platform: 'Facebook', conclusion: 'NEGATIVE (2024)', criticism: 'Art. 24.1 — Account Suspensions Reporting: inaccurate reporting of suspensions for manifestly illegal content in DSA Transparency Reports. Same finding as Instagram 2024.', remediation: 'Already remediated by October 2024 (3rd Transparency Report).' },
+  { platform: 'Facebook', conclusion: 'NEGATIVE (2024)', criticism: 'Art. 39.3 — Ads Repository: missing removal reason information; improper disclosure of ad content and payer information. Affects researcher and civil society access to advertising data.', remediation: 'Already remediated April 26, 2024.' },
+  { platform: 'Facebook', conclusion: 'NEGATIVE (2024)', criticism: 'Art. 42.2 — Accuracy by Member State Language: missing accuracy indicators; self-reported miscalculated human reviewer metrics. Same finding as Instagram 2024.', remediation: 'Q2 2025 planned. Status unclear in 2025 corpus.' },
+  { platform: 'Facebook', conclusion: 'NEGATIVE (2025)', criticism: 'Art. 20.4 — Complaint Handling: appeals of legally classified reporter appeals not processed within 7 days (EY-developed benchmark). Non-discriminatory, diligent, non-arbitrary handling requirements not met. Mirrors Instagram 2025 NEGATIVE on same article.', remediation: 'Q4 2025 implementation planned. Not yet implemented as of September 2025 audit.' },
+  { platform: 'Facebook', conclusion: 'NEGATIVE (2025)', criticism: 'Art. 26.2 — Commercial Content Labels (Reels Android): ~90% of Facebook Reels on Android missing required commercial disclosure labels for approximately 9 months. Primary short-video format. Technical implementation gap on the dominant mobile OS for the platform.', remediation: 'Label deployment completed and confirmed by 2025 audit cycle end.' },
+  { platform: 'Facebook', conclusion: 'Observation (2024 & 2025)', criticism: 'Arts. 18.1 & 22.1 — Definitional Refusals: Meta formally declined to define "promptly" (Art. 18.1, notice-to-authorities reporting) and "undue delay" (Art. 22.1, complaint handling) as measurable benchmarks. Unique in corpus — not a capability gap but a deliberate regulatory posture.', remediation: 'Reliance on future regulatory guidance stated as justification. No commitment to self-define benchmarks.' },
+  { platform: 'Facebook', conclusion: 'UNAUDITABLE (2024 & 2025)', criticism: '14 sub-articles unauditable in both cycles due to EC governmental investigations: Arts. 14.1, 16.1, 16.5, 16.6, 17.1, 20.1, 20.3, 24.5, 25.1, 28.1, 34.1, 34.2, 35.1, 40.12. PLUS HSC Commitments 2.1 & 2.2 (Facebook-specific addition). Includes core SRA (Art. 34.1), mitigation adequacy (Art. 35.1), minor protection (Art. 28.1), dark patterns (Art. 25.1), researcher access (Art. 40.12).', remediation: 'N/A — pending resolution of EC proceedings. Identical structural black hole to TikTok and Instagram.' },
+
   { platform: 'X', conclusion: 'Positive w/ Comments', criticism: 'Help Center mistakenly directed Trusted Flaggers to wrong URL', remediation: 'Updated Help Center URL' },
   { platform: 'X', conclusion: 'Positive / Unverifiable', criticism: 'Trusted Flaggers: Queues built but untested', remediation: 'Maintains queue' },
   { platform: 'Pinterest', conclusion: 'Procedural Flaw', criticism: 'Auditor accepted definition of undue delay for receipt as "when a final decision is made"', remediation: 'None' },
@@ -124,10 +137,13 @@ const disconnect = [
   { platform: 'Instagram', category: 'Recommender Systems (Art. 27) [REVISED]', claim: 'Non-profiled RS option available; Explore parameters documented; Reels and Feed options; Art. 38.1 compliance', auditor: 'Art. 27.1 Positive with Comments (Explore lacked non-profiled option documentation). Arts. 27.2, 27.3 Positive. Arts. 34.1/35.1 UNAUDITABLE.', ec: 'Surface-level Art. 27 transparency checks do not assess whether recommender architecture drives systemic risk. For SSIED on image-centric platform, the EC\'s question is whether algorithmic amplification precedes harm mitigation. Δ Different from TikTok (not Negative), but same architectural black hole.' },
   { platform: 'Instagram', category: 'User Remedies & Terms (Art. 14.5) [NEW FINDING]', claim: 'Terms of Use; Help Center; Community Standards; appeals processes described in linked pages', auditor: 'Positive with Comments (2025): Terms lack explicit summary of available remedies and redress mechanisms in unambiguous language. Planned remediation: H2 2026.', ec: 'A user\'s ability to understand their rights and recourse is the DSA\'s core user-protection commitment. H2 2026 implementation is a 2+ year delay from the audit period. Δ Longest remediation delay in the corpus.' },
 
-  { platform: 'Meta', category: 'Child Safety', claim: 'Playbooks & Epsilon lockdowns', auditor: 'SPOC Volume pipelines', ec: 'Demands proactive algorithmic demotion over reactive reporting.' },
-  { platform: 'Meta', category: 'Fundamental Rights', claim: 'Quick Promotions (QPs)', auditor: 'System Inspection', ec: 'Expects evaluation of entire ad-targeting infrastructure.' },
-  { platform: 'Meta', category: 'Civic Discourse', claim: 'Elections Readiness', auditor: 'Turnaround Time (SLA)', ec: 'Reactive SLAs inadequate; algorithms amplify before tickets filed.' },
-  { platform: 'Meta', category: 'Minors & Health', claim: 'Internal SLAs', auditor: 'SLA Enforcement/Staffing', ec: 'Passing a lenient self-defined metric does not mean risk is mitigated.' },
+  // Facebook — revised from primary documents (2024–2025)
+  { platform: 'Facebook', category: 'Transparency Reporting (Art. 15.1) [REVISED]', claim: 'Transparency Center; DSA Transparency Reports; Community Standards linked from Terms of Use', auditor: 'NEGATIVE (2024 & 2025): consolidated Facebook+Instagram metrics violate per-VLOP requirement; missing monetization metrics, categorization, complaint basis, accuracy indicators across two consecutive cycles.', ec: 'Art. 15.1 failure disables all external verification of Facebook\'s compliance. The consolidated-metrics approach means neither Facebook\'s nor Instagram\'s risk profile is independently readable. Δ Meta corporate-level failure — structural, not platform-specific.' },
+  { platform: 'Facebook', category: 'Dating Recommender (Art. 38.1) [NEW FINDING]', claim: 'Facebook Dating uses recommender systems; non-profiling option eventually implemented', auditor: 'NEGATIVE (2024): no non-profiling recommender option for 6+ months on Facebook Dating. Positive (2025): option implemented and confirmed by audit.', ec: 'A high-intimacy context (dating matching) operating without DSA-required non-profiling option for 6 months is more serious than equivalent failures on discovery features. Δ Only explicit recommender NEGATIVE on intimacy-context feature in corpus.' },
+  { platform: 'Facebook', category: 'Reels Commercial Labels (Art. 26.2) [NEW FINDING]', claim: 'Commercial content labeling for Reels; creator disclosure requirements implemented', auditor: 'NEGATIVE (2025): ~90% of Reels on Android missing commercial labels for ~9 months. Technical implementation failure on dominant mobile OS for primary short-video product.', ec: 'Commercial content transparency is a core user-protection DSA obligation. A 9-month failure affecting ~90% of Android impressions (majority of mobile market) is a systemic gap, not an isolated glitch. Δ Largest disclosure failure by user-exposure volume in primary document corpus.' },
+  { platform: 'Facebook', category: 'Protection of Minors (Art. 34.1(d)) [REVISED]', claim: 'Teen Accounts (default restricted settings); disabled profiled ads for <18; age assurance; parental supervision tools; SSIED safe messaging guidelines', auditor: 'Arts. 28.1, 34.1, 35.1 UNAUDITABLE (EC proceedings). Protection of Minors at Tier 3 (2025 SRA) — same classification as Instagram.', ec: 'Teen Account mitigations are architectural defaults, not architectural redesigns. Tier 3 on a social graph platform means the EC\'s core concern — algorithmic exposure to harmful content — remains unverified. Δ Tier 3 confirms Meta-wide pattern, not platform-specific remediation.' },
+  { platform: 'Facebook', category: 'Risk Assessment Architecture (Arts. 34.1 & 35.1) [NEW FINDING]', claim: 'ISO 31000:2018; UN Guiding Principles; Integrity GRC Programme; Three Lines of Defence; annual SRA (Year 3 in 2025)', auditor: 'UNAUDITABLE in both 2024 and 2025. EY cannot form opinion on SRA or mitigation adequacy for core DSA obligations.', ec: 'Facebook\'s entire compliance architecture — whether the Integrity Ecosystem is reasonable, proportionate, and effective — has never been independently verified. HSC Commitments 2.1 & 2.2 also unauditable (Facebook-specific addition to Instagram pattern). Δ Same structural black hole as TikTok and Instagram.' },
+  { platform: 'Facebook', category: 'Definitional Refusals (Arts. 18.1 & 22.1) [NEW FINDING]', claim: '"Promptly" and "undue delay" defined through legal process and regulatory guidance; internal SLAs as operational benchmarks', auditor: 'Observation (2024 & 2025): Meta formally declined to define "promptly" (notice to authorities) and "undue delay" (complaint handling) as measurable thresholds. Auditors noted as observation, not Negative.', ec: 'Definitional capture: the platform controls the metric against which compliance is measured. A refusal to self-define benchmarks is more corrosive than a missed deadline, as it makes all subsequent SLA-based audit conclusions unfalsifiable. Δ Analytically unique: not a capability gap but a deliberate regulatory posture.' },
   { platform: 'X', category: 'Illegal Content', claim: 'Trusted Flagger priority queues', auditor: 'Typographical Checks (broken Help Center URL)', ec: 'Opened formal proceedings for systemic illegal content failures.' },
   { platform: 'X', category: 'Fundamental Rights', claim: 'UI Transparency for ads', auditor: 'Ad Transparency Checks', ec: 'Formal proceedings target Blue Check system as structural dark pattern.' },
   { platform: 'X', category: 'Civic Discourse', claim: 'Community Notes', auditor: 'Verified feature exists', ec: 'Questions if crowdsourcing outpaces algorithmic virality.' },
@@ -178,6 +194,22 @@ const auditBenchmarks = [
     benchmarkNotes: 'Defining finding: Art. 15.1 NEGATIVE in both 2024 AND 2025 — only cross-cycle recurring substantive failure in corpus. Art. 23.1 bilateral failure (2025) is analytically novel. SSIED Tier 3 on image-centric platform is the EC\'s core concern. Instagram Direct excluded from DSA scope entirely.',
   },
   {
+    platform: 'Facebook',
+    auditCycles: '2 (2023–24; 2024–25). Year 1 exists but not in reviewed corpus.',
+    auditor: 'Ernst & Young LLP (EY)',
+    latestOpinion: 'No overall unqualified opinion (2025) — 14 sub-articles + HSC Commitments 2.1/2.2 unauditable. NEGATIVEs: Arts. 15.1 (2024 & 2025), 38.1 Dating (2024), 24.1 (2024), 39.3 (2024), 42.2 (2024), 20.4 (2025), 26.2 Reels Android (2025).',
+    gitcStatus: 'Not a recurring GITC failure (unlike TikTok). EY audit methodology differs from KPMG. Audits proceeded on evidence basis.',
+    recommenderAudited: 'Yes — Negative. Art. 38.1 NEGATIVE (2024): Facebook Dating had no non-profiling option for 6+ months. Positive in 2025 after fix. Arts. 34.1/35.1 (architecture adequacy) UNAUDITABLE both cycles. Dating context makes this the most serious recommender finding in corpus.',
+    unauditableArticles: '14 in both 2024 and 2025 (same as Instagram) PLUS HSC Commitments 2.1 & 2.2 (Facebook-specific): Arts. 14.1, 16.1, 16.5, 16.6, 17.1, 20.1, 20.3, 24.5, 25.1, 28.1, 34.1, 34.2, 35.1, 40.12 — all EC governmental investigations.',
+    metricInterrogation: 'No. Consolidated Facebook+Instagram metrics accepted without per-VLOP disaggregation despite NEGATIVE Art. 15.1 finding. Definitional refusals ("promptly", "undue delay") not interrogated as compliance circumvention.',
+    enforcementStatus: 'EC governmental investigations blocking 14 sub-articles including Arts. 34.1, 35.1, 28.1, 25.1. Parallel with Instagram — same scope, articles, and blocking logic. HSC Commitments 2.1/2.2 additionally blocked (Facebook-specific).',
+    trustedFlaggerValidity: 'Positive (2025) — Arts. 22.1 and 22.6 compliant. No CIAPC-equivalent zero-volume paradox identified.',
+    cclStatus: 'Art. 39.3 NEGATIVE (2024): missing removal reason info, remediated April 2024. Art. 26.2 NEGATIVE (2025): Reels Android commercial labels missing ~9 months (~90% of impressions). Art. 42.2 NEGATIVE (2024): missing accuracy indicators.',
+    platformSelfRevision: 'Yes — 2025 SRA acknowledges Protection of Minors Tier 3. Teen Account introduced as primary mitigation. Definitional refusals ("promptly", "undue delay") represent a reverse-revision: explicit resistance to self-benchmarking on compliance timelines.',
+    primaryDocStatus: 'Fully reviewed — 6 documents (2 SRAs, 2 Audit Reports, 2 Audit Implementation Reports)',
+    benchmarkNotes: 'Defining findings: (1) Art. 15.1 NEGATIVE both cycles — Meta corporate-level failure mirroring Instagram. (2) Art. 38.1 NEGATIVE: Facebook Dating had no DSA-compliant non-profiling option for 6+ months — most serious recommender finding on intimacy context in corpus. (3) Art. 26.2 NEGATIVE: Reels Android ~90% missing labels for ~9 months — largest disclosure failure by exposure volume. (4) Definitional refusals: Meta formally declined to define "promptly" and "undue delay" — only deliberate regulatory benchmarking refusal in corpus. Protection of Minors Tier 3 confirms Meta-wide pattern.',
+  },
+  {
     platform: 'Snapchat',
     auditCycles: '[Pending — documents in folder]',
     auditor: '[Pending]',
@@ -192,22 +224,6 @@ const auditBenchmarks = [
     platformSelfRevision: '[To be assessed]',
     primaryDocStatus: 'Pending — documents available in folder',
     benchmarkNotes: 'EC RFI on recommender systems is the key signal. Architectural self-assessment (1:1 messaging) was not tested by auditors.',
-  },
-  {
-    platform: 'Meta',
-    auditCycles: '[Pending — documents in folder]',
-    auditor: '[Pending]',
-    latestOpinion: 'Positive w/ Comments (from dataset)',
-    gitcStatus: '[To be assessed from primary documents]',
-    recommenderAudited: 'No — Audit validated SLA compliance and reporting pipelines. Recommendation algorithm not in scope.',
-    unauditableArticles: '[To be assessed]',
-    metricInterrogation: 'No. SLA compliance (1 missed of 25) accepted without population-level inference or harm-equivalence validation.',
-    enforcementStatus: 'No formal proceedings on record (from dataset)',
-    trustedFlaggerValidity: '[To be assessed]',
-    cclStatus: '[To be assessed]',
-    platformSelfRevision: '[To be assessed]',
-    primaryDocStatus: 'Pending — documents available in folder',
-    benchmarkNotes: 'Reactive SLA paradigm vs. EC demand for proactive algorithmic demotion is the central tension.',
   },
   {
     platform: 'X',
@@ -283,14 +299,14 @@ export default function DSAConsole() {
   const [platformFilter, setPlatformFilter] = useState('All');
   const [benchmarkPlatform, setBenchmarkPlatform] = useState('TikTok');
 
-  const platforms = ['All', 'Snapchat', 'TikTok', 'Instagram', 'Meta', 'X', 'Pinterest', 'YouTube'];
+  const platforms = ['All', 'Snapchat', 'TikTok', 'Instagram', 'Facebook', 'X', 'Pinterest', 'YouTube'];
 
   const tabs = [
     { id: 'riskMap',        label: 'Matrix 1A: Risk Map' },
     { id: 'auditFindings',  label: 'Matrix 1B: Audit Findings' },
     { id: 'synthesis',      label: 'Thematic Synthesis' },
     { id: 'disconnect',     label: 'Scope vs Substance' },
-    { id: 'benchmark',      label: '⬛ Audit Benchmarks' },
+    { id: 'benchmark',      label: '📊 Audit Benchmarks' },
   ];
 
   const filterData = (data) => {
@@ -310,6 +326,7 @@ export default function DSAConsole() {
 
   const isTikTokRow = (row) => row.platform === 'TikTok';
   const isInstagramRow = (row) => row.platform === 'Instagram';
+  const isFacebookRow = (row) => row.platform === 'Facebook';
 
   const renderRows = (data, keys) => (
     <tbody className="divide-y divide-slate-200 bg-white">
@@ -321,6 +338,8 @@ export default function DSAConsole() {
               ? 'bg-pink-50 hover:bg-pink-100 border-l-4 border-pink-400'
               : isInstagramRow(row)
               ? 'bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-400'
+              : isFacebookRow(row)
+              ? 'bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-400'
               : 'hover:bg-slate-50'
           }`}
         >
@@ -332,6 +351,8 @@ export default function DSAConsole() {
                     ? 'bg-pink-200 text-pink-900'
                     : row[key] === 'Instagram'
                     ? 'bg-purple-200 text-purple-900'
+                    : row[key] === 'Facebook'
+                    ? 'bg-amber-200 text-amber-900'
                     : 'bg-slate-100 text-slate-900'
                 }`}>{row[key]}</span>
               ) : key === 'conclusion' || key === 'theme' ? (
@@ -378,12 +399,14 @@ export default function DSAConsole() {
                 ? 'bg-pink-50 text-pink-900 border-pink-300 hover:bg-pink-100'
                 : b.platform === 'Instagram' && b.primaryDocStatus?.startsWith('Fully')
                 ? 'bg-purple-50 text-purple-900 border-purple-300 hover:bg-purple-100'
+                : b.platform === 'Facebook' && b.primaryDocStatus?.startsWith('Fully')
+                ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
             }`}
           >
             {b.platform}
             {b.primaryDocStatus?.startsWith('Fully') && (
-              <span className={`ml-2 text-xs text-white px-1.5 py-0.5 rounded-full ${b.platform === 'Instagram' ? 'bg-purple-500' : 'bg-pink-400'}`}>✓ Analyzed</span>
+              <span className={`ml-2 text-xs text-white px-1.5 py-0.5 rounded-full ${b.platform === 'Instagram' ? 'bg-purple-500' : b.platform === 'Facebook' ? 'bg-amber-500' : 'bg-pink-400'}`}>✓ Analyzed</span>
             )}
           </button>
         ))}
@@ -489,7 +512,7 @@ export default function DSAConsole() {
         <div>
           <h1 className="text-xl font-extrabold tracking-tight">DSA Compliance Console</h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            QDA Analysis of VLOP SRAs & Audits · TikTok primary docs integrated (2023–2025)
+            QDA Analysis of VLOP SRAs & Audits · TikTok, Instagram & Facebook primary docs integrated (2023–2025)
           </p>
         </div>
         <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-700">
