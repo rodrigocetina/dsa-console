@@ -21,6 +21,14 @@ const matrix1A = [
   { platform: 'TikTok', category: 'Art. 34.1(d) Addictive Design / Recommender', risk: 'FYF rabbit holes, addictive design, engagement-maximising architecture', mitigation: 'Default 60-min screen time; nocturnal takeovers; delayed screen-time warnings; Youth Council (15 teens, 8 countries); Family Pairing; Digital Wellness Lab (Boston Children\'s Hospital).', status: 'Active — Arts. 27(1), 27(3), 38(1) Negative 2024 audit' },
   { platform: 'TikTok', category: 'Art. 34.1(d) Minors / Age Assurance', risk: '2,203,894 underage accounts removed Q1 2023 alone; no established state-of-the-art for age verification', mitigation: 'Neutral registration age gate; automated underage detection; default privacy for under-16s; Microsoft age assurance initiative; WePotect partnership; AEPD, CNIL, Garante regulatory engagement.', status: 'Active — Art. 28(1) unauditable 2025 (EC proceedings)' },
 
+  // Instagram — enriched from primary 2024–2025 SRAs and EY Audit Reports
+  { platform: 'Instagram', category: 'Art. 15.1 Transparency Reporting', risk: 'Failure to report moderation categorization, monetization restrictions, complaint basis, accuracy indicators', mitigation: 'Transparency Center; DSA Transparency Reports; Community Standards linked from Terms of Use', status: 'NEGATIVE (2024 & 2025) — persistent non-compliance across two consecutive audit cycles' },
+  { platform: 'Instagram', category: 'Art. 23.1 Manifestly Illegal Suspension', risk: 'Repeat violators not warned; suspensions not applied after warnings; unreasonable suspension durations', mitigation: 'Community Standards enforcement; 98%+ proactive detection rates claimed', status: 'NEGATIVE (2025) — bilateral failure: under-enforcement AND over-enforcement simultaneously' },
+  { platform: 'Instagram', category: 'Art. 34.1(d) Minors & SSIED', risk: 'SSIED (Suicide, Self-Injury, Eating Disorders) escalated to Tier 3 (2025); Protection of Minors Tier 2→Tier 3', mitigation: 'Restricted Mode; disabled profiled ads for <18; SSIED safe messaging guidelines; 99.4% proactive detection', status: 'Tier 3 residual risk — Art. 28.1 UNAUDITABLE (EC proceedings)' },
+  { platform: 'Instagram', category: 'Art. 34.1(c) Civic Discourse', risk: 'Misinformation at Tier 3 residual risk; fact-checker coverage gaps; algorithm amplification', mitigation: 'Third-party fact-checkers; Elections integrity measures; authoritative source amplification', status: 'Active — Arts. 34.1/35.1 UNAUDITABLE (EC proceedings)' },
+  { platform: 'Instagram', category: 'Art. 27.1 Recommender Systems', risk: 'Explore feature lacked documentation on non-profiled option; Architecture driving SSIED and body image risk', mitigation: 'Non-profiled RS option available (Art. 38.1); Explore parameters documented; Reels and Feed algorithmic options', status: 'Positive w/ Comments — Arts. 34.1/35.1 (adequacy) UNAUDITABLE' },
+  { platform: 'Instagram', category: 'Art. 34.1(b) Fundamental Rights', risk: 'Fundamental Rights Tier 1→Tier 2 (worse); increased false positives from content moderation complexity', mitigation: 'Appeals; YPP-equivalent demonetization rules; human review; Three Lines of Defence model', status: 'Active — Art. 25.1 (dark patterns) UNAUDITABLE (EC proceedings)' },
+
   { platform: 'Meta', category: 'Art. 34.1(a) Child Safety', risk: 'Child exploitation, account takeovers', mitigation: 'Playbooks & Epsilon Checkpoint', status: 'Active' },
   { platform: 'Meta', category: 'Art. 34.1(b) Fundamental Rights', risk: 'Threats to life/safety', mitigation: 'Quick Promotions (QPs) to escalate threats', status: 'Active' },
   { platform: 'Meta', category: 'Art. 34.1(c) Civic Discourse', risk: 'Election disinformation', mitigation: 'Elections Readiness, War Rooms', status: 'Active' },
@@ -62,6 +70,18 @@ const matrix1B = [
   { platform: 'TikTok', conclusion: 'Negative (2025)', criticism: 'Art. 39(3) — Ad repository completeness and accuracy: persistent failures across evaluation period', remediation: 'Repository-level accuracy improvements required.' },
   { platform: 'TikTok', conclusion: 'UNAUDITABLE (2025)', criticism: 'Arts. 28(1), 34(1), 34(2), 35(1), 39(1), 40(12) — Cannot be assessed due to active EC enforcement proceedings. Includes core SRA obligations and researcher data access.', remediation: 'N/A — pending resolution of EC proceedings.' },
 
+  // Instagram — enriched from EY Audit Reports and Implementation Reports (2024, 2025)
+  { platform: 'Instagram', conclusion: 'NEGATIVE (2024 & 2025)', criticism: 'Art. 15.1 — Transparency Reporting (Content Moderation): NEGATIVE in BOTH cycles. 2024: 5 distinct non-compliances (monetization restrictions, business entity breakdown, restriction categorization, violation type/detection method, accuracy indicators). 2025: 3 new non-compliances (account suspension categorization, "other related restrictions" metrics, complaint basis for monetization restrictions).', remediation: '2024 remediation target Q2 2025 not met. Reporting framework restructuring planned Q1 2026. Unique in corpus: only cross-cycle recurring failure on same substantive article.' },
+  { platform: 'Instagram', conclusion: 'NEGATIVE (2025)', criticism: 'Art. 23.1 — Manifestly Illegal Content Suspension: bilateral failure. (1) Prior warnings not issued to repeat violators. (2) Service not suspended after prior warning. (3) Suspensions imposed for unreasonable duration. Non-compliance in both directions of the same provision simultaneously.', remediation: 'Q4 2025 dashboard/monitoring planned. Not implemented as of September 2025 report.' },
+  { platform: 'Instagram', conclusion: 'NEGATIVE (2025)', criticism: 'Art. 20.4 — Complaint Handling: two appeals of legally classified reporter appeals not processed within 7 days (EY-developed benchmark). Non-discriminatory, diligent, and non-arbitrary handling requirements not met.', remediation: 'Q4 2025 implementation planned. Not yet implemented.' },
+  { platform: 'Instagram', conclusion: 'NEGATIVE (2024)', criticism: 'Art. 24.1 — Account Suspensions Reporting: inaccurate reporting of suspensions for manifestly illegal content in DSA Transparency Reports.', remediation: 'Already remediated by October 2024 (3rd Transparency Report).' },
+  { platform: 'Instagram', conclusion: 'NEGATIVE (2024)', criticism: 'Art. 39.3 — Ads Library: missing removal reason information; improper disclosure of ad content and payer information.', remediation: 'Already remediated April 26, 2024.' },
+  { platform: 'Instagram', conclusion: 'NEGATIVE (2024)', criticism: 'Art. 42.2 — Accuracy by Member State Language: missing accuracy indicators; self-reported miscalculated human reviewer metrics.', remediation: 'Q2 2025 planned. Status unclear in 2025 corpus.' },
+  { platform: 'Instagram', conclusion: 'Positive w/ Comments (2025)', criticism: 'Art. 27.1 — Recommender Systems: Instagram Explore system card lacked documentation on non-profiled recommender option (Art. 38.1).', remediation: 'Q3 2025 implementation planned.' },
+  { platform: 'Instagram', conclusion: 'Positive w/ Comments (2025)', criticism: 'Art. 14.5 — Terms Summary: Terms lack specific summary of available remedies and redress mechanisms in clear, unambiguous language.', remediation: 'H2 2026. The longest implementation delay in the corpus: 2+ years from initial identification to planned remediation.' },
+  { platform: 'Instagram', conclusion: 'Positive w/ Comments (2025)', criticism: 'Art. 12.1 — SPOC: Single Point of Contact form was not responding to users from October 2, 2024 to January 24, 2025 due to broken link (service glitch undetected for ~113 days).', remediation: 'Fixed January 24, 2025. Dashboard with real-time alerting implemented.' },
+  { platform: 'Instagram', conclusion: 'UNAUDITABLE (2024 & 2025)', criticism: '14 sub-articles unauditable in both cycles due to EC governmental investigations: Arts. 14.1, 16.1, 16.5, 16.6, 17.1, 20.1, 20.3, 24.5, 25.1, 28.1, 34.1, 34.2, 35.1, 40.12. Includes core SRA (Art. 34.1), mitigation adequacy (Art. 35.1), minor protection (Art. 28.1), dark patterns (Art. 25.1), and researcher access (Art. 40.12).', remediation: 'N/A — pending resolution of EC proceedings. Identical black hole pattern to TikTok.' },
+
   { platform: 'Meta', conclusion: 'Positive w/ Comments', criticism: 'Missed internal 7-day SLA on 1 of 25 tickets due to surge', remediation: 'Implemented dynamic staffing governance' },
   { platform: 'Meta', conclusion: 'Observation', criticism: 'Undefined regulatory terms (rapidly, undue delay)', remediation: 'Reliance on future guidance' },
   { platform: 'X', conclusion: 'Positive w/ Comments', criticism: 'Help Center mistakenly directed Trusted Flaggers to wrong URL', remediation: 'Updated Help Center URL' },
@@ -95,6 +115,14 @@ const disconnect = [
   { platform: 'TikTok', category: 'Civic Discourse / AIGC [REVISED]', claim: '11 IFCN fact-checkers; Election Centres in 27 EU languages; Rapid Response system; C2PA AIGC labels; $1M climate initiative (632M+ impressions)', auditor: 'Arts. 34(1) and 35(1) unauditable 2025. AIGC and Recommender Systems newly introduced as cross-cutting risk amplifiers in 2025 SRA.', ec: 'FYF is a high-velocity civic harm amplifier. Voluntary AIGC labels will not be applied by bad actors; algorithms amplify regardless. \u0394 TikTok 2025 SRA now concedes EC\'s core argument — but assessment is unauditable.' },
   { platform: 'TikTok', category: 'Fundamental Rights / Dark Patterns [REVISED]', claim: 'Appeals systems; UN Human Rights Due Diligence; RightsCon participation; expert consultations', auditor: 'Art. 25(1) Negative 2024 (dark patterns). Art. 20(4) Negative 2025 (documentation retention). Art. 35(1) unauditable 2025. GITC failure affects appeals chains.', ec: 'Engagement-maximising design is systemic manipulation. Periodic self-review remedy does not require changing any interface element. \u0394 Negative finding confirms EC concern at article level; procedural framing does not address architectural argument.' },
   { platform: 'TikTok', category: 'Advertising Transparency / CCL [NEW FINDING]', claim: 'Commercial Content Library active; DSA Transparency Database submissions; Trusted Flagger IP queues', auditor: 'Art. 24(5) Negative 2025: generic violation messages, duplicates, active display in removed-content countries. Art. 39(3) Negative. Art. 39(1) unauditable. Compound failure across two cycles.', ec: 'CCL failures undermine researcher and civil society access to ad targeting data. Art. 40(12) (researcher access) also unauditable. \u0394 New finding — not in original dataset. Compound: inaccurate AND unauditable.' },
+
+  // Instagram — revised from primary documents (2024–2025)
+  { platform: 'Instagram', category: 'Transparency Reporting (Art. 15.1) [REVISED]', claim: 'Transparency Center; DSA reports; Community Standards linked from Terms of Use', auditor: 'NEGATIVE (2024 & 2025): missing monetization metrics, categorization, complaint basis, accuracy indicators across two consecutive cycles. Q2 2025 remediation target not met.', ec: 'Art. 15.1 is the verification mechanism for all other compliance claims. Two consecutive NEGATIVE conclusions mean no external actor can validate whether the Integrity Ecosystem actually works. Δ Unique in corpus: only cross-cycle recurring substantive failure.' },
+  { platform: 'Instagram', category: 'Manifestly Illegal Suspension (Art. 23.1) [NEW FINDING]', claim: '98%+ proactive detection rates; Community Standards enforcement', auditor: 'NEGATIVE (2025): bilateral failure. No prior warnings issued to repeat violators; no suspension after warnings given; suspensions imposed for unreasonable duration.', ec: 'Bilateral failure (under-enforcement AND over-enforcement simultaneously) indicates absence of principled calibration logic, not resource gap. Δ New from 2025 primary docs. Not in original dataset.' },
+  { platform: 'Instagram', category: 'Minors & SSIED (Art. 34.1(d)) [REVISED]', claim: 'Restricted Mode; disabled profiled ads for <18; safe messaging guidelines; 99.4% proactive SSIED detection', auditor: 'Art. 28.1 UNAUDITABLE (EC proceedings). SSIED escalates Tier 2 → Tier 3 in 2025 SRA. Art. 28.2 Positive (no profiled ads to minors).', ec: 'On an image-centric platform, SSIED Tier 3 is the EC\'s core concern. Recommender systems may surface at-risk content before detection acts. Sequencing gap (exposure vs. detection) unaddressed. Δ Tier 3 escalation is 2025 primary doc finding.' },
+  { platform: 'Instagram', category: 'Risk Assessment Architecture (Arts. 34.1 & 35.1) [NEW FINDING]', claim: 'ISO 31000:2018; UN Guiding Principles; Integrity GRC Programme; Three Lines of Defence; annual SRA (Year 3)', auditor: 'UNAUDITABLE in both 2024 and 2025. EY cannot form opinion on SRA or mitigation adequacy obligations.', ec: 'The platform\'s entire compliance architecture — whether the Integrity Ecosystem is reasonable, proportionate, and effective — has never been independently verified. Δ Identical pattern to TikTok. Δ Instagram Direct exclusion removes private channel from scope entirely.' },
+  { platform: 'Instagram', category: 'Recommender Systems (Art. 27) [REVISED]', claim: 'Non-profiled RS option available; Explore parameters documented; Reels and Feed options; Art. 38.1 compliance', auditor: 'Art. 27.1 Positive with Comments (Explore lacked non-profiled option documentation). Arts. 27.2, 27.3 Positive. Arts. 34.1/35.1 UNAUDITABLE.', ec: 'Surface-level Art. 27 transparency checks do not assess whether recommender architecture drives systemic risk. For SSIED on image-centric platform, the EC\'s question is whether algorithmic amplification precedes harm mitigation. Δ Different from TikTok (not Negative), but same architectural black hole.' },
+  { platform: 'Instagram', category: 'User Remedies & Terms (Art. 14.5) [NEW FINDING]', claim: 'Terms of Use; Help Center; Community Standards; appeals processes described in linked pages', auditor: 'Positive with Comments (2025): Terms lack explicit summary of available remedies and redress mechanisms in unambiguous language. Planned remediation: H2 2026.', ec: 'A user\'s ability to understand their rights and recourse is the DSA\'s core user-protection commitment. H2 2026 implementation is a 2+ year delay from the audit period. Δ Longest remediation delay in the corpus.' },
 
   { platform: 'Meta', category: 'Child Safety', claim: 'Playbooks & Epsilon lockdowns', auditor: 'SPOC Volume pipelines', ec: 'Demands proactive algorithmic demotion over reactive reporting.' },
   { platform: 'Meta', category: 'Fundamental Rights', claim: 'Quick Promotions (QPs)', auditor: 'System Inspection', ec: 'Expects evaluation of entire ad-targeting infrastructure.' },
@@ -132,6 +160,22 @@ const auditBenchmarks = [
     platformSelfRevision: 'Yes — 2025 SRA introduces Recommender Systems and AIGC as explicit cross-cutting risk amplifiers. Absent from 2023 SRA.',
     primaryDocStatus: 'Fully reviewed — 6 documents, ~600 pages (2023–2025)',
     benchmarkNotes: 'Highest-complexity compliance profile in corpus. Formal architecture is sophisticated; substantive risk governance is partially unverifiable. 2025 SRA is the first to concede EC\'s central recommender-systems argument.',
+  },
+  {
+    platform: 'Instagram',
+    auditCycles: '2 (2023–24; 2024–25). Year 1 exists but not in reviewed corpus.',
+    auditor: 'Ernst & Young LLP (EY)',
+    latestOpinion: 'No overall unqualified opinion (2025) — 14 sub-articles unauditable. 3 NEGATIVE individual conclusions (Arts. 15.1 ×3, 20.4, 23.1).',
+    gitcStatus: 'Not a recurring GITC failure (unlike TikTok). EY audit methodology differs from KPMG. Audits proceeded on evidence basis.',
+    recommenderAudited: 'Partially. Art. 27: surface checks Positive (Art. 27.1 Positive w/ Comments — Explore gap). Arts. 34.1/35.1 (architecture adequacy) UNAUDITABLE both cycles. Recommender contribution to SSIED Tier 3 unassessed.',
+    unauditableArticles: '14 in BOTH 2024 and 2025: Arts. 14.1, 16.1, 16.5, 16.6, 17.1, 20.1, 20.3, 24.5, 25.1, 28.1, 34.1, 34.2, 35.1, 40.12 — all EC governmental investigations.',
+    metricInterrogation: 'No. 99%+ proactive detection rates accepted without sequencing analysis (detection before or after user exposure). SSIED Tier 3 escalation not cross-referenced with detection metrics.',
+    enforcementStatus: 'EC governmental investigations blocking 14 sub-articles including Arts. 34.1, 35.1, 28.1, 25.1. Scope not publicly specified.',
+    trustedFlaggerValidity: 'Positive (2025) — Arts. 22.1 and 22.6 compliant. No CIAPC-equivalent zero-volume paradox identified.',
+    cclStatus: 'Art. 26.1 Positive w/ Comments (2025): Instagram Profile absent from central ad repository July–Sept 2024, remediated Q3 2024. Art. 39.3 Negative (2024), remediated April 2024.',
+    platformSelfRevision: 'Yes — 2025 SRA introduces more granular taxonomy (22 Problem Areas from 19) and explicitly acknowledges SSIED and Fraud/Deception control limitations. SSIED Tier 3 escalation self-reported.',
+    primaryDocStatus: 'Fully reviewed — 6 documents (2 SRAs, 2 Audit Reports, 2 Audit Implementation Reports)',
+    benchmarkNotes: 'Defining finding: Art. 15.1 NEGATIVE in both 2024 AND 2025 — only cross-cycle recurring substantive failure in corpus. Art. 23.1 bilateral failure (2025) is analytically novel. SSIED Tier 3 on image-centric platform is the EC\'s core concern. Instagram Direct excluded from DSA scope entirely.',
   },
   {
     platform: 'Snapchat',
@@ -239,7 +283,7 @@ export default function DSAConsole() {
   const [platformFilter, setPlatformFilter] = useState('All');
   const [benchmarkPlatform, setBenchmarkPlatform] = useState('TikTok');
 
-  const platforms = ['All', 'Snapchat', 'TikTok', 'Meta', 'X', 'Pinterest', 'YouTube'];
+  const platforms = ['All', 'Snapchat', 'TikTok', 'Instagram', 'Meta', 'X', 'Pinterest', 'YouTube'];
 
   const tabs = [
     { id: 'riskMap',        label: 'Matrix 1A: Risk Map' },
@@ -265,6 +309,7 @@ export default function DSAConsole() {
   );
 
   const isTikTokRow = (row) => row.platform === 'TikTok';
+  const isInstagramRow = (row) => row.platform === 'Instagram';
 
   const renderRows = (data, keys) => (
     <tbody className="divide-y divide-slate-200 bg-white">
@@ -274,6 +319,8 @@ export default function DSAConsole() {
           className={`transition-colors ${
             isTikTokRow(row)
               ? 'bg-pink-50 hover:bg-pink-100 border-l-4 border-pink-400'
+              : isInstagramRow(row)
+              ? 'bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-400'
               : 'hover:bg-slate-50'
           }`}
         >
@@ -283,6 +330,8 @@ export default function DSAConsole() {
                 <span className={`font-bold px-2 py-1 rounded text-xs ${
                   row[key] === 'TikTok'
                     ? 'bg-pink-200 text-pink-900'
+                    : row[key] === 'Instagram'
+                    ? 'bg-purple-200 text-purple-900'
                     : 'bg-slate-100 text-slate-900'
                 }`}>{row[key]}</span>
               ) : key === 'conclusion' || key === 'theme' ? (
@@ -325,14 +374,16 @@ export default function DSAConsole() {
             className={`px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
               b.platform === benchmarkPlatform
                 ? 'bg-slate-800 text-white border-slate-800'
-                : b.primaryDocStatus?.startsWith('Fully')
+                : b.platform === 'TikTok' && b.primaryDocStatus?.startsWith('Fully')
                 ? 'bg-pink-50 text-pink-900 border-pink-300 hover:bg-pink-100'
+                : b.platform === 'Instagram' && b.primaryDocStatus?.startsWith('Fully')
+                ? 'bg-purple-50 text-purple-900 border-purple-300 hover:bg-purple-100'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
             }`}
           >
             {b.platform}
             {b.primaryDocStatus?.startsWith('Fully') && (
-              <span className="ml-2 text-xs bg-pink-400 text-white px-1.5 py-0.5 rounded-full">✓ Analyzed</span>
+              <span className={`ml-2 text-xs text-white px-1.5 py-0.5 rounded-full ${b.platform === 'Instagram' ? 'bg-purple-500' : 'bg-pink-400'}`}>✓ Analyzed</span>
             )}
           </button>
         ))}
