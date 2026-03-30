@@ -515,6 +515,19 @@ export default function DSAConsole() {
     return data.filter(item => item.platform === platformFilter);
   };
 
+  // Auto-derive source URL from case reference embedded in summary text
+  // EC pattern: (ip_24_926) → https://ec.europa.eu/commission/presscorner/detail/en/ip_24_926
+  // Also handles mex_ references (formal communications)
+  const getActionUrl = (action) => {
+    if (action.url) return action.url;
+    const match = action.summary.match(/\(([a-z]+_\d+_\d+)\)/i);
+    if (match && action.source === 'EC') {
+      return `https://ec.europa.eu/commission/presscorner/detail/en/${match[1]}`;
+    }
+    if (action.source === 'CnaM') return 'https://www.cnam.ie/news/';
+    return null;
+  };
+
   const renderHeaders = (keys) => (
     <thead>
       <tr className="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b-2 border-slate-300 tracking-wider">
@@ -583,6 +596,18 @@ export default function DSAConsole() {
     </tbody>
   );
 
+  // Platform transparency / DSA document pages (for benchmark links)
+  const platformTransparencyUrls = {
+    'TikTok':    'https://www.tiktok.com/transparency/en-us/dsa/',
+    'Instagram': 'https://transparency.meta.com/',
+    'Facebook':  'https://transparency.meta.com/',
+    'X':         'https://transparency.x.com/',
+    'Snapchat':  'https://values.snap.com/privacy/transparency',
+    'YouTube':   'https://transparencyreport.google.com/',
+    'LinkedIn':  'https://www.linkedin.com/legal/transparency',
+    'Pinterest': 'https://policy.pinterest.com/en/transparency-report',
+  };
+
   // Benchmark view — vertical card layout for selected platform
   const selectedBenchmark = auditBenchmarks.find(b => b.platform === benchmarkPlatform);
   const renderBenchmarkCard = () => (
@@ -622,6 +647,16 @@ export default function DSAConsole() {
                 <p className="text-sm mt-1 text-slate-300">
                   {selectedBenchmark.primaryDocStatus}
                 </p>
+                {platformTransparencyUrls[selectedBenchmark.platform] && (
+                  <a
+                    href={platformTransparencyUrls[selectedBenchmark.platform]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-1.5 text-xs text-blue-300 hover:text-blue-100 hover:underline font-medium"
+                  >
+                    ↗ Platform transparency page
+                  </a>
+                )}
               </div>
               <div className="text-right">
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-bold ${
@@ -779,6 +814,17 @@ export default function DSAConsole() {
                           <span className="text-xs text-slate-400 font-medium">{action.articles}</span>
                           <span className="text-xs text-slate-300 select-none">·</span>
                           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{action.source}</span>
+                          {getActionUrl(action) && (
+                            <a
+                              href={getActionUrl(action)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-auto text-xs text-blue-500 hover:text-blue-700 hover:underline font-medium flex-shrink-0"
+                              title="View source"
+                            >
+                              ↗ Source
+                            </a>
+                          )}
                         </div>
                         <p className="text-sm text-slate-700 leading-relaxed">{action.summary}</p>
                         {action.outcome && <p className="text-xs text-slate-400 mt-1.5 italic">→ {action.outcome}</p>}
