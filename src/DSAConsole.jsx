@@ -402,7 +402,7 @@ const auditBenchmarks = [
     recommenderAudited: 'Partially — Y1: Recommender systems for Discover and Spotlight not independently assessed; audit focused on Art. 39.1 (Ads Gallery), transparency obligations, and dark patterns. Y2 B.1 recommendation identifies documentation gaps across Arts. 27.3 (recommender opt-out), 38.1 (non-profiling option), 35.1 (mitigation proportionality), and 28.1/28.2 (minor protection) — not a NEGATIVE finding, but a documentation insufficiency. Recommender architecture effectiveness (Discover editorial curation, Spotlight pre-moderation) has not been independently verified as an Art. 35 mitigation. EC RFI on recommender systems signals external scepticism about the architectural-as-mitigation argument.',
     unauditableArticles: 'ZERO unauditable articles in either Y1 or Y2 — analytically unique across the entire VLOP corpus. No EC formal proceedings have been opened against Snap as of August 2025. Arts. 34.1, 34.2, 35.1 (SRA quality and mitigation adequacy) were audited in both cycles — unlike TikTok (EC proceedings), Meta platforms (EC proceedings), and X (EC proceedings). Art. 28.1 (minor protection) audited — unlike TikTok (EC proceedings) and Meta (EC proceedings). Art. 25.1 (dark patterns) audited — unlike TikTok (Negative 2024), X (Negative + EC proceedings), and Meta (EC proceedings). Full compliance chain (Arts. 34→35→37) verifiable.',
     metricInterrogation: 'Limited. PVP (Policy Violating Prevalence) scale accepted as relative metric — EY did not independently validate sampling methodology or test whether Extremely Low PVP thresholds are comparable to other platforms\' absolute prevalence rates. 40-day SLA for illegal content resolution accepted as satisfying "undue delay" standard without explicit Arts. 17/20 benchmark comparison. VVR (Violative View Rate) introduced in Y3 but not audited (Y3 is SRA only, no Y3 audit report yet). Protect Children study (2024) finding — Snapchat ranked last (10% detection rate for CSAM) — not cross-referenced with Snap\'s own CSEAI Extremely Low PVP self-assessment in either audit cycle.',
-    enforcementStatus: 'No EC formal proceedings as of August 2025 — the only VLOP in corpus with a fully clean regulatory slate. EC RFI (Request for Information) issued on recommender systems and curated feeds — this is an information-gathering step, not a formal investigation or enforcement action. RFI signals EC interest in Snap\'s architectural-as-mitigation argument (1:1 messaging, no open feed). DSA Art. 34(2)(b) critical impact assessment triggered by Y3 16-17yo Public Profile posting feature — compliance with EC design change notification procedures under review.',
+    enforcementStatus: 'EC formal proceedings opened March 26, 2026 (ip_26_723) on child protection: age assurance deemed insufficient, exposure of minors to grooming, criminal recruitment, and illegal goods. First formal VLOP proceedings exclusively on child protection. Prior trajectory: Nov 2023 RFI (minors, joint with Meta) → Mar 2024 GenAI RFI → Oct 2024 recommender systems RFI → Oct 2025 safeguards-for-minors RFI → Mar 2026 formal proceedings. Also subject to CnaM Arts. 12/16 review (2025). ANALYTICAL NOTE: Snapchat lost its status as the only VLOP with zero EC proceedings in March 2026 — its clean regulatory record ran from VLOP designation (Aug 2023) to Mar 2026.',
     trustedFlaggerValidity: 'No specific Trusted Flagger audit finding in either cycle. Art. 22.1 (TF processing obligations) not flagged as a compliance concern in Y1 or Y2 — unlike YouTube (NEGATIVE Y2 on Art. 22.1) and TikTok (GITC failure affecting moderation systems). No CIAPC-equivalent zero-volume certification paradox identified. Arts. 16.5 and 16.6 (TF obligations) not subject to EC proceedings — unlike TikTok and X (both have No Conclusion on these articles due to EC proceedings). Trusted Flagger framework appears compliant in both cycles, though EY\'s attestation methodology does not independently verify TF operational volume or prioritisation queue performance.',
     cclStatus: 'Y1 Art. 39.1 recommendation (B.6): Ads Gallery lacked search by Creator Name — identified and committed to fix. Y2: EY confirmed Creator Name search implemented October 2024 (recommendation closed). Art. 39.1 moved from Positive w/ Comments (Y1) to Positive (Y2). No Art. 39.3 (repository completeness) NEGATIVE in either cycle — unlike TikTok (Negative 2025), Facebook (Negative 2024), Instagram (Negative 2024), and X (No Conclusion). Snap\'s Ads Repository received the cleanest CCL/Ads Gallery compliance record across all reviewed VLOPs.',
     platformSelfRevision: 'Yes — notable across 3 SRA cycles. Y2 additions: VVR (Violative View Rate) added as second metric responsive to civil society feedback (CSOs noted PVP alone insufficient). Y3 additions: explicit Art. 34(2) risk factor sub-sections for each harm category (responding to EC transparency expectations); VVR data integrated throughout. Y3 risk conclusions: explicitly stated NO CHANGES from Y2 across all categories. Only change: Harassment/Bullying improved from Very Low (Y2) to Extremely Low (Y3) — a positive self-revision, not a deterioration. No categories escalated from Y2 to Y3 (in contrast to X: terrorist content Tier 3→Tier 1; Instagram: SSIED Tier 2→Tier 3). Snap is the only VLOP in corpus with no upward risk escalations between Y2 and Y3.',
@@ -466,7 +466,7 @@ const auditBenchmarks = [
     recommenderAudited: 'Partially. Art. 27.2 received Disclaimer in Y2 — D&T unable to form opinion (insufficient evidence on recommender transparency). Arts. 34.1/35.1 audited as Positive (after Y1 B.9 recommendation) — but "Positive" reflects documentary sufficiency, not causal verification of professional-architecture risk reduction claims. LinkedIn\'s professional feed recommender and job recommendation engine not independently tested for algorithmic risk contribution. DTSP Safe Framework\'s "professional context reduces probability" premise not subjected to causal verification in either audit cycle.',
     unauditableArticles: 'None blocked by EC formal proceedings — LinkedIn faces no EC proceedings as of March 2026. Some Disclaimers in both cycles (Arts. 15.1, 42.2 Y1/Y2; Arts. 27.2 Y2; Art. 24.1(b) Y1) reflect evidence insufficiency, not proceedings-blocking. Full DSA compliance chain (Arts. 34→35→37) is auditable — unlike TikTok (6 articles blocked), Meta (14 articles blocked), and X (10 articles blocked). Makes LinkedIn alongside Snapchat and YouTube as the only VLOPs where the Art. 34/35 compliance chain is independently assessable. EY/D&T\'s acceptance of DTSP outcomes is an auditing choice, not a proceedings-imposed limitation.',
     metricInterrogation: 'Minimal. DTSP probability tier assignments (Not Likely/Remote/Probable/Expected) accepted without independent validation. Control effectiveness ratings (Managed = 65% for 9 of 11 Y3 categories) self-assessed. D&T recommended documentation improvements (Y1 B.9) but challenged no quantitative probability or severity tier. "Expected" probability for Consumer Protection & Fraud accepted without interrogating whether Managed maturity (65%) is sufficient for the highest probability tier. Art. 15.1 persistent Disclaimer means TR data — which would provide operational metrics for validation — is itself unverifiable by any external actor.',
-    enforcementStatus: 'None — LinkedIn faces no EC formal proceedings as of March 2026. Two consecutive Qualified audit opinions have not triggered EC enforcement engagement. LinkedIn\'s Section D materiality argument remains formally unaddressed by the EC. Possible interpretations: (a) lower systemic risk profile of professional network vs. consumer social media; (b) lower EC enforcement priority for B2B/professional-context platforms; (c) active within-period remediation pattern (most Y1/Y2 Negatives remediated before report publication).',
+    enforcementStatus: 'No EC formal proceedings as of March 2026 — two consecutive Qualified audit opinions have not triggered EC enforcement engagement. However: (1) EC RFI on sensitive-data ad targeting (Mar 2024, Art. 26.3) resulted in LinkedIn disabling Group-based ad targeting EU-wide — a compliance outcome without proceedings; (2) Coimisiún na Meán (Ireland DSC) commenced formal investigation Dec 2025 — first formal investigation into LinkedIn across the corpus, specific articles TBD; (3) CnaM Arts. 12/16 review (2025). LinkedIn\'s Section D materiality argument remains formally unaddressed by EC. ANALYTICAL NOTE: No EC formal proceedings despite Qualified ×2 + Art. 16 two-generation failure + Art. 15.1 Disclaimer ×2 is the most significant enforcement gap in the corpus.',
     trustedFlaggerValidity: 'Y2: Art. 22.3 received Partial Remediated (from Y2 color matrix overview). Arts. 22.1/22.6 Positive in Y2. Y1 AIR B.4 covered Arts. 23.2/23.3 (manifestly unfounded reporters — process update by May 31, 2025). Y2: Arts. 23.2/23.3 NEGATIVE — confirmed outstanding. No equivalent to TikTok\'s CIAPC zero-volume certification paradox or YouTube\'s NEGATIVE on timeliness. LinkedIn\'s trusted flagger operational volume and prioritisation queue performance not independently interrogated in either audit cycle.',
     cclStatus: 'Y1 AIR B.5/B.6: Arts. 26.1/39.1/39.2/39.3 implemented by January 31, 2025 ("Why Am I Seeing Ads" update + Ad Library changes). Art. 26.3 (third-party advertising controls, T&C update) by April 30, 2025 (AIR B.2). Y2: Art. 27.2 Disclaimer (unable to form opinion on recommender transparency obligations). Art. 42.2 Disclaimer (unable to form opinion on Transparency Report accuracy indicators by EU MS language). No NEGATIVE on commercial communications in either cycle. No political advertising on LinkedIn — structural advantage for ad transparency compliance absent from platforms with political ad revenue.',
     platformSelfRevision: 'Yes — taxonomy evolution is the defining self-revision across three SRA cycles. Y1: 11 risk areas (Civic Discourse + Public Security combined; GBV separate). Y2/Y3: 12 risk areas (Consumer Protection & Fraud split out as standalone; Civic Discourse separated from Public Security). Consumer Protection & Fraud immediately assigned "Expected" probability when introduced — candid self-assessment. Civic Discourse probability dropped (Likely Y2 → Not Likely Y3) — most favorable single improvement. Private & Family Life probability rose (Remote → Not Likely) Y3 — only upward shift. AIR Section D: LinkedIn formally challenged audit methodology — unique regulatory posture in the VLOP corpus. No downgrade of overall risk tier across any category in three SRA cycles.',
@@ -507,6 +507,7 @@ export default function DSAConsole() {
     { id: 'synthesis',      label: 'Thematic Synthesis' },
     { id: 'disconnect',     label: 'Scope vs Substance' },
     { id: 'benchmark',      label: '📊 Audit Benchmarks' },
+    { id: 'enforcement',    label: '⚖️ Enforcement Timeline' },
   ];
 
   const filterData = (data) => {
@@ -524,42 +525,39 @@ export default function DSAConsole() {
     </thead>
   );
 
-  const isTikTokRow = (row) => row.platform === 'TikTok';
-  const isInstagramRow = (row) => row.platform === 'Instagram';
-  const isFacebookRow = (row) => row.platform === 'Facebook';
-  const isYouTubeRow = (row) => row.platform === 'YouTube';
+  const platformRowClass = {
+    'TikTok':    'bg-pink-50 hover:bg-pink-100 border-l-4 border-pink-400',
+    'Instagram': 'bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-400',
+    'Facebook':  'bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-400',
+    'YouTube':   'bg-green-50 hover:bg-green-100 border-l-4 border-green-500',
+    'X':         'bg-slate-50 hover:bg-slate-100 border-l-4 border-slate-400',
+    'Snapchat':  'bg-yellow-50 hover:bg-yellow-100 border-l-4 border-yellow-400',
+    'LinkedIn':  'bg-blue-50 hover:bg-blue-100 border-l-4 border-blue-400',
+    'Pinterest': 'bg-rose-50 hover:bg-rose-100 border-l-4 border-rose-400',
+  };
+
+  const platformBadgeClass = {
+    'TikTok':    'bg-pink-200 text-pink-900',
+    'Instagram': 'bg-purple-200 text-purple-900',
+    'Facebook':  'bg-amber-200 text-amber-900',
+    'YouTube':   'bg-green-200 text-green-900',
+    'X':         'bg-slate-200 text-slate-900',
+    'Snapchat':  'bg-yellow-200 text-yellow-900',
+    'LinkedIn':  'bg-blue-200 text-blue-900',
+    'Pinterest': 'bg-rose-200 text-rose-900',
+  };
 
   const renderRows = (data, keys) => (
     <tbody className="divide-y divide-slate-200 bg-white">
       {data.map((row, idx) => (
         <tr
           key={idx}
-          className={`transition-colors ${
-            isTikTokRow(row)
-              ? 'bg-pink-50 hover:bg-pink-100 border-l-4 border-pink-400'
-              : isInstagramRow(row)
-              ? 'bg-purple-50 hover:bg-purple-100 border-l-4 border-purple-400'
-              : isFacebookRow(row)
-              ? 'bg-amber-50 hover:bg-amber-100 border-l-4 border-amber-400'
-              : isYouTubeRow(row)
-              ? 'bg-green-50 hover:bg-teal-50 border-l-4 border-green-500'
-              : 'hover:bg-slate-50'
-          }`}
+          className={`transition-colors ${platformRowClass[row.platform] || 'hover:bg-slate-50'}`}
         >
           {keys.map(key => (
             <td key={key} className="px-5 py-3 text-sm align-top leading-relaxed text-slate-700">
               {key === 'platform' ? (
-                <span className={`font-bold px-2 py-1 rounded text-xs ${
-                  row[key] === 'TikTok'
-                    ? 'bg-pink-200 text-pink-900'
-                    : row[key] === 'Instagram'
-                    ? 'bg-purple-200 text-purple-900'
-                    : row[key] === 'Facebook'
-                    ? 'bg-amber-200 text-amber-900'
-                    : row[key] === 'YouTube'
-                    ? 'bg-green-200 text-green-900'
-                    : 'bg-slate-100 text-slate-900'
-                }`}>{row[key]}</span>
+                <span className={`font-bold px-2 py-1 rounded text-xs ${platformBadgeClass[row[key]] || 'bg-slate-100 text-slate-900'}`}>{row[key]}</span>
               ) : key === 'conclusion' || key === 'theme' ? (
                 <span className={`font-bold px-2 py-1 rounded text-xs ${
                   row[key]?.includes('Negative') || row[key]?.includes('UNAUDITABLE')
@@ -587,8 +585,6 @@ export default function DSAConsole() {
 
   // Benchmark view — vertical card layout for selected platform
   const selectedBenchmark = auditBenchmarks.find(b => b.platform === benchmarkPlatform);
-  const isFullyAnalyzed = selectedBenchmark?.primaryDocStatus?.startsWith('Fully');
-
   const renderBenchmarkCard = () => (
     <div className="p-2">
       {/* Platform selector */}
@@ -600,21 +596,18 @@ export default function DSAConsole() {
             className={`px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
               b.platform === benchmarkPlatform
                 ? 'bg-slate-800 text-white border-slate-800'
-                : b.platform === 'TikTok' && b.primaryDocStatus?.startsWith('Fully')
-                ? 'bg-pink-50 text-pink-900 border-pink-300 hover:bg-pink-100'
-                : b.platform === 'Instagram' && b.primaryDocStatus?.startsWith('Fully')
-                ? 'bg-purple-50 text-purple-900 border-purple-300 hover:bg-purple-100'
-                : b.platform === 'Facebook' && b.primaryDocStatus?.startsWith('Fully')
-                ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
-                : b.platform === 'YouTube' && b.primaryDocStatus?.startsWith('Fully')
-                ? 'bg-green-50 text-green-900 border-green-300 hover:bg-green-100'
+                : b.platform === 'TikTok'    ? 'bg-pink-50 text-pink-900 border-pink-300 hover:bg-pink-100'
+                : b.platform === 'Instagram'  ? 'bg-purple-50 text-purple-900 border-purple-300 hover:bg-purple-100'
+                : b.platform === 'Facebook'   ? 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+                : b.platform === 'YouTube'    ? 'bg-green-50 text-green-900 border-green-300 hover:bg-green-100'
+                : b.platform === 'X'          ? 'bg-slate-50 text-slate-800 border-slate-300 hover:bg-slate-100'
+                : b.platform === 'Snapchat'   ? 'bg-yellow-50 text-yellow-900 border-yellow-300 hover:bg-yellow-100'
+                : b.platform === 'LinkedIn'   ? 'bg-blue-50 text-blue-900 border-blue-300 hover:bg-blue-100'
+                : b.platform === 'Pinterest'  ? 'bg-rose-50 text-rose-900 border-rose-300 hover:bg-rose-100'
                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
             }`}
           >
             {b.platform}
-            {b.primaryDocStatus?.startsWith('Fully') && (
-              <span className={`ml-2 text-xs text-white px-1.5 py-0.5 rounded-full ${b.platform === 'Instagram' ? 'bg-purple-500' : b.platform === 'Facebook' ? 'bg-amber-500' : b.platform === 'YouTube' ? 'bg-green-600' : 'bg-pink-400'}`}>✓ Analyzed</span>
-            )}
           </button>
         ))}
       </div>
@@ -622,11 +615,11 @@ export default function DSAConsole() {
       {selectedBenchmark && (
         <div className="space-y-3">
           {/* Header */}
-          <div className={`rounded-xl p-5 ${isFullyAnalyzed ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700'}`}>
+          <div className="rounded-xl p-5 bg-slate-900 text-white">
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-2xl font-extrabold">{selectedBenchmark.platform}</h2>
-                <p className={`text-sm mt-1 ${isFullyAnalyzed ? 'text-slate-300' : 'text-slate-500'}`}>
+                <p className="text-sm mt-1 text-slate-300">
                   {selectedBenchmark.primaryDocStatus}
                 </p>
               </div>
@@ -642,7 +635,7 @@ export default function DSAConsole() {
                 }`}>
                   {selectedBenchmark.latestOpinion}
                 </span>
-                <p className={`text-xs mt-1 ${isFullyAnalyzed ? 'text-slate-400' : 'text-slate-400'}`}>
+                <p className="text-xs mt-1 text-slate-400">
                   {selectedBenchmark.auditor} · {selectedBenchmark.auditCycles}
                 </p>
               </div>
@@ -695,17 +688,6 @@ export default function DSAConsole() {
             <p className="text-sm text-slate-700 leading-relaxed">{selectedBenchmark.benchmarkNotes}</p>
           </div>
 
-          {/* EC Enforcement */}
-          <div className={`rounded-lg p-4 border-l-4 ${
-            selectedBenchmark.enforcementStatus?.includes('Formal')
-              ? 'bg-red-50 border-red-500'
-              : selectedBenchmark.enforcementStatus?.includes('RFI')
-              ? 'bg-amber-50 border-amber-400'
-              : 'bg-slate-50 border-slate-300'
-          }`}>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">⚖️ EC Enforcement Status</p>
-            <p className="text-sm text-slate-700">{selectedBenchmark.enforcementStatus}</p>
-          </div>
         </div>
       )}
     </div>
@@ -719,7 +701,7 @@ export default function DSAConsole() {
         <div>
           <h1 className="text-xl font-extrabold tracking-tight">DSA Compliance Console</h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            QDA Analysis of VLOP SRAs & Audits · TikTok, Instagram, Facebook & YouTube primary docs integrated (2023–2025)
+            QDA Analysis of VLOP SRAs, Audits & Enforcement · 8 platforms · Primary docs 2023–2026
           </p>
         </div>
         <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-700">
@@ -751,23 +733,69 @@ export default function DSAConsole() {
             {tab.label}
           </button>
         ))}
-        {/* TikTok indicator */}
-        <div className="ml-auto flex items-center px-4 text-xs text-pink-600 font-semibold border-l border-slate-200">
-          <span className="w-2 h-2 rounded-full bg-pink-400 mr-2 animate-pulse"></span>
-          TikTok rows updated from primary docs
-        </div>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
-        {activeTab === 'benchmark' ? (
+        {activeTab === 'enforcement' ? (
+          <div className="p-6">
+            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+              <div className="mb-4 pb-4 border-b border-slate-100">
+                <h2 className="text-lg font-bold text-slate-900">⚖️ DSA Enforcement Timeline</h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  EC and national DSC (Coimisiún na Meán) enforcement actions 2023–2026 · {filterData(enforcementActions).length} actions shown · Use platform filter to cross-map with audit findings
+                </p>
+              </div>
+              <div className="space-y-2">
+                {[...filterData(enforcementActions)].sort((a, b) => a.date.localeCompare(b.date)).map((action, idx) => {
+                  const typeColors = {
+                    'RFI': 'bg-blue-100 text-blue-800',
+                    'Formal Proceedings': 'bg-orange-100 text-orange-800',
+                    'Preliminary Finding': 'bg-red-100 text-red-800',
+                    'Fine': 'bg-red-800 text-white',
+                    'Commitments Accepted': 'bg-green-100 text-green-800',
+                    'Retention Order': 'bg-purple-100 text-purple-800',
+                    'CnaM Investigation': 'bg-teal-100 text-teal-800',
+                    'Additional Measures': 'bg-amber-100 text-amber-800',
+                  };
+                  const platformColors = {
+                    'TikTok': 'bg-pink-200 text-pink-900',
+                    'Facebook': 'bg-amber-200 text-amber-900',
+                    'Instagram': 'bg-purple-200 text-purple-900',
+                    'YouTube': 'bg-green-200 text-green-900',
+                    'X': 'bg-slate-200 text-slate-900',
+                    'Snapchat': 'bg-yellow-200 text-yellow-900',
+                    'LinkedIn': 'bg-blue-200 text-blue-900',
+                    'Pinterest': 'bg-rose-200 text-rose-900',
+                  };
+                  const isMilestone = action.type === 'Fine' || action.type === 'Formal Proceedings' || action.type === 'Preliminary Finding' || action.type === 'Commitments Accepted';
+                  return (
+                    <div key={idx} className={`flex gap-4 p-4 border rounded-lg transition-colors items-start ${isMilestone ? 'border-slate-300 bg-slate-50 hover:bg-slate-100' : 'border-slate-100 hover:bg-slate-50'}`}>
+                      <div className="w-24 text-xs text-slate-500 font-mono pt-1 flex-shrink-0">{action.date}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex gap-2 mb-1.5 flex-wrap items-center">
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${platformColors[action.platform] || 'bg-slate-100 text-slate-800'}`}>{action.platform}</span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${typeColors[action.type] || 'bg-slate-100 text-slate-800'}`}>{action.type}</span>
+                          <span className="text-xs text-slate-400 font-medium">{action.articles}</span>
+                          <span className="text-xs text-slate-300 select-none">·</span>
+                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{action.source}</span>
+                        </div>
+                        <p className="text-sm text-slate-700 leading-relaxed">{action.summary}</p>
+                        {action.outcome && <p className="text-xs text-slate-400 mt-1.5 italic">→ {action.outcome}</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'benchmark' ? (
           <div className="p-6">
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
               <div className="mb-4 pb-4 border-b border-slate-100">
                 <h2 className="text-lg font-bold text-slate-900">Audit Quality Benchmark Framework</h2>
                 <p className="text-sm text-slate-500 mt-1">
-                  Standardised dimensions for comparing audit depth and compliance quality across all VLOPs.
-                  TikTok is the first fully analysed platform — its profile establishes the benchmark for subsequent analysis.
+                  Standardised dimensions for comparing audit depth and compliance quality across all VLOPs · Primary documents 2023–2026.
                 </p>
               </div>
               {renderBenchmarkCard()}
