@@ -495,13 +495,19 @@ const benchmarkKeys = [
 // COMPONENT
 // ==========================================
 export default function DSAConsole() {
-  const [activeTab, setActiveTab] = useState('riskMap');
+  const [activeTab, setActiveTab] = useState('overview');
   const [platformFilter, setPlatformFilter] = useState('All');
   const [benchmarkPlatform, setBenchmarkPlatform] = useState('TikTok');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedRows, setExpandedRows] = useState({});
+  const chartsRendered = React.useRef(false);
+
+  const toggleRow = (key) => setExpandedRows(prev => ({ ...prev, [key]: !prev[key] }));
 
   const platforms = ['All', 'Snapchat', 'TikTok', 'Instagram', 'Facebook', 'X', 'Pinterest', 'LinkedIn', 'YouTube'];
 
   const tabs = [
+    { id: 'overview',       label: '🏠 Overview' },
     { id: 'riskMap',        label: 'Matrix 1A: Risk Map' },
     { id: 'auditFindings',  label: 'Matrix 1B: Audit Findings' },
     { id: 'synthesis',      label: 'Thematic Synthesis' },
@@ -511,8 +517,14 @@ export default function DSAConsole() {
   ];
 
   const filterData = (data) => {
-    if (platformFilter === 'All') return data;
-    return data.filter(item => item.platform === platformFilter);
+    let filtered = platformFilter === 'All' ? data : data.filter(item => item.platform === platformFilter);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(item =>
+        Object.values(item).some(v => typeof v === 'string' && v.toLowerCase().includes(q))
+      );
+    }
+    return filtered;
   };
 
   // Auto-derive source URL from case reference embedded in summary text
@@ -560,36 +572,55 @@ export default function DSAConsole() {
     'Pinterest': 'bg-rose-200 text-rose-900',
   };
 
+  const TRUNCATE_LEN = 180;
+
   const renderRows = (data, keys) => (
     <tbody className="divide-y divide-slate-200 bg-white">
-      {data.map((row, idx) => (
-        <tr
-          key={idx}
-          className={`transition-colors ${platformRowClass[row.platform] || 'hover:bg-slate-50'}`}
-        >
-          {keys.map(key => (
-            <td key={key} className="px-5 py-3 text-sm align-top leading-relaxed text-slate-700">
-              {key === 'platform' ? (
-                <span className={`font-bold px-2 py-1 rounded text-xs ${platformBadgeClass[row[key]] || 'bg-slate-100 text-slate-900'}`}>{row[key]}</span>
-              ) : key === 'conclusion' || key === 'theme' ? (
-                <span className={`font-bold px-2 py-1 rounded text-xs ${
-                  row[key]?.includes('Negative') || row[key]?.includes('UNAUDITABLE')
-                    ? 'bg-red-100 text-red-800'
-                    : row[key]?.includes('Qualified')
-                    ? 'bg-amber-100 text-amber-800'
-                    : 'bg-slate-100 text-slate-900'
-                }`}>{row[key]}</span>
-              ) : (
-                <span>{row[key]}</span>
-              )}
-            </td>
-          ))}
-        </tr>
-      ))}
+      {data.map((row, idx) => {
+        const rowKey = idx + '-' + (row.platform || '') + '-' + (row.category || row.theme || row.conclusion || '');
+        const isExpanded = expandedRows[rowKey];
+        return (
+          <tr
+            key={idx}
+            className={`transition-colors cursor-pointer ${platformRowClass[row.platform] || 'hover:bg-slate-50'}`}
+            onClick={() => toggleRow(rowKey)}
+          >
+            {keys.map(key => {
+              const raw = row[key] || '';
+              const isTruncatable = typeof raw === 'string' && raw.length > TRUNCATE_LEN;
+              const displayVal = isTruncatable && !isExpanded ? raw.slice(0, TRUNCATE_LEN) + '…' : raw;
+              return (
+                <td key={key} className="px-5 py-3 text-sm align-top leading-relaxed text-slate-700">
+                  {key === 'platform' ? (
+                    <span className={`font-bold px-2 py-1 rounded text-xs ${platformBadgeClass[row[key]] || 'bg-slate-100 text-slate-900'}`}>{row[key]}</span>
+                  ) : key === 'conclusion' || key === 'theme' ? (
+                    <span className={`font-bold px-2 py-1 rounded text-xs ${
+                      raw?.includes('Negative') || raw?.includes('UNAUDITABLE')
+                        ? 'bg-red-100 text-red-800'
+                        : raw?.includes('Qualified')
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-slate-100 text-slate-900'
+                    }`}>{raw}</span>
+                  ) : (
+                    <span>
+                      {displayVal}
+                      {isTruncatable && (
+                        <span className="ml-1 text-xs text-blue-500 font-semibold">
+                          {isExpanded ? '▲ less' : '▼ more'}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+        );
+      })}
       {data.length === 0 && (
         <tr>
           <td colSpan={keys.length} className="text-center py-12 text-slate-500 italic">
-            No data for selected platform in this view.
+            No data for selected platform / search query.
           </td>
         </tr>
       )}
@@ -728,26 +759,240 @@ export default function DSAConsole() {
     </div>
   );
 
+  // ── Overview tab ──────────────────────────────────────────────
+  const formalProceedings = enforcementActions.filter(a => a.type === 'Formal Proceedings').length;
+  const fines = enforcementActions.filter(a => a.type === 'Fine').length;
+  const negativeFindings = matrix1B.filter(r => r.conclusion?.includes('Negative') || r.conclusion?.includes('NEGATIVE')).length;
+  const unauditableItems = matrix1A.filter(r => r.status?.includes('UNAUDITABLE')).length;
+
+  const platformColors8 = {
+    'Snapchat':  '#eab308',
+    'TikTok':    '#ec4899',
+    'Instagram': '#a855f7',
+    'Facebook':  '#f59e0b',
+    'X':         '#64748b',
+    'Pinterest': '#f43f5e',
+    'LinkedIn':  '#3b82f6',
+    'YouTube':   '#22c55e',
+  };
+
+  // Per-platform counts for charts
+  const platformList = ['Snapchat','TikTok','Instagram','Facebook','X','Pinterest','LinkedIn','YouTube'];
+  const negPerPlatform = platformList.map(p => matrix1B.filter(r => r.platform === p && (r.conclusion?.includes('Negative') || r.conclusion?.includes('NEGATIVE'))).length);
+  const enfPerPlatform = platformList.map(p => enforcementActions.filter(a => a.platform === p).length);
+  const riskPerPlatform = platformList.map(p => matrix1A.filter(r => r.platform === p).length);
+
+  // Type breakdown for enforcement donut
+  const enfTypeMap = {};
+  enforcementActions.forEach(a => { enfTypeMap[a.type] = (enfTypeMap[a.type] || 0) + 1; });
+
+  const renderOverview = () => (
+    <div className="p-6 space-y-6">
+      {/* KPI row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Platforms Monitored', value: 8, color: 'bg-blue-600', icon: '🌐' },
+          { label: 'Negative Audit Findings', value: negativeFindings, color: 'bg-red-600', icon: '❌' },
+          { label: 'Formal EC Proceedings', value: formalProceedings, color: 'bg-orange-500', icon: '⚖️' },
+          { label: 'DSA Fines Issued', value: fines, color: 'bg-purple-600', icon: '💶' },
+        ].map(kpi => (
+          <div key={kpi.label} className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-lg ${kpi.color} flex items-center justify-center text-xl flex-shrink-0`}>{kpi.icon}</div>
+            <div>
+              <div className="text-3xl font-extrabold text-slate-900">{kpi.value}</div>
+              <div className="text-xs text-slate-500 font-medium mt-0.5 leading-tight">{kpi.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Negative findings bar */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-700 mb-4">Negative Audit Findings by Platform</h3>
+          <div className="space-y-2">
+            {platformList.map((p, i) => (
+              <div key={p} className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-slate-600 w-20 flex-shrink-0">{p}</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
+                  <div
+                    className="h-5 rounded-full flex items-center justify-end pr-2 transition-all"
+                    style={{ width: `${negPerPlatform[i] > 0 ? Math.max(negPerPlatform[i] * 14, 12) : 0}%`, backgroundColor: platformColors8[p] }}
+                  >
+                    {negPerPlatform[i] > 0 && <span className="text-xs font-bold text-white">{negPerPlatform[i]}</span>}
+                  </div>
+                </div>
+                {negPerPlatform[i] === 0 && <span className="text-xs text-slate-400">0</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Enforcement actions bar */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-700 mb-4">Enforcement Actions by Platform</h3>
+          <div className="space-y-2">
+            {platformList.map((p, i) => (
+              <div key={p} className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-slate-600 w-20 flex-shrink-0">{p}</span>
+                <div className="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
+                  <div
+                    className="h-5 rounded-full flex items-center justify-end pr-2 transition-all"
+                    style={{ width: `${enfPerPlatform[i] > 0 ? Math.max(enfPerPlatform[i] * 5, 10) : 0}%`, backgroundColor: platformColors8[p] }}
+                  >
+                    {enfPerPlatform[i] > 0 && <span className="text-xs font-bold text-white">{enfPerPlatform[i]}</span>}
+                  </div>
+                </div>
+                {enfPerPlatform[i] === 0 && <span className="text-xs text-slate-400">0</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Enforcement type breakdown + Risk categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Enforcement type pills */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-700 mb-4">Enforcement Actions by Type</h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(enfTypeMap).sort((a,b) => b[1]-a[1]).map(([type, count]) => {
+              const typeColors = {
+                'RFI': 'bg-blue-100 text-blue-800',
+                'Formal Proceedings': 'bg-orange-100 text-orange-800',
+                'Preliminary Finding': 'bg-red-100 text-red-800',
+                'Fine': 'bg-red-800 text-white',
+                'Commitments Accepted': 'bg-green-100 text-green-800',
+                'Retention Order': 'bg-purple-100 text-purple-800',
+                'CnaM Investigation': 'bg-teal-100 text-teal-800',
+                'Additional Measures': 'bg-amber-100 text-amber-800',
+              };
+              return (
+                <span key={type} className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 ${typeColors[type] || 'bg-slate-100 text-slate-800'}`}>
+                  {type}
+                  <span className="bg-white bg-opacity-40 rounded-full w-5 h-5 flex items-center justify-center font-extrabold">{count}</span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Unauditable articles alert */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h3 className="text-sm font-bold text-slate-700 mb-4">Compliance Overview</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+              <span className="text-sm font-semibold text-red-800">Unauditable Risk Categories</span>
+              <span className="text-xl font-extrabold text-red-700">{unauditableItems}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <span className="text-sm font-semibold text-amber-800">Total Risk Map Entries</span>
+              <span className="text-xl font-extrabold text-amber-700">{matrix1A.length}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <span className="text-sm font-semibold text-blue-800">Enforcement Actions (total)</span>
+              <span className="text-xl font-extrabold text-blue-700">{enforcementActions.length}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <span className="text-sm font-semibold text-slate-700">Audit Findings Tracked</span>
+              <span className="text-xl font-extrabold text-slate-700">{matrix1B.length}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Platform compliance matrix */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h3 className="text-sm font-bold text-slate-700 mb-4">Platform Compliance Matrix — Audit Findings at a Glance</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-slate-100 text-slate-600 uppercase font-bold tracking-wider">
+                <th className="px-3 py-2 text-left">Platform</th>
+                <th className="px-3 py-2 text-center">Audit Opinion</th>
+                <th className="px-3 py-2 text-center">EC Proceedings</th>
+                <th className="px-3 py-2 text-center">Neg. Findings</th>
+                <th className="px-3 py-2 text-center">Enforcement Actions</th>
+                <th className="px-3 py-2 text-center">Risk Tier (Max)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {platformList.map((p, i) => {
+                const bench = auditBenchmarks.find(b => b.platform === p);
+                const hasProceedings = enforcementActions.some(a => a.platform === p && a.type === 'Formal Proceedings');
+                const maxTier = matrix1A.filter(r => r.platform === p).some(r => r.status?.includes('TIER 1')) ? 'Tier 1 🔴'
+                  : matrix1A.filter(r => r.platform === p).some(r => r.status?.includes('Tier 3') || r.status?.includes('TIER 3')) ? 'Tier 3 🟡'
+                  : 'Tier 2 🟠';
+                const opinion = bench?.latestOpinion || '—';
+                return (
+                  <tr key={p} className={`hover:bg-slate-50 ${platformRowClass[p] || ''}`}>
+                    <td className="px-3 py-2.5 font-bold">
+                      <span className={`px-2 py-1 rounded text-xs ${platformBadgeClass[p] || 'bg-slate-100 text-slate-900'}`}>{p}</span>
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                        opinion.includes('Negative') ? 'bg-red-100 text-red-800'
+                        : opinion.includes('Qualified') ? 'bg-amber-100 text-amber-800'
+                        : opinion.includes('Positive') ? 'bg-green-100 text-green-800'
+                        : 'bg-slate-100 text-slate-600'
+                      }`}>{opinion}</span>
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      {hasProceedings ? <span className="text-orange-600 font-bold">⚠ Yes</span> : <span className="text-green-600">—</span>}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-bold">
+                      <span className={negPerPlatform[i] > 0 ? 'text-red-700' : 'text-slate-400'}>{negPerPlatform[i]}</span>
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-bold text-slate-600">{enfPerPlatform[i]}</td>
+                    <td className="px-3 py-2.5 text-center text-xs">{maxTier}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-screen w-full bg-slate-50 font-sans">
 
       {/* Top bar */}
-      <div className="bg-slate-900 px-6 py-4 flex justify-between items-center text-white shadow-md">
+      <div className="bg-slate-900 px-6 py-4 flex flex-wrap gap-3 justify-between items-center text-white shadow-md">
         <div>
           <h1 className="text-xl font-extrabold tracking-tight">DSA Compliance Console</h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            QDA Analysis of VLOP SRAs, Audits & Enforcement · 8 platforms · Primary docs 2023–2026
+            QDA Analysis of VLOP SRAs, Audits &amp; Enforcement · 8 platforms · Primary docs 2023–2026
           </p>
         </div>
-        <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-700">
-          <label className="text-xs font-semibold text-slate-300">FILTER:</label>
-          <select
-            className="bg-slate-900 text-white border border-slate-600 rounded px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-            value={platformFilter}
-            onChange={(e) => setPlatformFilter(e.target.value)}
-          >
-            {platforms.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Global search */}
+          <div className="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+            <span className="text-slate-400 text-sm">🔍</span>
+            <input
+              type="text"
+              placeholder="Search all data…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="bg-transparent text-white placeholder-slate-500 text-sm focus:outline-none w-36"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-white text-xs">✕</button>
+            )}
+          </div>
+          {/* Platform filter */}
+          <div className="flex items-center gap-3 bg-slate-800 p-2 rounded-lg border border-slate-700">
+            <label className="text-xs font-semibold text-slate-300">FILTER:</label>
+            <select
+              className="bg-slate-900 text-white border border-slate-600 rounded px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              value={platformFilter}
+              onChange={(e) => setPlatformFilter(e.target.value)}
+            >
+              {platforms.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -772,7 +1017,7 @@ export default function DSAConsole() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto">
-        {activeTab === 'enforcement' ? (
+        {activeTab === 'overview' ? renderOverview() : activeTab === 'enforcement' ? (
           <div className="p-6">
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
               <div className="mb-4 pb-4 border-b border-slate-100">
@@ -782,7 +1027,7 @@ export default function DSAConsole() {
                 </p>
               </div>
               <div className="space-y-2">
-                {[...filterData(enforcementActions)].sort((a, b) => a.date.localeCompare(b.date)).map((action, idx) => {
+                {[...filterData(enforcementActions)].sort((a, b) => a.date.localeCompare(b.date)).map((action, idx, arr) => {
                   const typeColors = {
                     'RFI': 'bg-blue-100 text-blue-800',
                     'Formal Proceedings': 'bg-orange-100 text-orange-800',
@@ -793,7 +1038,17 @@ export default function DSAConsole() {
                     'CnaM Investigation': 'bg-teal-100 text-teal-800',
                     'Additional Measures': 'bg-amber-100 text-amber-800',
                   };
-                  const platformColors = {
+                  const dotColors = {
+                    'RFI': '#3b82f6',
+                    'Formal Proceedings': '#f97316',
+                    'Preliminary Finding': '#ef4444',
+                    'Fine': '#7f1d1d',
+                    'Commitments Accepted': '#22c55e',
+                    'Retention Order': '#a855f7',
+                    'CnaM Investigation': '#14b8a6',
+                    'Additional Measures': '#f59e0b',
+                  };
+                  const platformBgColors = {
                     'TikTok': 'bg-pink-200 text-pink-900',
                     'Facebook': 'bg-amber-200 text-amber-900',
                     'Instagram': 'bg-purple-200 text-purple-900',
@@ -804,16 +1059,26 @@ export default function DSAConsole() {
                     'Pinterest': 'bg-rose-200 text-rose-900',
                   };
                   const isMilestone = action.type === 'Fine' || action.type === 'Formal Proceedings' || action.type === 'Preliminary Finding' || action.type === 'Commitments Accepted';
+                  const isLast = idx === arr.length - 1;
                   return (
-                    <div key={idx} className={`flex gap-4 p-4 border rounded-lg transition-colors items-start ${isMilestone ? 'border-slate-300 bg-slate-50 hover:bg-slate-100' : 'border-slate-100 hover:bg-slate-50'}`}>
-                      <div className="w-24 text-xs text-slate-500 font-mono pt-1 flex-shrink-0">{action.date}</div>
-                      <div className="flex-1 min-w-0">
+                    <div key={idx} className="flex gap-0 items-stretch">
+                      {/* Timeline spine */}
+                      <div className="flex flex-col items-center w-10 flex-shrink-0">
+                        <div
+                          className="w-4 h-4 rounded-full flex-shrink-0 mt-4 z-10 shadow-sm border-2 border-white"
+                          style={{ backgroundColor: dotColors[action.type] || '#94a3b8' }}
+                        />
+                        {!isLast && <div className="w-0.5 flex-1 bg-slate-200 mt-1" />}
+                      </div>
+                      {/* Card */}
+                      <div className={`flex-1 mb-2 p-4 border rounded-lg transition-colors ml-2 ${isMilestone ? 'border-slate-300 bg-slate-50 hover:bg-slate-100 shadow-sm' : 'border-slate-100 hover:bg-slate-50'}`}>
                         <div className="flex gap-2 mb-1.5 flex-wrap items-center">
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${platformColors[action.platform] || 'bg-slate-100 text-slate-800'}`}>{action.platform}</span>
+                          <span className="text-xs text-slate-400 font-mono">{action.date}</span>
+                          <span className="text-slate-200 select-none">·</span>
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded ${platformBgColors[action.platform] || 'bg-slate-100 text-slate-800'}`}>{action.platform}</span>
                           <span className={`text-xs font-bold px-2 py-0.5 rounded ${typeColors[action.type] || 'bg-slate-100 text-slate-800'}`}>{action.type}</span>
                           <span className="text-xs text-slate-400 font-medium">{action.articles}</span>
-                          <span className="text-xs text-slate-300 select-none">·</span>
-                          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{action.source}</span>
+                          <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">{action.source}</span>
                           {getActionUrl(action) && (
                             <a
                               href={getActionUrl(action)}
