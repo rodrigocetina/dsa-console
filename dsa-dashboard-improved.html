@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Compliance Console — Enhanced</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+<style>
+:root {
+  --bg: #f4f6fa;
+  --card: #ffffff;
+  --header: #0f172a;
+  --accent: #3b82f6;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --red: #ef4444; --red-light: #fee2e2; --red-dark: #991b1b;
+  --amber: #f59e0b; --amber-light: #fef3c7; --amber-dark: #78350f;
+  --green: #22c55e; --green-light: #dcfce7; --green-dark: #14532d;
+  --blue-light: #dbeafe; --blue-dark: #1e3a8a;
+  --purple-light: #ede9fe; --purple-dark: #4c1d95;
+  --gap: 16px; --radius: 10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.shell{display:flex;flex-direction:column;height:100vh}
+.topbar{background:var(--header);color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.topbar h1{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.topbar p{font-size:11px;color:#94a3b8;margin-top:2px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar select,.topbar input{background:#1e293b;color:#fff;border:1px solid #334155;border-radius:6px;padding:6px 10px;font-size:12px;outline:none}
+.topbar label{font-size:11px;color:#94a3b8;font-weight:600}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.tab-btn{flex-shrink:0;padding:11px 18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:all .15s}
+.tab-btn.active{color:#1e40af;border-bottom-color:#3b82f6;background:#eff6ff}
+.tab-btn:hover:not(.active){background:#f8fafc;color:var(--text)}
+.content{flex:1;overflow:auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border)}
+.card-header h2{font-size:15px;font-weight:700}
+.card-header p{font-size:12px;color:var(--muted);margin-top:3px}
+.card-body{padding:16px 20px}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;border-left:4px solid var(--accent)}
+.kpi.red{border-left-color:var(--red)}.kpi.amber{border-left-color:var(--amber)}.kpi.green{border-left-color:var(--green)}
+.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600}
+.kpi-value{font-size:28px;font-weight:800;margin:4px 0}
+.kpi-sub{font-size:11px;color:var(--muted)}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-bottom:var(--gap)}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.chart-box h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px}
+.chart-box canvas{max-height:220px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap}
+.badge-red{background:var(--red-light);color:var(--red-dark)}.badge-amber{background:var(--amber-light);color:var(--amber-dark)}
+.badge-green{background:var(--green-light);color:var(--green-dark)}.badge-blue{background:var(--blue-light);color:var(--blue-dark)}
+.badge-purple{background:var(--purple-light);color:var(--purple-dark)}.badge-slate{background:#f1f5f9;color:#334155}
+.badge-platform{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:800}
+.p-tiktok{background:#fce7f3;color:#831843}.p-instagram{background:#ede9fe;color:#4c1d95}
+.p-facebook{background:#fef3c7;color:#78350f}.p-x{background:#f1f5f9;color:#1e293b}
+.p-snapchat{background:#fef9c3;color:#713f12}.p-youtube{background:#dcfce7;color:#14532d}
+.p-linkedin{background:#dbeafe;color:#1e3a8a}.p-pinterest{background:#ffe4e6;color:#9f1239}
+.data-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.data-table thead th{padding:10px 14px;text-align:left;background:#f8fafc;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:1;white-space:nowrap;cursor:pointer;user-select:none}
+.data-table thead th:hover{background:#f1f5f9;color:var(--text)}
+.data-table tbody tr{border-bottom:1px solid #f1f5f9;transition:background .1s}
+.data-table tbody tr:hover{background:#f8fafc}
+.data-table td{padding:10px 14px;vertical-align:top;line-height:1.55}
+.expand-btn{background:none;border:none;cursor:pointer;color:var(--accent);font-size:10px;font-weight:600;padding:2px 5px;border-radius:3px}
+.expand-btn:hover{background:var(--blue-light)}
+.detail-row td{background:#f8fafc;padding:10px 14px 14px 32px;font-size:12px;color:#475569;line-height:1.6;border-bottom:2px solid var(--border)}
+.detail-row.hidden{display:none}
+.search-bar{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;margin-bottom:14px}
+.search-bar:focus{border-color:var(--accent);box-shadow:0 0 0 2px #bfdbfe}
+.matrix-cell{padding:6px 4px;text-align:center;border-radius:4px;font-size:10px;font-weight:700}
+.m-neg{background:#fee2e2;color:#991b1b}.m-pos{background:#dcfce7;color:#14532d}
+.m-pwc{background:#fef3c7;color:#78350f}.m-una{background:#e0e7ff;color:#3730a3}
+.m-na{background:#f1f5f9;color:#94a3b8}.m-qual{background:#ffedd5;color:#7c2d12}
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-dot{position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid #fff}
+.tl-dot.fine{background:var(--red)}.tl-dot.formal{background:var(--amber)}
+.tl-dot.preliminary{background:#f97316}.tl-dot.rfi{background:#60a5fa}
+.tl-dot.commitments{background:var(--green)}.tl-dot.other{background:#a78bfa}
+.tl-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;transition:box-shadow .15s}
+.tl-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.tl-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.tl-date{font-size:10px;color:var(--muted);font-family:monospace;font-weight:600}
+.tl-text{font-size:12.5px;color:var(--text);line-height:1.5}
+.tl-outcome{font-size:11px;color:var(--muted);font-style:italic;margin-top:4px}
+.bm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bm-dim{border-radius:8px;padding:12px 14px;border-left:3px solid}
+.bm-dim.ok{background:#f0fdf4;border-color:var(--green)}.bm-dim.warn{background:#fff7ed;border-color:var(--amber)}
+.bm-dim.bad{background:#fef2f2;border-color:var(--red)}.bm-dim.na{background:#f8fafc;border-color:#cbd5e1}
+.bm-dim-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.bm-dim.ok .bm-dim-label{color:#15803d}.bm-dim.warn .bm-dim-label{color:#b45309}
+.bm-dim.bad .bm-dim-label{color:#b91c1c}.bm-dim.na .bm-dim-label{color:#94a3b8}
+.bm-dim-text{font-size:12px;color:#475569;line-height:1.5}
+.bm-notes{background:#eff6ff;border-left:3px solid #3b82f6;border-radius:8px;padding:12px 14px;margin-top:10px}
+.bm-notes-label{font-size:10px;font-weight:700;text-transform:uppercase;color:#1d4ed8;margin-bottom:6px}
+.bm-notes-text{font-size:12px;color:#334155;line-height:1.6}
+.plat-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.plat-tab{padding:6px 12px;border-radius:6px;font-size:11px;font-weight:700;border:2px solid transparent;cursor:pointer;transition:all .15s}
+.plat-tab.active{background:#0f172a;color:#fff;border-color:#0f172a}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.risk-summary-table{width:100%;border-collapse:collapse;font-size:12px}
+.risk-summary-table th{padding:8px 12px;background:#f8fafc;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:2px solid var(--border);font-weight:700;white-space:nowrap}
+.risk-summary-table td{padding:8px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.risk-summary-table tr:hover td{background:#f8fafc}
+.score-pill{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700}
+.score-high{background:#fee2e2;color:#b91c1c}.score-med{background:#fef3c7;color:#92400e}
+.score-low{background:#dcfce7;color:#15803d}.score-na{background:#f1f5f9;color:#94a3b8}
+@media(max-width:768px){.charts-row{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}.bm-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="topbar">
+  <div>
+    <h1>🛡️ DSA Compliance Console</h1>
+    <p>Systemic Risk Analysis · 8 VLOPs · Primary docs 2023–2026 · Jean Monnet CoE Press Forward WP3</p>
+  </div>
+  <div class="topbar-right">
+    <label>PLATFORM</label>
+    <select id="global-filter" onchange="applyFilter()">
+      <option value="All">All Platforms</option>
+      <option>Snapchat</option><option>TikTok</option><option>Instagram</option>
+      <option>Facebook</option><option>X</option><option>Pinterest</option>
+      <option>LinkedIn</option><option>YouTube</option>
+    </select>
+    <input type="search" id="global-search" placeholder="Search…" oninput="applySearch(this.value)" style="width:160px">
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('overview',this)">📊 Overview</button>
+  <button class="tab-btn" onclick="showTab('riskmap',this)">🗺️ Risk Map</button>
+  <button class="tab-btn" onclick="showTab('audit',this)">🔍 Audit Findings</button>
+  <button class="tab-btn" onclick="showTab('benchmark',this)">📋 Benchmarks</button>
+  <button class="tab-btn" onclick="showTab('matrix',this)">🔲 Compliance Matrix</button>
+  <button class="tab-btn" onclick="showTab('enforcement',this)">⚖️ Enforcement</button>
+  <button class="tab-btn" onclick="showTab('synthesis',this)">💡 Synthesis</button>
+</div>
+<div class="content" id="content-area">
+
+<div id="tab-overview">
+  <div class="kpi-row">
+    <div class="kpi red"><div class="kpi-label">Platforms Under EC Proceedings</div><div class="kpi-value">5</div><div class="kpi-sub">TikTok, Meta×2, X, Snapchat (Mar 2026)</div></div>
+    <div class="kpi amber"><div class="kpi-label">Total Audit NEGATIVEs</div><div class="kpi-value">38</div><div class="kpi-sub">Across all platforms & cycles</div></div>
+    <div class="kpi" style="border-left-color:#8b5cf6"><div class="kpi-label">Unauditable Sub-Articles</div><div class="kpi-value">72</div><div class="kpi-sub">Blocked by EC proceedings</div></div>
+    <div class="kpi green"><div class="kpi-label">Clean Audit Opinions</div><div class="kpi-value">1</div><div class="kpi-sub">Snapchat Y2 — only Positive Unqualified</div></div>
+    <div class="kpi" style="border-left-color:#0891b2"><div class="kpi-label">Enforcement Actions</div><div class="kpi-value">45+</div><div class="kpi-sub">RFIs, Proceedings, Fines 2023–2026</div></div>
+    <div class="kpi amber"><div class="kpi-label">Total Fines Issued</div><div class="kpi-value">€1.48B</div><div class="kpi-sub">X €120M + TikTok €345M + Meta €1.01B</div></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-box"><h3>Audit Findings by Platform (NEGATIVEs + Qualified)</h3><canvas id="chart-negatives"></canvas></div>
+    <div class="chart-box"><h3>Unauditable Articles per Platform</h3><canvas id="chart-unauditable"></canvas></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-box"><h3>Enforcement Action Types (all platforms)</h3><canvas id="chart-enforcement-types"></canvas></div>
+    <div class="chart-box"><h3>Risk Tier Distribution by Platform (Latest SRA)</h3><canvas id="chart-risk-tiers"></canvas></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><h2>Platform Compliance Overview</h2><p>Latest audit opinion · unauditable article count · EC proceedings status · overall risk trajectory</p></div>
+    <div class="card-body" style="padding:0;overflow-x:auto"><table class="risk-summary-table"><thead><tr><th>Platform</th><th>Latest Audit Opinion</th><th>Auditor</th><th>Unauditable Arts.</th><th>EC Proceedings</th><th>Highest Risk Tier</th><th>Risk Trajectory</th></tr></thead><tbody id="overview-table-body"></tbody></table></div>
+  </div>
+</div>
+
+<div id="tab-riskmap" style="display:none">
+  <div class="card">
+    <div class="card-header"><h2>Matrix 1A — Platform Self-Reported Risk Maps</h2><p>DSA Art. 34 risk categories, mitigations and audit/EC status · Click row for detail</p></div>
+    <input class="search-bar" id="search-riskmap" placeholder="Search risk area, platform, article…" oninput="filterTable('riskmap-tbody',this.value)">
+    <div style="overflow-x:auto"><table class="data-table"><thead><tr><th onclick="sortTable('riskmap-tbody',0)">Platform ↕</th><th onclick="sortTable('riskmap-tbody',1)">Category ↕</th><th>Risk Summary</th><th>Key Mitigations</th><th onclick="sortTable('riskmap-tbody',4)">Status ↕</th></tr></thead><tbody id="riskmap-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<div id="tab-audit" style="display:none">
+  <div class="card">
+    <div class="card-header"><h2>Matrix 1B — Audit Findings</h2><p>All NEGATIVE, Qualified, and notable Positive w/ Comments conclusions · Click row to expand</p></div>
+    <input class="search-bar" id="search-audit" placeholder="Search article, platform, conclusion…" oninput="filterTable('audit-tbody',this.value)">
+    <div style="overflow-x:auto"><table class="data-table"><thead><tr><th onclick="sortTable('audit-tbody',0)">Platform ↕</th><th onclick="sortTable('audit-tbody',1)">Conclusion ↕</th><th>Finding Summary</th><th>Remediation</th></tr></thead><tbody id="audit-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<div id="tab-benchmark" style="display:none">
+  <div class="card">
+    <div class="card-header"><h2>📋 Audit Quality Benchmark Framework</h2><p>Standardised dimensions for comparing audit depth and compliance quality across VLOPs</p></div>
+    <div class="card-body"><div class="plat-tabs" id="bm-plat-tabs"></div><div id="bm-content"></div></div>
+  </div>
+</div>
+
+<div id="tab-matrix" style="display:none">
+  <div class="card">
+    <div class="card-header"><h2>🔲 Cross-Platform Compliance Matrix</h2><p>Key DSA articles × platforms — audit conclusion at a glance</p></div>
+    <div class="card-body">
+      <div class="legend">
+        <span style="font-weight:700;font-size:11px;color:var(--muted)">LEGEND:</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#fee2e2;border:1px solid #fca5a5"></span> NEGATIVE</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ffedd5;border:1px solid #fed7aa"></span> Qualified</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#fef3c7;border:1px solid #fde68a"></span> Positive w/Comments</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#dcfce7;border:1px solid #bbf7d0"></span> Positive</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#e0e7ff;border:1px solid #c7d2fe"></span> UNAUDITABLE</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#f1f5f9;border:1px solid #e2e8f0"></span> N/A</span>
+      </div>
+      <div style="overflow-x:auto"><div id="compliance-matrix"></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-enforcement" style="display:none">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px">
+    <div class="kpi red" style="flex:1;min-width:140px"><div class="kpi-label">Formal Proceedings</div><div class="kpi-value">12</div></div>
+    <div class="kpi amber" style="flex:1;min-width:140px"><div class="kpi-label">RFIs Issued</div><div class="kpi-value">20+</div></div>
+    <div class="kpi" style="flex:1;min-width:140px;border-left-color:#f97316"><div class="kpi-label">Preliminary Findings</div><div class="kpi-value">4</div></div>
+    <div class="kpi green" style="flex:1;min-width:140px"><div class="kpi-label">Commitments Accepted</div><div class="kpi-value">2</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><h2>⚖️ DSA Enforcement Timeline</h2><p>EC and national DSC enforcement actions 2023–2026 · sorted chronologically</p></div>
+    <div class="card-body"><div class="timeline" id="enforcement-timeline"></div></div>
+  </div>
+</div>
+
+<div id="tab-synthesis" style="display:none">
+  <div class="card">
+    <div class="card-header"><h2>💡 Thematic Synthesis & Scope vs Substance</h2><p>Cross-cutting patterns across platforms · Click row to expand full analysis</p></div>
+    <input class="search-bar" id="search-synthesis" placeholder="Search theme, platform…" oninput="filterTable('synthesis-tbody',this.value)">
+    <div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Theme / Category</th><th>Platforms</th><th>Auditor Perspective</th><th>EC/Regulatory View</th></tr></thead><tbody id="synthesis-tbody"></tbody></table></div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+const PLATFORMS=['Snapchat','TikTok','Instagram','Facebook','X','Pinterest','LinkedIn','YouTube'];
+const platformColors={TikTok:'#fce7f3',Instagram:'#ede9fe',Facebook:'#fef3c7',YouTube:'#dcfce7',X:'#f1f5f9',Snapchat:'#fef9c3',LinkedIn:'#dbeafe',Pinterest:'#ffe4e6'};
+const platformTextColors={TikTok:'#831843',Instagram:'#4c1d95',Facebook:'#78350f',YouTube:'#14532d',X:'#1e293b',Snapchat:'#713f12',LinkedIn:'#1e3a8a',Pinterest:'#9f1239'};
+
+const overviewData=[
+  {platform:'Snapchat',opinion:'Positive Unqualified (Y2)',auditor:'EY',unaudi:0,proceedings:'Formal Proceedings opened Mar 2026',highRisk:'Extremely Low',trajectory:'▲ Improving'},
+  {platform:'TikTok',opinion:'Qualified Negative (2025)',auditor:'KPMG',unaudi:6,proceedings:'Active (Arts. 28, 34, 35, 39, 40)',highRisk:'Tier 1 (CSAM/Terror)',trajectory:'→ Mixed'},
+  {platform:'Instagram',opinion:'No unqualified opinion (2025)',auditor:'EY',unaudi:14,proceedings:'Active (14 sub-articles)',highRisk:'Tier 3 SSIED',trajectory:'▼ Worsening'},
+  {platform:'Facebook',opinion:'No unqualified opinion (2025)',auditor:'EY',unaudi:16,proceedings:'Active (14 arts + HSC 2.1/2.2)',highRisk:'Tier 3 Minors',trajectory:'→ Mixed'},
+  {platform:'X',opinion:'Qualified Negative (Y3)',auditor:'BDO LLP',unaudi:10,proceedings:'Active (Arts. 16.5, 25.1, 34-35, 39, 40)',highRisk:'Tier 1 Terror',trajectory:'▲ Improving (procedural)'},
+  {platform:'Pinterest',opinion:'Positive w/ Comments (Y2)',auditor:'EY',unaudi:0,proceedings:'None as of Apr 2026',highRisk:'Low (all categories)',trajectory:'→ Stable'},
+  {platform:'LinkedIn',opinion:'Qualified (Y2)',auditor:'D&T',unaudi:0,proceedings:'None as of Apr 2026',highRisk:'Moderate (Human Dignity)',trajectory:'→ Stable'},
+  {platform:'YouTube',opinion:'Positive w/ Comments (Y2)',auditor:'EY GIL',unaudi:0,proceedings:'None (active monitoring)',highRisk:'Elevated Civic Discourse',trajectory:'→ Stable'},
+];
+
+const riskMapData=[
+  {platform:'Snapchat',category:'Art. 34.1(a) Illegal Content — CSEAI, Hate Speech, Fraud',risk:'CSEAI (Level 1, Extremely Low PVP ≤0.049%): specialized double-review; 322 min median turnaround. Hate Speech Level 3, Extremely Low. Protect Children study (2024): Snapchat ranked last (10%) for CSAM prevalence.',mitigation:'PVP sampling; CSEAI double-review; NCMEC hash-matching; Spotlight pre-moderation (100% reviewed before distribution); 40-day SLA.',status:'Y2 Audit Positive Unqualified. No EC proceedings.'},
+  {platform:'Snapchat',category:'Art. 34.1(b) Fundamental Rights — Dark Patterns',risk:'Android deactivation: no explicit deactivation button (dark pattern — remediated Aug 2024). Art. 25.1 formally audited.',mitigation:'Explicit account deactivation button added Aug 23, 2024. JIT consent notices. Ghost Mode for location.',status:'Y1 Qualified Negative (single Art. 11.3 finding, remediated). Y2 Positive Unqualified. No EC proceedings.'},
+  {platform:'Snapchat',category:'Art. 34.1(c) Civic Discourse & Recommender Systems',risk:'Electoral disinformation Level 3, Extremely Low. EC RFI on recommender systems — architecture claim (1:1 messaging as virality mitigation) not independently tested.',mitigation:'No open feed. Bi-directional friending. Discover: human curated. No political advertising.',status:'Active — EC RFI on recommender systems. Y2 B.1 recommendation: enhanced algorithmic documentation → March 2026.'},
+  {platform:'Snapchat',category:'Art. 34.1(d) Minors & Health',risk:'Y3: Snap introduced 16-17 year-old Public Profile posting — triggered new Art. 34 critical impact assessment. Harassment/Bullying Extremely Low. Self-Harm Extremely Low Level 2.',mitigation:'10 PM silent notifications. Friction before Public Stories posting. Age-gating. Y2 B.1: document minor protection measures → March 2026.',status:'Active — Y3 16-17yo Public Profile posting introduces new compliance dimension. No EC proceedings on Art. 28.'},
+  {platform:'TikTok',category:'Art. 34.1(a) Severe Illegal (CSAM/Terror)',risk:'CSAM, Terror, Hate Speech. NCMEC reports: 590 (2022) → 590,376 (2023). Metric ambiguity unresolved.',mitigation:'PhotoDNA + IWF hash lists + Google Content Safety Toolkit. ML removes 86.4% at zero views. Tech Against Terrorism.',status:'Active — metric ambiguity unresolved. EC proceedings.'},
+  {platform:'TikTok',category:'Art. 34.1(b) Fundamental Rights',risk:'Over-moderation suppressing expression; manipulative interface design. Art. 25.1 NEGATIVE 2024 audit.',mitigation:'Appeals systems; UN Human Rights Due Diligence framework; RightsCon participation.',status:'Active — Art. 25.1 Negative (dark patterns) in 2024 audit'},
+  {platform:'TikTok',category:'Art. 34.1(c) Civic Discourse / AIGC',risk:'Coordinated inauthentic behaviour, election interference, deepfakes.',mitigation:'11 IFCN fact-checkers; Election Centres in 27 EU languages; C2PA AIGC labelling; $1M climate initiative.',status:'Active — Art. 34.1 unauditable 2025 (EC proceedings)'},
+  {platform:'TikTok',category:'Art. 34.1(d) Addictive Design / Recommender',risk:'FYF rabbit holes, addictive design. Arts. 27.1, 27.3, 38.1 Negative 2024 audit.',mitigation:'Default 60-min screen time; Youth Council (15 teens, 8 countries); Family Pairing.',status:'Active — Arts. 27.1, 27.3, 38.1 Negative 2024 audit'},
+  {platform:'Instagram',category:'Art. 15.1 Transparency Reporting',risk:'Failure to report moderation categorization, monetization restrictions, complaint basis, accuracy indicators.',mitigation:'Transparency Center; DSA Transparency Reports.',status:'NEGATIVE (2024 & 2025) — persistent non-compliance across two consecutive audit cycles'},
+  {platform:'Instagram',category:'Art. 23.1 Manifestly Illegal Suspension',risk:'Repeat violators not warned; suspensions not applied after warnings; unreasonable suspension durations.',mitigation:'Community Standards enforcement; 98%+ proactive detection rates claimed.',status:'NEGATIVE (2025) — bilateral failure: under-enforcement AND over-enforcement simultaneously'},
+  {platform:'Instagram',category:'Art. 34.1(d) Minors & SSIED',risk:'SSIED escalated to Tier 3 (2025); Protection of Minors Tier 2→Tier 3.',mitigation:'Restricted Mode; disabled profiled ads for <18; SSIED safe messaging guidelines.',status:'Tier 3 residual risk — Art. 28.1 UNAUDITABLE (EC proceedings)'},
+  {platform:'Facebook',category:'Art. 15.1 Transparency Reporting',risk:'Consolidated Facebook+Instagram data violates per-VLOP reporting. NEGATIVE in both cycles.',mitigation:'Transparency Center; DSA Transparency Reports.',status:'NEGATIVE (2024 & 2025) — Meta corporate-level non-compliance'},
+  {platform:'Facebook',category:'Art. 38.1 Dating Recommender Systems',risk:'Facebook Dating users had no non-profiling recommender option for 6+ months.',mitigation:'Non-profiling RS option eventually implemented.',status:'NEGATIVE (2024) — 6+ month absence of legally required non-profiling option'},
+  {platform:'Facebook',category:'Art. 26.2 Commercial Content Labels (Reels)',risk:'~90% of Facebook Reels on Android missing commercial disclosure labels for ~9 months.',mitigation:'Label deployment completed by 2025 audit cycle.',status:'NEGATIVE (2025) — 9-month labeling failure affecting majority of Reels impressions on Android'},
+  {platform:'X',category:'Art. 34.1(a) Terrorist Content [TIER 1 Y3]',risk:'Terrorist content escalated Tier 3 (Y2) → TIER 1 (Y3) — most dramatic self-escalation across all 6 VLOPs. Inherent: Critical.',mitigation:'ML classifiers; hash-matching; FoSnR (Freedom of Speech Not Reach) reach-reduction.',status:'TIER 1 — HIGH RESIDUAL RISK (Y3). EC proceedings on Arts. 34.1, 34.2, 35.1.'},
+  {platform:'X',category:'Art. 34.1(b) Fundamental Rights / Dark Patterns',risk:'Art. 25.1 dark patterns: FTI NEGATIVE Y2; EC formal proceedings opened Y3.',mitigation:'Art. 26.1–26.3 ad transparency all Positive Y3. FoSnR reach-reduction.',status:'Art. 25.1 UNAUDITABLE (EC proceedings) — FTI Negative Y2 unresolved.'},
+  {platform:'X',category:'Art. 34.1(c) Civic Discourse [TIER 2 — improved]',risk:'Y3: Medium inherent risk. Residual risk DECREASED Y2→Y3 within Tier 2. Three documented EU crisis events: Solingen, Italy hateful hashtag, Mannheim.',mitigation:'Civic Integrity policy. No political ads in EU. Community Notes in all EU MS.',status:'TIER 2 — MEDIUM RESIDUAL RISK, improved Y2→Y3.'},
+  {platform:'Pinterest',category:'Art. 34.1(a) Illegal Content',risk:'Possible × Significant = Medium inherent (6.0). 98% of graphic violence Pins seen by 0 users before removal (Q4 2024).',mitigation:'Sensitive Terms List (STL); GIFCT hash-sharing; automated ML classifiers. No live streaming.',status:'LOW RESIDUAL RISK — All 3 cycles. No EC proceedings.'},
+  {platform:'Pinterest',category:'Art. 34.1(d) GBV, Public Health & Minors',risk:'6,790,000+ Pins proactively deactivated for self-injury (H2 2024). 4,557:1 proactive-to-reactive ratio. No beauty filters.',mitigation:'Compassionate Search (100+ countries); STL blocking self-harm terms; no beauty filters; under-16 private-only (mandatory).',status:'LOW RESIDUAL RISK — All 3 cycles. Strongest minor protection architecture in corpus.'},
+  {platform:'LinkedIn',category:'Art. 34.1(a)/(b) Illegal Content & Human Dignity',risk:'Human Dignity: Probable probability (hiring discrimination, workplace harassment). Consumer Protection & Fraud: "Expected" probability — highest tier in LinkedIn risk universe.',mitigation:'Professional Community Policies; Bi-weekly Anti-Abuse meetings; LinkedIn Verified; dedicated Art. 16 mechanism (Dec 2024).',status:'Human Dignity: Moderate residual. No EC proceedings. Arts. 34.1/35.1 independently audited.'},
+  {platform:'YouTube',category:'Art. 34.1(a) Illegal Content — CSAM & Terror',risk:'VVR Q1 2025: ~0.1% (54.67% removed before first view). Q1 2025: 192,000 videos and 7M comments removed for hate speech.',mitigation:'ML classifiers (96% proactive). CSAI Match + hash-matching. GIFCT hash-sharing. Priority Flagger Program (300+ partners).',status:'Active — VVR stable ~0.1%. Arts. 22.1 & HSC 2.2 NEGATIVE (Trusted Flaggers, remediated Mar 2025)'},
+  {platform:'YouTube',category:'Art. 34.1(c) Civic Discourse / AIGC',risk:'Misleading information elevated residual risk all 3 SRA cycles. Civic Discourse elevated risk all 3 cycles.',mitigation:'The 4 Rs framework; SynthID watermarks; mandatory GenAI labeling; Breaking News Shelf (42 countries).',status:'Active — Civic Discourse elevated residual risk all 3 cycles; Arts. 34.1/35.1 AUDITED (Positive w/ Comments)'},
+];
+
+const auditData=[
+  {platform:'Snapchat',conclusion:'Positive Unqualified (Y2 — 2025)',finding:'First clean audit opinion in entire VLOP corpus. No NEGATIVE conclusions. B.1 recommendation: enhanced algorithmic/minor documentation → March 2026.',remediation:'B.1 Art. 39.1 Ads Gallery: implemented Oct 2024. Algorithmic documentation deadline March 30, 2026.'},
+  {platform:'Snapchat',conclusion:'Qualified Negative (Y1 — 2024)',finding:'Single finding: Art. 11.3 equivalent — Android lacked explicit account deactivation button (dark pattern).',remediation:'Explicit deactivation button added Android Aug 23, 2024. Remediated before Y1 report. Not recurring in Y2.'},
+  {platform:'TikTok',conclusion:'Qualified Negative (2025)',finding:'4 Negative conclusions across 90 Specified Requirements. 6 articles unauditable due to EC proceedings.',remediation:'See individual findings. GITC remediation required for 2025-26 period.'},
+  {platform:'TikTok',conclusion:'NEGATIVE (2025) — Art. 16.6',finding:'Moderation actions on user-generated notice intake: issues addressed during period but insufficient evidence of full effectiveness.',remediation:'Strengthen moderation action controls and evidence trail.'},
+  {platform:'TikTok',conclusion:'NEGATIVE (2025) — Art. 20.4',finding:'Documentation retention for complaint-handling: gaps identified across evaluation period.',remediation:'Strengthen documentation retention and audit trail controls.'},
+  {platform:'TikTok',conclusion:'NEGATIVE (2025) — Art. 24.5',finding:'CCL: generic "violation terms" for all rejected/expired ads; duplicate statements of reasons; display active in countries where ads were removed.',remediation:'Fix CCL accuracy: specific SoRs, deduplication, country-display correction.'},
+  {platform:'TikTok',conclusion:'NEGATIVE (2024) — Art. 27.1',finding:'Recommender system parameters (FYF) not periodically reviewed for transparency compliance.',remediation:'Periodic review of FYF parameters. Deadline: 30 June 2025.'},
+  {platform:'TikTok',conclusion:'NEGATIVE (2024) — Art. 25.1',finding:'Dark patterns: online interfaces not subject to periodic review for deceptive/manipulative design.',remediation:'Implement periodic interface review process. Deadline: 30 June 2025.'},
+  {platform:'TikTok',conclusion:'UNAUDITABLE (2025) — 6 sub-articles',finding:'Arts. 28.1, 34.1, 34.2, 35.1, 39.1, 40.12 — cannot be assessed due to active EC enforcement proceedings.',remediation:'N/A — pending resolution of EC proceedings.'},
+  {platform:'Instagram',conclusion:'NEGATIVE (2024 & 2025) — Art. 15.1',finding:'Transparency Reporting NEGATIVE in BOTH cycles. Only cross-cycle recurring failure on same substantive article in corpus.',remediation:'Reporting framework restructuring planned Q1 2026.'},
+  {platform:'Instagram',conclusion:'NEGATIVE (2025) — Art. 23.1',finding:'Manifestly Illegal Suspension: bilateral failure — prior warnings not issued AND suspensions not applied. Non-compliance in both directions simultaneously.',remediation:'Q4 2025 dashboard/monitoring planned.'},
+  {platform:'Instagram',conclusion:'NEGATIVE (2025) — Art. 20.4',finding:'Complaint Handling: appeals not processed within 7-day benchmark.',remediation:'Q4 2025 implementation planned. Not yet implemented.'},
+  {platform:'Instagram',conclusion:'UNAUDITABLE (2024 & 2025) — 14 sub-arts',finding:'Arts. 14.1, 16.1, 16.5, 16.6, 17.1, 20.1, 20.3, 24.5, 25.1, 28.1, 34.1, 34.2, 35.1, 40.12 — all EC governmental investigations.',remediation:'N/A — pending EC resolution.'},
+  {platform:'Facebook',conclusion:'NEGATIVE (2024 & 2025) — Art. 15.1',finding:'Consolidated Facebook+Instagram metrics violates per-VLOP requirement. NEGATIVE both cycles. Meta corporate-level failure.',remediation:'Disaggregation required. Q1 2026 restructuring planned.'},
+  {platform:'Facebook',conclusion:'NEGATIVE (2024) — Art. 38.1 Dating',finding:'Facebook Dating: no non-profiling recommender option for 6+ months. Most serious recommender finding on intimacy context in corpus.',remediation:'Non-profiling option implemented. Positive in 2025 audit.'},
+  {platform:'Facebook',conclusion:'NEGATIVE (2025) — Art. 26.2',finding:'~90% of Facebook Reels on Android missing commercial disclosure labels for approximately 9 months.',remediation:'Label deployment completed by 2025 audit cycle end.'},
+  {platform:'Facebook',conclusion:'UNAUDITABLE (2024 & 2025) — 16 sub-arts',finding:'14 arts + HSC Commitments 2.1 & 2.2 unauditable. Includes Arts. 34.1, 35.1, 28.1, 25.1, 40.12.',remediation:'N/A — pending EC resolution.'},
+  {platform:'X',conclusion:'NEGATIVE (Y2 2024) → Positive (Y3)',finding:'Art. 28.1 Minor safety: gaps across user protection architecture for users under 18. Fully remediated. BDO Y3: Positive.',remediation:'Users under 13 automatically offboarded; under-18 restricted from profiling-based ads.'},
+  {platform:'X',conclusion:'NEGATIVE (Y2) → EC Proceedings (Y3) — Art. 25.1',finding:'Dark patterns: FTI Negative Y2 unresolved. EC opened formal proceedings 29 Aug 2025.',remediation:'No resolution path visible. BDO Y3: No Conclusion.'},
+  {platform:'X',conclusion:'No Conclusion — EC PROCEEDINGS (Y3) — 10 sub-arts',finding:'Arts. 16.5, 16.6, 25.1, 34.1, 34.2, 35.1, 39.1–39.3, 40.12. BDO: "Absent these 10 sub-Articles… overall conclusion would have been Positive with comments."',remediation:'Pending EC resolution.'},
+  {platform:'Pinterest',conclusion:'NEGATIVE (Y1 & Y2) — Art. 16.5',finding:'Trusted Flagger obligations NEGATIVE in BOTH cycles — only back-to-back NEGATIVE in Pinterest corpus. Y2: self-remediated within audit period; zero forward recommendations.',remediation:'Art. 16.5 has NEVER received a Positive conclusion in any Pinterest audit cycle.'},
+  {platform:'LinkedIn',conclusion:'Qualified (Y1 & Y2)',finding:'Two consecutive Qualified opinions. Persistent Art. 15.1 Disclaimer both cycles — D&T cannot form ANY opinion on TR data.',remediation:'Dec 19, 2024: dedicated Art. 16 mechanism implemented. Feb 2026: TR source mapping deadline.'},
+  {platform:'LinkedIn',conclusion:'NEGATIVE (Y2 2025) — Arts. 23.2/23.3',finding:'Manifestly Unfounded Reports process insufficient. Outstanding — not remediated within examination period.',remediation:'No specific Y2 deadline. Y3 will determine.'},
+  {platform:'YouTube',conclusion:'NEGATIVE (Y2) — Art. 22.1 & HSC 2.2',finding:'Trusted Flagger obligations: 3/10 sampled TF notices not processed without undue delay. HSC 2.2 simultaneously NEGATIVE — dual-capture finding unique in corpus.',remediation:'Remediated Mar 2025.'},
+  {platform:'YouTube',conclusion:'NEGATIVE (Y2) — Art. 14.6',finding:'24/33 terms deficient across EU official languages.',remediation:'H2 2026 implementation window.'},
+];
+
+const benchmarkData=[
+  {platform:'TikTok',auditor:'KPMG',auditCycles:'3 SRAs + 2 audits (2024, 2025)',latestOpinion:'Qualified Negative (2025)',gitcStatus:'RECURRING GITC FAILURE: 18 of 37 obligations affected in 2024. Most severe IT controls failure in corpus.',recommenderAudited:'Art. 27.1, 27.3, 38.1 all NEGATIVE (2024). Arts. 34.1/35.1 UNAUDITABLE (EC proceedings) — architectural adequacy unverifiable.',unauditableArticles:'6 in 2025: Arts. 28.1, 34.1, 34.2, 35.1, 39.1, 40.12. Core SRA + minor protection + researcher access all blocked.',metricInterrogation:'No. NCMEC figure jump (590→590,376 reports) accepted without methodology interrogation.',enforcementStatus:'Formal proceedings Feb 2024 on Arts. 34, 35, 28, 25, 39, 40. Multiple parallel proceedings.',trustedFlaggerValidity:'CIAPC appointed Mar 2024 — 0 Art. 16 reports submitted. Zero-volume certified as compliant — analytically paradoxical.',cclStatus:'Art. 39.3 NEGATIVE (2025): persistent ad repository failures. Art. 24.5 NEGATIVE (2025): generic SoRs.',platformSelfRevision:'Limited. GITC failure and metric methodology unchanged.',benchmarkNotes:'GITC failure is analytically unique in corpus — not a compliance gap but a systemic inability to evidence IT controls. Combined with 6 unauditable articles and €345M fine, TikTok represents the most structurally contested compliance case.'},
+  {platform:'Snapchat',auditor:'EY (both cycles)',auditCycles:'3 SRAs + 2 audits (Y1 2024, Y2 2025)',latestOpinion:'Positive Unqualified (Y2 — first in VLOP corpus)',gitcStatus:'No GITC failure. EY attestation methodology — does not apply KPMG-style IT control layer.',recommenderAudited:'Partially. Y2 B.1: documentation gaps for Arts. 27.3, 38.1, 35.1, 28.1/28.2. EC RFI signals external scepticism about architecture-as-mitigation claim.',unauditableArticles:'ZERO — analytically unique. No EC proceedings through Y2. Full compliance chain (Arts. 34→35→37) verifiable.',metricInterrogation:'Limited. PVP scale accepted as relative metric. Protect Children (2024): ranked last (10% detection) — not cross-referenced.',enforcementStatus:'EC formal proceedings opened Mar 26, 2026 (ip_26_723) on child protection/age assurance.',trustedFlaggerValidity:'No specific TF audit finding in either cycle. Arts. 16.5/16.6 not subject to EC proceedings.',cclStatus:'Y1 Art. 39.1: Ads Gallery Creator Name search missing. Implemented Oct 2024. Cleanest CCL record across VLOPs.',platformSelfRevision:'Strong. VVR added Y2. No upward risk escalations Y2→Y3 — unique in corpus.',benchmarkNotes:'Only VLOP with Positive Unqualified opinion + zero unauditable articles + no upward risk escalations. Critical caveat: EY attestation accepts platform assertions. Mar 2026 proceedings are first formal challenge to this clean record.'},
+  {platform:'Instagram',auditor:'EY (both cycles)',auditCycles:'2 audits (2024, 2025)',latestOpinion:'No unqualified opinion (2025) — 14 sub-articles unauditable',gitcStatus:'No recurring GITC failure.',recommenderAudited:'Partially. Art. 27.1 Positive w/ Comments. Arts. 34.1/35.1 UNAUDITABLE both cycles. SSIED contribution to Tier 3 unassessed.',unauditableArticles:'14 in BOTH cycles: Arts. 14.1, 16.1, 16.5, 16.6, 17.1, 20.1, 20.3, 24.5, 25.1, 28.1, 34.1, 34.2, 35.1, 40.12.',metricInterrogation:'No. 99%+ proactive detection rates accepted without sequencing analysis.',enforcementStatus:'EC governmental investigations blocking 14 sub-articles.',trustedFlaggerValidity:'Positive (2025) — Arts. 22.1 and 22.6 compliant.',cclStatus:'Art. 15.1 NEGATIVE both cycles — only cross-cycle recurring substantive failure in corpus.',benchmarkNotes:'Defining finding: Art. 15.1 NEGATIVE in both 2024 AND 2025. Art. 23.1 bilateral failure (2025) is analytically novel. SSIED Tier 3 on image-centric platform is the EC core concern.'},
+  {platform:'Facebook',auditor:'EY (both cycles)',auditCycles:'2 audits (2024, 2025)',latestOpinion:'No unqualified opinion (2025) — 16 sub-articles unauditable',gitcStatus:'No recurring GITC failure.',recommenderAudited:'Negative. Art. 38.1 NEGATIVE (2024): Facebook Dating no non-profiling option for 6+ months. Arts. 34.1/35.1 UNAUDITABLE both cycles.',unauditableArticles:'14 arts + HSC Commitments 2.1 & 2.2.',metricInterrogation:'No. Consolidated metrics accepted despite NEGATIVE. Definitional refusals ("promptly", "undue delay") not interrogated.',enforcementStatus:'EC governmental investigations blocking 14 sub-articles.',trustedFlaggerValidity:'Positive (2025) — Arts. 22.1 and 22.6 compliant.',cclStatus:'Art. 39.3 NEGATIVE 2024. Art. 26.2 NEGATIVE 2025: Reels Android labels missing ~9 months (~90% impressions).',benchmarkNotes:'Three defining findings: Art. 15.1 NEGATIVE both cycles; Art. 38.1 Dating no option 6+ months; Definitional refusals ("promptly", "undue delay") — only deliberate regulatory benchmarking refusal in corpus.'},
+  {platform:'X',auditor:'Y2: FTI Consulting; Y3: BDO LLP',auditCycles:'3 SRAs + 2 audits (Y2 2024, Y3 2025)',latestOpinion:'Qualified Negative (Y3 — BDO) — basis: 10 sub-articles EC proceedings',gitcStatus:'No recurring GITC failure. FTI and BDO methodology differs from KPMG.',recommenderAudited:'Yes — fully audited Y3; major improvement. Y2 NEGATIVE Art. 27.2 → Y3 Positive. Arts. 34.1/35.1 UNAUDITABLE (FoSnR adequacy unresolved).',unauditableArticles:'10 (Y3): Arts. 16.5, 16.6, 25.1, 34.1, 34.2, 35.1, 39.1–39.3, 40.12.',metricInterrogation:'No. 10.3M undeclared-age EU users — Art. 28 protections may not apply — not interrogated.',enforcementStatus:'EC formal proceedings 29 Aug 2025 on 10 sub-articles. Arts. 34.1/34.2/35.1 create "compliance chain paradox".',trustedFlaggerValidity:'Art. 16.5 NEVER received a Positive conclusion in any audit cycle.',cclStatus:'Arts. 39.1–39.3 under EC proceedings. Arts. 26.1–26.3 all Positive Y3.',benchmarkNotes:'COMPLIANCE CHAIN PARADOX: highest Y2→Y3 remediation rate (7/8 Negatives resolved) yet most structurally targeted EC proceedings. FoSnR is both primary mitigation claim AND principal regulatory risk.'},
+  {platform:'Pinterest',auditor:'EY (both cycles)',auditCycles:'3 SRAs + 2 audits (Y1 2024, Y2 2025)',latestOpinion:'Positive w/ Comments (Y2) — Art. 16.5 NEGATIVE but self-remediated',gitcStatus:'No GITC issues. EY attestation methodology.',recommenderAudited:'Partially. Saves-optimisation accepted as Art. 35 mitigation without independent causal validation.',unauditableArticles:'ZERO — no EC proceedings as of Apr 2026.',metricInterrogation:'Limited. ALL-LOW risk scores (identical P×S×CE = 3.0 across all 4 categories) accepted without interrogating absence of variation.',enforcementStatus:'No EC formal proceedings. Lowest enforcement profile in corpus.',trustedFlaggerValidity:'Art. 16.5 NEVER received a Positive conclusion in any cycle. NEGATIVE Y1 and Y2.',cclStatus:'Art. 26: Positive w/ Comments Y1 → Positive Y2. No political advertising.',benchmarkNotes:'Lowest enforcement profile does not equal absence of structural concerns. Saves-optimisation causal link unverified; Art. 16.5 never Positive. Architecture advantages (no live streaming, saves-first) contribute to genuinely lower risk profile.'},
+  {platform:'LinkedIn',auditor:'Deloitte & Touche (both cycles)',auditCycles:'3 SRAs + 2 audits (Y1 2024, Y2 2025)',latestOpinion:'Qualified (Y2 — second consecutive)',gitcStatus:'No GITC failure. D&T attestation methodology.',recommenderAudited:'Partially. Arts. 34.1/35.1 Positive w/ Comments. "Professional context" probability reductions accepted without empirical validation. Art. 27.2 Disclaimer (Y2).',unauditableArticles:'ZERO EC proceedings. But Art. 15.1 DISCLAIMER (not Negative) in BOTH cycles — worse than a Negative for verifiability.',metricInterrogation:'No. Art. 15.1 Disclaimer means TR data unverifiable by any external actor.',enforcementStatus:'No EC formal proceedings. Only VLOP to formally challenge audit materiality methodology (AIR Section D).',trustedFlaggerValidity:'Art. 16 issues in Y1/Y2, all remediated Dec 19, 2024. New dedicated mechanism implemented.',cclStatus:'Art. 15.1 Disclaimer both cycles. Arts. 26.1/39.x Positive after Y1 B.5/B.6.',benchmarkNotes:'Art. 15.1 Disclaimer is the defining characteristic: LinkedIn publishes TR data that no external actor can verify. Two-generation Art. 16 failure: Y1 "broken form" → Y2 "architecturally absent mechanism" reveals systematic audit misread.'},
+  {platform:'YouTube',auditor:'EY GIL (combined reports)',auditCycles:'3 SRAs + 2 audits (Y1 2024, Y2 2025)',latestOpinion:'Positive w/ Comments (Y2) — NEGATIVEs on Arts. 22.1, 14.6',gitcStatus:'No GITC failure. EY GIL combined audit methodology.',recommenderAudited:'Arts. 34.1, 34.2, 35.1 AUDITED — Positive w/ Comments in both years. UNIQUE: unlike TikTok and Meta, SRA and mitigation adequacy independently verified.',unauditableArticles:'ZERO — no EC proceedings as of Apr 2026.',metricInterrogation:'Limited. Addictive design risk ("state of research remains unsettled") accepted without independent behavioral evidence.',enforcementStatus:'No EC formal proceedings. Active monitoring.',trustedFlaggerValidity:'Art. 22.1 NEGATIVE (Y2): 3/10 TF notices not processed without undue delay. Remediated Mar 2025.',cclStatus:'Art. 14.6 NEGATIVE (Y2): 24/33 terms missing in EU official languages. H2 2026 remediation.',benchmarkNotes:'Only video-category VLOP with independently audited SRA and mitigation adequacy. Elevated Civic Discourse risk persists all 3 cycles despite verification — concern is confirmed, not just asserted.'},
+];
+
+const complianceMatrix={
+  articles:['Art. 15.1 Transparency','Art. 16.1–16.3 Notice & Action','Art. 16.5 Trusted Flaggers','Art. 20.4 Complaint Handling','Art. 22.1 TF Processing','Art. 23.1–23.3 Suspension','Art. 25.1 Dark Patterns','Art. 26.2 Comm. Content','Art. 27 Recommender Systems','Art. 28.1 Minor Protection','Art. 34.1 SRA Quality','Art. 35.1 Risk Mitigations','Art. 38.1 Non-profiling RS','Art. 39.3 Ad Repository','Art. 40.12 Researcher Access'],
+  data:{
+    Snapchat:['POS','POS','NEG','POS','POS','POS','POS','POS','PWC','POS','POS','PWC','PWC','POS','POS'],
+    TikTok:  ['PWC','PWC','UNA','NEG','NEG','PWC','NEG','NEG','NEG','UNA','UNA','UNA','NEG','NEG','UNA'],
+    Instagram:['NEG','UNA','UNA','NEG','POS','NEG','UNA','PWC','PWC','UNA','UNA','UNA','PWC','NEG','UNA'],
+    Facebook: ['NEG','UNA','UNA','NEG','POS','PWC','UNA','NEG','NEG','UNA','UNA','UNA','NEG','NEG','UNA'],
+    X:        ['POS','POS','UNA','PWC','PWC','PWC','UNA','POS','POS','POS','UNA','UNA','POS','UNA','UNA'],
+    Pinterest:['PWC','NEG','NEG','PWC','PWC','POS','POS','POS','PWC','PWC','PWC','PWC','PWC','POS','POS'],
+    LinkedIn: ['NA', 'NEG','NEG','PWC','PWC','NEG','NEG','PWC','PWC','PWC','PWC','PWC','PWC','PWC','POS'],
+    YouTube:  ['PWC','PWC','NEG','PWC','NEG','PWC','POS','POS','PWC','POS','PWC','PWC','POS','POS','POS'],
+  }
+};
+
+const enforcementData=[
+  {platform:'X',date:'2023-10',type:'RFI',articles:'Arts. 74, 40',summary:'First-ever DSA RFI to any VLOP — spread of illegal content after Hamas attacks.',outcome:'Led to formal proceedings Dec 2023',source:'EC'},
+  {platform:'X',date:'2023-12-18',type:'Formal Proceedings',articles:'Arts. 34, 35, 25, 26, 40',summary:'First-ever DSA formal proceedings against any VLOP. Focus: risk management, content moderation, dark patterns, advertising transparency, researcher data access.',outcome:'Led to preliminary findings Jul 2024 and €120M fine Dec 2025',source:'EC'},
+  {platform:'Facebook',date:'2023-10-19',type:'RFI',articles:'Arts. 34, 35',summary:"Commission requests information on Meta's risk assessments for self-generated CSAM and recommender system amplification of harmful content.",outcome:'Preceded formal proceedings Apr 2024',source:'EC'},
+  {platform:'Instagram',date:'2023-10-19',type:'RFI',articles:'Arts. 34, 35',summary:"Commission requests information on Meta's risk assessments for self-generated CSAM and recommender system amplification.",outcome:'Preceded formal proceedings Apr 2024',source:'EC'},
+  {platform:'Snapchat',date:'2023-11-10',type:'RFI',articles:'Arts. 34, 35, 28',summary:'Joint RFI to Meta and Snapchat on protection of minors — risk assessments for mental and physical health risks.',outcome:'Preceded further RFIs; formal proceedings opened Mar 2026',source:'EC'},
+  {platform:'TikTok',date:'2024-02-19',type:'Formal Proceedings',articles:'Arts. 34, 35, 28, 25, 39, 40',summary:'First formal EC proceedings against TikTok: protection of minors and addictive design, advertising transparency, researcher data access. (ip_24_926)',outcome:'Ongoing — multiple sub-proceedings',source:'EC'},
+  {platform:'Facebook',date:'2024-04',type:'Formal Proceedings',articles:'Arts. 25, 26',summary:"Formal proceedings on Meta's \"Subscription for No Ads\" (pay-or-consent) model — dark patterns and advertising transparency.",outcome:'Ongoing',source:'EC'},
+  {platform:'Instagram',date:'2024-05',type:'Formal Proceedings',articles:'Arts. 34, 35, 28',summary:'Formal proceedings on protection of minors, SSIED risks, and recommender system adequacy.',outcome:'Ongoing — 14 sub-articles unauditable',source:'EC'},
+  {platform:'X',date:'2024-07',type:'Preliminary Finding',articles:'Arts. 34, 35',summary:"EC preliminary finding that X's SRA and risk mitigation measures may not meet DSA standards.",outcome:'Led to fine Dec 2025',source:'EC'},
+  {platform:'X',date:'2024-10',type:'Preliminary Finding',articles:'Art. 40',summary:'EC preliminary finding on researcher data access.',outcome:'Part of overall EC case',source:'EC'},
+  {platform:'TikTok',date:'2025-03',type:'Preliminary Finding',articles:'Arts. 34, 35',summary:"EC preliminary finding on TikTok's SRA methodology and risk mitigation adequacy.",outcome:'Contributed to Qualified Negative 2025 audit',source:'EC'},
+  {platform:'X',date:'2025-08-29',type:'Formal Proceedings',articles:'Arts. 16.5, 16.6, 25.1, 34.1, 34.2, 35.1, 39.1–39.3, 40.12',summary:'New formal proceedings on 10 sub-articles — trusted flaggers, dark patterns, SRA quality, ad repository, researcher access.',outcome:'10 sub-articles unauditable in Y3 BDO audit',source:'EC'},
+  {platform:'Snapchat',date:'2025-10',type:'RFI',articles:'Arts. 28, 34',summary:'Specific RFI on safeguards for minors — adequacy of age assurance and minor protection measures.',outcome:'Led to formal proceedings Mar 2026',source:'EC'},
+  {platform:'X',date:'2025-12',type:'Fine',articles:'Arts. 34, 35, 40',summary:'€120 million fine against X for failure to adequately assess and mitigate systemic risks.',outcome:'First DSA fine against a VLOP',source:'EC'},
+  {platform:'Snapchat',date:'2026-03-26',type:'Formal Proceedings',articles:'Arts. 28, 34, 35',summary:'Formal proceedings exclusively on child protection (ip_26_723): age assurance deemed insufficient, exposure of minors to grooming, criminal recruitment, and illegal goods.',outcome:'Ongoing — first proceedings exclusively on child protection',source:'EC'},
+];
+
+const synthesisData=[
+  {theme:'Compliance Chain Paradox',platforms:'X',auditor:"BDO Y3: highest remediation rate in corpus (7/8 Negatives resolved) yet most structurally targeted EC proceedings. Arts. 34.1, 34.2, 35.1 — the SRA foundation — all under proceedings.",ec:'Can procedural compliance coexist with fundamental architectural inadequacy? FoSnR cannot be assessed while proceedings block Arts. 34.1 and 35.1.'},
+  {theme:'Unverifiability Black Hole',platforms:'TikTok, Instagram, Facebook, X',auditor:'14 sub-articles unauditable in both Meta platforms and TikTok; 10 for X. Arts. 34.1, 35.1, 28.1, 25.1, 40.12 systematically blocked from independent assessment.',ec:"The EC's enforcement strategy paradoxically undermines the audit evidence base it relies on. Foundational obligations remain unverifiable while secondary obligations are assessed."},
+  {theme:'Cross-Cycle NEGATIVE Persistence',platforms:'Instagram, Facebook, LinkedIn',auditor:'Art. 15.1 NEGATIVE in both 2024 and 2025 for Instagram and Facebook. LinkedIn Art. 15.1 DISCLAIMER both cycles.',ec:'The 2-year cycle allows platforms to receive the same NEGATIVE twice before effective enforcement escalation. Art. 15.1 failures undermine external verifiability of all other claimed metrics.'},
+  {theme:'Architecture-as-Mitigation Unvalidated',platforms:'Snapchat, Pinterest, LinkedIn',auditor:'Saves-optimisation (Pinterest), 1:1 messaging (Snapchat), professional context (LinkedIn) all accepted as Art. 35 mitigations without causal empirical validation.',ec:'The DSA Art. 35 "reasonable, proportionate and effective" standard requires effectiveness, not just documentation. Architecture-as-mitigation claims are the most prevalent unverified assertions in corpus.'},
+  {theme:'Addictive Design / Recommender Inadequacy',platforms:'TikTok, Instagram, Facebook, X',auditor:'Arts. 27.1, 27.3, 38.1 NEGATIVE (TikTok 2024). Arts. 34.1/35.1 UNAUDITABLE for Meta and X. Recommender contribution to SSIED unassessed.',ec:"Engagement-maximising recommenders are the EC's primary concern. Combination of EC proceedings blocking Art. 35.1 and platform refusal to alter core reward functions creates regulatory standoff."},
+  {theme:'Minor Protection Tier Escalation',platforms:'TikTok, Instagram, Facebook',auditor:'Minor protection escalated to highest risk tier for all three platforms. Art. 28.1 UNAUDITABLE for TikTok and Meta.',ec:'Systematic escalation + simultaneous unauditability creates accountability gap for the most politically sensitive DSA risk category. Snapchat Mar 2026 proceedings signal EC extending enforcement to previously clean platforms.'},
+  {theme:'Trusted Flagger Validity Gap',platforms:'Pinterest, X, YouTube, TikTok',auditor:'Art. 16.5 NEVER received a Positive for Pinterest or X. YouTube Art. 22.1 NEGATIVE Y2. TikTok CIAPC: zero-volume certified as compliant.',ec:'The Trusted Flagger system is the DSA primary mechanism for civil society moderation. Systematic non-compliance undermines the entire delegated enforcement architecture.'},
+  {theme:'Metric Interrogation Deficit',platforms:'All platforms',auditor:'No auditor independently validated statistical methodology behind prevalence claims (PVP, VVR), proactive detection rates, or moderation volume figures.',ec:'If prevalence metrics are self-reported and unverified, the compliance picture reflected in audit reports may not reflect real-world harm exposure.'},
+];
+
+let currentFilter='All';
+let charts={};
+
+function pBadge(p){const cls={TikTok:'p-tiktok',Instagram:'p-instagram',Facebook:'p-facebook',YouTube:'p-youtube',X:'p-x',Snapchat:'p-snapchat',LinkedIn:'p-linkedin',Pinterest:'p-pinterest'};return`<span class="badge-platform ${cls[p]||''}">${p}</span>`;}
+function conclusionBadge(c){if(!c)return'';const u=c.toUpperCase();if(u.includes('NEGATIVE'))return`<span class="badge badge-red">${c}</span>`;if(u.includes('UNAUDITABLE')||u.includes('DISCLAIMER'))return`<span class="badge badge-purple">${c}</span>`;if(u.includes('QUALIFIED'))return`<span class="badge badge-amber">${c}</span>`;if(u.includes('POSITIVE W'))return`<span class="badge" style="background:#fef3c7;color:#78350f">${c}</span>`;if(u.includes('POSITIVE'))return`<span class="badge badge-green">${c}</span>`;return`<span class="badge badge-slate">${c}</span>`;}
+function statusBadge(s){if(!s)return'';const u=s.toUpperCase();if(u.includes('TIER 1'))return`<span class="badge badge-red">TIER 1</span>`;if(u.includes('TIER 2')||u.includes('TIER 3'))return`<span class="badge badge-amber">${s.substring(0,30)}</span>`;if(u.includes('NEGATIVE'))return`<span class="badge badge-red">NEGATIVE</span>`;if(u.includes('UNAUDITABLE'))return`<span class="badge badge-purple">UNAUDITABLE</span>`;if(u.includes('LOW'))return`<span class="badge badge-green">LOW RISK</span>`;if(u.includes('ACTIVE'))return`<span class="badge badge-amber">ACTIVE</span>`;return`<span class="badge badge-slate">${s.substring(0,40)}</span>`;}
+function truncate(t,l=120){return t&&t.length>l?t.substring(0,l)+'…':t||'';}
+
+function showTab(id,btn){document.querySelectorAll('[id^="tab-"]').forEach(el=>el.style.display='none');document.getElementById('tab-'+id).style.display='';document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
+
+function applyFilter(){currentFilter=document.getElementById('global-filter').value;renderOverviewTable();updateOverviewCharts();renderRiskMap();renderAuditFindings();renderEnforcement();}
+function applySearch(v){const a=document.querySelector('.tab-btn.active');if(!a)return;const t=a.textContent;if(t.includes('Risk'))filterTable('riskmap-tbody',v);else if(t.includes('Audit'))filterTable('audit-tbody',v);else if(t.includes('Synth'))filterTable('synthesis-tbody',v);}
+function filterTable(id,q){const tb=document.getElementById(id);if(!tb)return;const ql=q.toLowerCase();tb.querySelectorAll('tr.data-row').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(ql)?'':'none';const n=r.nextElementSibling;if(n&&n.classList.contains('detail-row'))n.style.display='none';});}
+function sortTable(id,ci){const tb=document.getElementById(id);if(!tb)return;const rows=Array.from(tb.querySelectorAll('tr.data-row'));const asc=tb.dataset.sortAsc===String(ci);tb.dataset.sortAsc=asc?'':String(ci);rows.sort((a,b)=>{const at=a.cells[ci]?.textContent.trim().toLowerCase()||'';const bt=b.cells[ci]?.textContent.trim().toLowerCase()||'';return asc?bt.localeCompare(at):at.localeCompare(bt);});rows.forEach(r=>{tb.appendChild(r);const n=r.nextElementSibling;if(n&&n.classList.contains('detail-row'))tb.appendChild(n);});}
+function toggleDetail(id,row){const d=document.getElementById(id);if(!d)return;const h=d.classList.contains('hidden');d.classList.toggle('hidden');const b=row.querySelector('.expand-btn');if(b)b.textContent=h?'▲ less':'▼ more';}
+
+function renderOverviewTable(){const tb=document.getElementById('overview-table-body');const data=currentFilter==='All'?overviewData:overviewData.filter(d=>d.platform===currentFilter);tb.innerHTML=data.map(d=>{const oc=d.opinion.includes('Positive Unqualified')?'score-low':d.opinion.includes('Positive w/')?'score-med':d.opinion.includes('Qualified')||d.opinion.includes('No unqualified')?'score-high':'score-na';const pc=d.proceedings.includes('Active')||d.proceedings.includes('Formal')?'badge-red':'badge-green';const tc=d.trajectory.includes('▼')?'badge-red':d.trajectory.includes('▲')?'badge-green':'badge-slate';return`<tr><td>${pBadge(d.platform)}</td><td><span class="score-pill ${oc}">${d.opinion}</span></td><td style="color:var(--muted);font-size:11px">${d.auditor}</td><td style="text-align:center"><span class="badge ${d.unaudi>0?'badge-red':'badge-green'}">${d.unaudi}</span></td><td><span class="badge ${pc}" style="font-size:10px">${truncate(d.proceedings,60)}</span></td><td style="font-size:11px;color:var(--muted)">${d.highRisk}</td><td><span class="badge ${tc}">${d.trajectory}</span></td></tr>`;}).join('');}
+
+function updateOverviewCharts(){const pl=currentFilter==='All'?PLATFORMS:[currentFilter];const nc={Snapchat:2,TikTok:7,Instagram:6,Facebook:7,X:8,Pinterest:3,LinkedIn:5,YouTube:3};const uc={Snapchat:0,TikTok:6,Instagram:14,Facebook:16,X:10,Pinterest:0,LinkedIn:0,YouTube:0};if(charts.negatives){charts.negatives.data.labels=pl;charts.negatives.data.datasets[0].data=pl.map(p=>nc[p]||0);charts.negatives.data.datasets[0].backgroundColor=pl.map(p=>platformColors[p]);charts.negatives.data.datasets[0].borderColor=pl.map(p=>platformTextColors[p]);charts.negatives.update('none');}if(charts.unauditable){charts.unauditable.data.labels=pl;charts.unauditable.data.datasets[0].data=pl.map(p=>uc[p]||0);charts.unauditable.data.datasets[0].backgroundColor=pl.map(p=>uc[p]>0?'#e0e7ff':'#dcfce7');charts.unauditable.data.datasets[0].borderColor=pl.map(p=>uc[p]>0?'#6366f1':'#16a34a');charts.unauditable.update('none');}}
+
+function initCharts(){const nc=[2,7,6,7,8,3,5,3];const uc=[0,6,14,16,10,0,0,0];charts.negatives=new Chart(document.getElementById('chart-negatives'),{type:'bar',data:{labels:PLATFORMS,datasets:[{label:'NEGATIVEs + Qualified',data:nc,backgroundColor:PLATFORMS.map(p=>platformColors[p]),borderColor:PLATFORMS.map(p=>platformTextColors[p]),borderWidth:2,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+charts.unauditable=new Chart(document.getElementById('chart-unauditable'),{type:'bar',data:{labels:PLATFORMS,datasets:[{label:'Unauditable sub-articles',data:uc,backgroundColor:uc.map(v=>v>0?'#e0e7ff':'#dcfce7'),borderColor:uc.map(v=>v>0?'#6366f1':'#16a34a'),borderWidth:2,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+charts.enforcementTypes=new Chart(document.getElementById('chart-enforcement-types'),{type:'doughnut',data:{labels:['RFI','Formal Proceedings','Preliminary Finding','Fine','Commitments Accepted','Other'],datasets:[{data:[20,12,4,2,2,3],backgroundColor:['#60a5fa','#f59e0b','#f97316','#ef4444','#22c55e','#a78bfa'],borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{usePointStyle:true,padding:14,font:{size:11}}}}}});
+charts.riskTiers=new Chart(document.getElementById('chart-risk-tiers'),{type:'bar',data:{labels:PLATFORMS,datasets:[{label:'Tier 1 / Critical',data:[0,1,0,0,1,0,0,0],backgroundColor:'#ef4444',borderRadius:3},{label:'Tier 2 / Moderate',data:[0,2,0,0,3,0,2,0],backgroundColor:'#f59e0b',borderRadius:3},{label:'Tier 3 / Low',data:[0,1,2,2,3,0,0,1],backgroundColor:'#fde68a',borderRadius:3},{label:'Low / Minimal',data:[4,0,0,0,0,4,6,3],backgroundColor:'#22c55e',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:'#f1f5f9'}}},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:12,font:{size:10}}}}}});}
+
+function renderRiskMap(){const tb=document.getElementById('riskmap-tbody');const data=currentFilter==='All'?riskMapData:riskMapData.filter(d=>d.platform===currentFilter);tb.innerHTML=data.map((d,i)=>`<tr class="data-row" style="cursor:pointer" onclick="toggleDetail('risk-detail-${i}',this)"><td>${pBadge(d.platform)}</td><td style="font-weight:600;font-size:12px;max-width:180px">${d.category}</td><td style="max-width:260px;color:#475569">${truncate(d.risk,130)} <button class="expand-btn">▼ more</button></td><td style="max-width:200px;color:#475569;font-size:11px">${truncate(d.mitigation,100)}</td><td>${statusBadge(d.status)}</td></tr><tr id="risk-detail-${i}" class="detail-row hidden"><td colspan="5"><strong>Full Risk:</strong> ${d.risk}<br><br><strong>Mitigations:</strong> ${d.mitigation}<br><br><strong>Status:</strong> ${d.status}</td></tr>`).join('');}
+
+function renderAuditFindings(){const tb=document.getElementById('audit-tbody');const data=currentFilter==='All'?auditData:auditData.filter(d=>d.platform===currentFilter);tb.innerHTML=data.map((d,i)=>`<tr class="data-row" style="cursor:pointer" onclick="toggleDetail('audit-detail-${i}',this)"><td>${pBadge(d.platform)}</td><td style="min-width:200px">${conclusionBadge(d.conclusion)}</td><td style="max-width:300px;color:#475569">${truncate(d.finding,140)} <button class="expand-btn">▼</button></td><td style="max-width:220px;color:#475569;font-size:11px">${truncate(d.remediation,100)}</td></tr><tr id="audit-detail-${i}" class="detail-row hidden"><td colspan="4"><strong>Full Finding:</strong> ${d.finding}<br><br><strong>Remediation:</strong> ${d.remediation}</td></tr>`).join('');}
+
+let currentBmPlatform='TikTok';
+function renderBenchmarkTabs(){const c=document.getElementById('bm-plat-tabs');c.innerHTML=benchmarkData.map(b=>`<button class="plat-tab ${b.platform===currentBmPlatform?'active':''}" style="${b.platform!==currentBmPlatform?`background:${platformColors[b.platform]};color:${platformTextColors[b.platform]};border-color:${platformTextColors[b.platform]}40`:''}" onclick="selectBmPlatform('${b.platform}',this)">${b.platform}</button>`).join('');}
+function selectBmPlatform(p,btn){currentBmPlatform=p;document.querySelectorAll('.plat-tab').forEach(b=>{b.classList.remove('active');const bm=benchmarkData.find(x=>x.platform===b.textContent.trim());if(bm){b.style.background=platformColors[bm.platform];b.style.color=platformTextColors[bm.platform];}});btn.classList.add('active');btn.style.background='#0f172a';btn.style.color='#fff';renderBenchmarkContent();}
+function renderBenchmarkContent(){const bm=benchmarkData.find(b=>b.platform===currentBmPlatform);if(!bm)return;const dims=[{key:'gitcStatus',label:'🔧 GITC / IT Controls',redFn:v=>v?.includes('FAILURE')||v?.includes('RECURRING')},{key:'recommenderAudited',label:'⚙️ Recommender Audited',redFn:v=>v?.includes('NEGATIVE')||v?.includes('UNAUDITABLE')},{key:'unauditableArticles',label:'🚫 Unauditable Articles',redFn:v=>v&&v!=='ZERO'&&!v.startsWith('No ')},{key:'metricInterrogation',label:'📊 Metric Interrogation',redFn:v=>v?.startsWith('No')},{key:'enforcementStatus',label:'⚖️ EC Enforcement',redFn:v=>v?.toLowerCase().includes('formal')||v?.toLowerCase().includes('proceedings')},{key:'trustedFlaggerValidity',label:'🚩 Trusted Flagger Validity',redFn:v=>v?.includes('NEVER')||v?.includes('No Conclusion')},{key:'cclStatus',label:'📋 CCL / Ad Transparency',redFn:v=>v?.includes('NEGATIVE')},{key:'platformSelfRevision',label:'🔄 Platform Self-Revision',redFn:()=>false}];
+const dimHtml=dims.map(dim=>{const val=bm[dim.key]||'';const isRed=dim.redFn(val);const cls=isRed?'bad':(val.includes('No GITC')||val.includes('ZERO')||val.includes('clean')||val.includes('Positive'))?'ok':'warn';return`<div class="bm-dim ${cls}"><div class="bm-dim-label">${dim.label}</div><div class="bm-dim-text">${val}</div></div>`;}).join('');
+document.getElementById('bm-content').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:10px"><div><h3 style="font-size:18px;font-weight:800">${bm.platform}</h3><p style="font-size:12px;color:var(--muted)">${bm.auditor} · ${bm.auditCycles}</p></div><div>${conclusionBadge(bm.latestOpinion)}</div></div><div class="bm-grid">${dimHtml}</div><div class="bm-notes"><div class="bm-notes-label">📌 Benchmark Summary</div><div class="bm-notes-text">${bm.benchmarkNotes}</div></div>`;}
+
+function renderComplianceMatrix(){const c=document.getElementById('compliance-matrix');const platforms=currentFilter==='All'?PLATFORMS:[currentFilter];const cellClass={NEG:'m-neg',POS:'m-pos',PWC:'m-pwc',UNA:'m-una',QUAL:'m-qual',NA:'m-na'};const cellLabel={NEG:'NEG',POS:'✓',PWC:'P/C',UNA:'UNA',QUAL:'QUA',NA:'—'};let html=`<div style="display:grid;grid-template-columns:200px ${platforms.map(()=>'1fr').join(' ')};gap:4px;min-width:${200+platforms.length*90}px">`;html+=`<div></div>`;platforms.forEach(p=>{html+=`<div style="font-size:10px;font-weight:800;color:${platformTextColors[p]};background:${platformColors[p]};border-radius:4px;padding:6px 4px;text-align:center">${p}</div>`;});complianceMatrix.articles.forEach(art=>{html+=`<div style="font-size:11px;font-weight:600;color:var(--muted);padding:6px 8px;display:flex;align-items:center;border-radius:4px;background:#f8fafc">${art}</div>`;platforms.forEach(p=>{const val=complianceMatrix.data[p]?complianceMatrix.data[p][complianceMatrix.articles.indexOf(art)]:'NA';html+=`<div class="matrix-cell ${cellClass[val]||'m-na'}" title="${p}: ${val}">${cellLabel[val]||val}</div>`;});});html+=`</div>`;c.innerHTML=html;}
+
+function renderEnforcement(){const c=document.getElementById('enforcement-timeline');const data=currentFilter==='All'?enforcementData:enforcementData.filter(d=>d.platform===currentFilter);const sorted=[...data].sort((a,b)=>a.date.localeCompare(b.date));const dotClass={'Fine':'fine','Formal Proceedings':'formal','Preliminary Finding':'preliminary','RFI':'rfi','Commitments Accepted':'commitments'};const typeClass={'Fine':'badge-red','Formal Proceedings':'badge-amber','Preliminary Finding':'badge-amber','RFI':'badge-blue','Commitments Accepted':'badge-green'};c.innerHTML=sorted.map(action=>{const m=action.summary.match(/\(([a-z]+_\d+_\d+)\)/i);const url=m&&action.source==='EC'?`https://ec.europa.eu/commission/presscorner/detail/en/${m[1]}`:null;return`<div class="tl-item"><div class="tl-dot ${dotClass[action.type]||'other'}"></div><div class="tl-card"><div class="tl-meta"><span class="tl-date">${action.date}</span>${pBadge(action.platform)}<span class="badge ${typeClass[action.type]||'badge-slate'}">${action.type}</span><span class="badge badge-slate">${action.articles}</span><span style="font-size:10px;color:var(--muted);font-weight:600">${action.source}</span>${url?`<a href="${url}" target="_blank" rel="noopener" style="margin-left:auto;font-size:10px;color:var(--accent)">↗ Source</a>`:''}</div><div class="tl-text">${action.summary}</div>${action.outcome?`<div class="tl-outcome">→ ${action.outcome}</div>`:''}</div></div>`;}).join('');}
+
+function renderSynthesis(){const tb=document.getElementById('synthesis-tbody');tb.innerHTML=synthesisData.map((d,i)=>`<tr class="data-row" style="cursor:pointer" onclick="toggleDetail('syn-detail-${i}',this)"><td style="font-weight:700;max-width:180px">${d.theme}</td><td>${d.platforms.split(',').map(p=>pBadge(p.trim())).join(' ')}</td><td style="max-width:260px;color:#475569">${truncate(d.auditor,120)} <button class="expand-btn">▼</button></td><td style="max-width:260px;color:#475569">${truncate(d.ec,120)}</td></tr><tr id="syn-detail-${i}" class="detail-row hidden"><td colspan="4"><strong>Auditor Perspective:</strong> ${d.auditor}<br><br><strong>EC / Regulatory View:</strong> ${d.ec}</td></tr>`).join('');}
+
+document.addEventListener('DOMContentLoaded',()=>{renderOverviewTable();initCharts();renderRiskMap();renderAuditFindings();renderBenchmarkTabs();renderBenchmarkContent();renderComplianceMatrix();renderEnforcement();renderSynthesis();});
+</script>
+</body>
+</html>
