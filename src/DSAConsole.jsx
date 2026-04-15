@@ -760,11 +760,6 @@ export default function DSAConsole() {
   );
 
   // ── Overview tab ──────────────────────────────────────────────
-  const formalProceedings = enforcementActions.filter(a => a.type === 'Formal Proceedings').length;
-  const fines = enforcementActions.filter(a => a.type === 'Fine').length;
-  const negativeFindings = matrix1B.filter(r => r.conclusion?.includes('Negative') || r.conclusion?.includes('NEGATIVE')).length;
-  const unauditableItems = matrix1A.filter(r => r.status?.includes('UNAUDITABLE')).length;
-
   const platformColors8 = {
     'Snapchat':  '#eab308',
     'TikTok':    '#ec4899',
@@ -776,22 +771,33 @@ export default function DSAConsole() {
     'YouTube':   '#22c55e',
   };
 
-  // Per-platform counts for charts
   const platformList = ['Snapchat','TikTok','Instagram','Facebook','X','Pinterest','LinkedIn','YouTube'];
+
+  // All overview stats respect the platform filter
+  const filteredPlatforms = platformFilter === 'All' ? platformList : platformList.filter(p => p === platformFilter);
+  const filteredM1B   = matrix1B.filter(r => filteredPlatforms.includes(r.platform));
+  const filteredM1A   = matrix1A.filter(r => filteredPlatforms.includes(r.platform));
+  const filteredEnf   = enforcementActions.filter(a => filteredPlatforms.includes(a.platform));
+
+  const formalProceedings = filteredEnf.filter(a => a.type === 'Formal Proceedings').length;
+  const fines             = filteredEnf.filter(a => a.type === 'Fine').length;
+  const negativeFindings  = filteredM1B.filter(r => r.conclusion?.includes('Negative') || r.conclusion?.includes('NEGATIVE')).length;
+  const unauditableItems  = filteredM1A.filter(r => r.status?.includes('UNAUDITABLE')).length;
+
+  // Per-platform counts for bar charts (only filtered platforms shown)
   const negPerPlatform = platformList.map(p => matrix1B.filter(r => r.platform === p && (r.conclusion?.includes('Negative') || r.conclusion?.includes('NEGATIVE'))).length);
   const enfPerPlatform = platformList.map(p => enforcementActions.filter(a => a.platform === p).length);
-  const riskPerPlatform = platformList.map(p => matrix1A.filter(r => r.platform === p).length);
 
-  // Type breakdown for enforcement donut
+  // Enforcement type breakdown (filtered)
   const enfTypeMap = {};
-  enforcementActions.forEach(a => { enfTypeMap[a.type] = (enfTypeMap[a.type] || 0) + 1; });
+  filteredEnf.forEach(a => { enfTypeMap[a.type] = (enfTypeMap[a.type] || 0) + 1; });
 
   const renderOverview = () => (
     <div className="p-6 space-y-6">
       {/* KPI row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Platforms Monitored', value: 8, color: 'bg-blue-600', icon: '🌐' },
+          { label: 'Platforms Monitored', value: filteredPlatforms.length, color: 'bg-blue-600', icon: '🌐' },
           { label: 'Negative Audit Findings', value: negativeFindings, color: 'bg-red-600', icon: '❌' },
           { label: 'Formal EC Proceedings', value: formalProceedings, color: 'bg-orange-500', icon: '⚖️' },
           { label: 'DSA Fines Issued', value: fines, color: 'bg-purple-600', icon: '💶' },
@@ -812,20 +818,23 @@ export default function DSAConsole() {
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
           <h3 className="text-sm font-bold text-slate-700 mb-4">Negative Audit Findings by Platform</h3>
           <div className="space-y-2">
-            {platformList.map((p, i) => (
-              <div key={p} className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-slate-600 w-20 flex-shrink-0">{p}</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
-                  <div
-                    className="h-5 rounded-full flex items-center justify-end pr-2 transition-all"
-                    style={{ width: `${negPerPlatform[i] > 0 ? Math.max(negPerPlatform[i] * 14, 12) : 0}%`, backgroundColor: platformColors8[p] }}
-                  >
-                    {negPerPlatform[i] > 0 && <span className="text-xs font-bold text-white">{negPerPlatform[i]}</span>}
+            {filteredPlatforms.map((p) => {
+              const i = platformList.indexOf(p);
+              return (
+                <div key={p} className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-slate-600 w-20 flex-shrink-0">{p}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
+                    <div
+                      className="h-5 rounded-full flex items-center justify-end pr-2 transition-all"
+                      style={{ width: `${negPerPlatform[i] > 0 ? Math.max(negPerPlatform[i] * 14, 12) : 0}%`, backgroundColor: platformColors8[p] }}
+                    >
+                      {negPerPlatform[i] > 0 && <span className="text-xs font-bold text-white">{negPerPlatform[i]}</span>}
+                    </div>
                   </div>
+                  {negPerPlatform[i] === 0 && <span className="text-xs text-slate-400">0</span>}
                 </div>
-                {negPerPlatform[i] === 0 && <span className="text-xs text-slate-400">0</span>}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -833,20 +842,23 @@ export default function DSAConsole() {
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
           <h3 className="text-sm font-bold text-slate-700 mb-4">Enforcement Actions by Platform</h3>
           <div className="space-y-2">
-            {platformList.map((p, i) => (
-              <div key={p} className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-slate-600 w-20 flex-shrink-0">{p}</span>
-                <div className="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
-                  <div
-                    className="h-5 rounded-full flex items-center justify-end pr-2 transition-all"
-                    style={{ width: `${enfPerPlatform[i] > 0 ? Math.max(enfPerPlatform[i] * 5, 10) : 0}%`, backgroundColor: platformColors8[p] }}
-                  >
-                    {enfPerPlatform[i] > 0 && <span className="text-xs font-bold text-white">{enfPerPlatform[i]}</span>}
+            {filteredPlatforms.map((p) => {
+              const i = platformList.indexOf(p);
+              return (
+                <div key={p} className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-slate-600 w-20 flex-shrink-0">{p}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-5 overflow-hidden">
+                    <div
+                      className="h-5 rounded-full flex items-center justify-end pr-2 transition-all"
+                      style={{ width: `${enfPerPlatform[i] > 0 ? Math.max(enfPerPlatform[i] * 5, 10) : 0}%`, backgroundColor: platformColors8[p] }}
+                    >
+                      {enfPerPlatform[i] > 0 && <span className="text-xs font-bold text-white">{enfPerPlatform[i]}</span>}
+                    </div>
                   </div>
+                  {enfPerPlatform[i] === 0 && <span className="text-xs text-slate-400">0</span>}
                 </div>
-                {enfPerPlatform[i] === 0 && <span className="text-xs text-slate-400">0</span>}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
