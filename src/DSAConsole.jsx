@@ -918,7 +918,8 @@ export default function DSAConsole() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {platformList.map((p, i) => {
+              {platformList.filter(p => platformFilter === 'All' || p === platformFilter).map((p, i) => {
+                const i2 = platformList.indexOf(p);
                 const bench = auditBenchmarks.find(b => b.platform === p);
                 const hasProceedings = enforcementActions.some(a => a.platform === p && a.type === 'Formal Proceedings');
                 const maxTier = matrix1A.filter(r => r.platform === p).some(r => r.status?.includes('TIER 1')) ? 'Tier 1 🔴'
@@ -942,9 +943,9 @@ export default function DSAConsole() {
                       {hasProceedings ? <span className="text-orange-600 font-bold">⚠ Yes</span> : <span className="text-green-600">—</span>}
                     </td>
                     <td className="px-3 py-2.5 text-center font-bold">
-                      <span className={negPerPlatform[i] > 0 ? 'text-red-700' : 'text-slate-400'}>{negPerPlatform[i]}</span>
+                      <span className={negPerPlatform[i2] > 0 ? 'text-red-700' : 'text-slate-400'}>{negPerPlatform[i2]}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-center font-bold text-slate-600">{enfPerPlatform[i]}</td>
+                    <td className="px-3 py-2.5 text-center font-bold text-slate-600">{enfPerPlatform[i2]}</td>
                     <td className="px-3 py-2.5 text-center text-xs">{maxTier}</td>
                   </tr>
                 );
@@ -1131,7 +1132,13 @@ export default function DSAConsole() {
                 {activeTab === 'synthesis' && (
                   <>
                     {renderHeaders(['theme', 'platforms', 'auditor', 'ec'])}
-                    {renderRows(synthesis, ['theme', 'platforms', 'auditor', 'ec'])}
+                    {renderRows(
+                      synthesis.filter(r =>
+                        (platformFilter === 'All' || r.platforms?.includes(platformFilter)) &&
+                        (!searchQuery.trim() || Object.values(r).some(v => typeof v === 'string' && v.toLowerCase().includes(searchQuery.toLowerCase())))
+                      ),
+                      ['theme', 'platforms', 'auditor', 'ec']
+                    )}
                   </>
                 )}
                 {activeTab === 'disconnect' && (
