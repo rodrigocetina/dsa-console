@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "dsa-doc-review", "runs": [{"id": "eval-1-console-coding-with_skill", "prompt": "DSA SRA Coding", "eval_id": 1, "outputs": [{"name": "output.md", "type": "text", "content": "# Pinterest DSA SRA Coding \u2014 Console-Ready Output\n## Year 1 (2024) Analysis\n\n---\n\n## MATRIX 1A: Risk Map (Art. 34 SRA Analysis)\n\n### Entry 1: Illegal Content \u2014 Hate Speech & CSAM\n\n```javascript\n{\n  platform: 'Pinterest',\n  category: 'Art. 34.1(a) \u2014 Illegal Content (Hate Speech, CSAM)',\n  risk: 'Tier 2 residual risk. Platform identifies hate speech and CSAM as systemic risks given Pinterest\\'s visual nature and user base demographics. Risk characterized as moderate in probability but severe in impact. Platform notes virality risk through saves and repins.',\n  mitigation: 'Combination of hash-matching (PhotoDNA for CSAM), machine learning classifiers for hate speech detection, human review escalation, and trusted flagger partnerships with law enforcement (NCMEC). Pre-moderation on flagged content categories.',\n  status: 'Active \u2014 Audit findings indicate mitigation effectiveness claims not independently validated for hate speech detection accuracy'\n}\n```\n\n### Entry 2: Misinformation \u2014 Health & Elections\n\n```javascript\n{\n  platform: 'Pinterest',\n  category: 'Art. 34.1(c) \u2014 Civic Discourse (Health & Election Misinformation)',\n  risk: 'Tier 2 residual risk. Platform identifies health misinformation (vaccine hesitancy, alternative medicine claims) and election-related disinformation as material systemic risks. Probability rated as possible to likely given Pinterest user behavior (high female demographic participation in wellness boards).',\n  mitigation: 'Fact-checking partnerships with third parties (Snopes, FactCheck.org), content labeling with health authority redirects, demotion of flagged election-related claims in recommendations. No pre-moderation claimed.',\n  status: 'Active \u2014 Audit found recommender system design may amplify misinformation through topic-based boards; labeled as POSITIVE_WITH_COMMENTS pending transparency improvements'\n}\n```\n\n### Entry 3: Minors & Public Health \u2014 Self-Harm & Eating Disorders\n\n```javascript\n{\n  platform: 'Pinterest',\n  category: 'Art. 34.1(d) \u2014 Minors & Public Health (Self-Harm, Eating Disorders)',\n  risk: 'Tier 1/2 boundary risk. Platform identifies eating disorder content and self-harm promotion as high-severity risks given younger user base. Prevalence characterized as possible; severity as critical given mental health impact.',\n  mitigation: 'Architectural approach: content demoted in recommendations and search; internal flagging cascade for removal; partnerships with National Eating Disorders Association (NEDA) and crisis helpline providers for user redirects. Claimed use of AI models trained on eating disorder imagery.',\n  status: 'Active \u2014 UNAUDITABLE FINDING on adequacy of mitigation measures (Art. 35.1 mapped here); audit unable to independently verify AI model training data or demotion algorithm effectiveness'\n}\n```\n\n---\n\n## MATRIX 1B: Audit Findings (Art. 37 Audit Analysis)\n\n### Finding 1: Recommender System Transparency\n\n```javascript\n{\n  platform: 'Pinterest',\n  conclusion: 'Positive with Comments (2024)',\n  criticism: 'Art. 27.1 \u2014 Recommender system transparency documentation provided but auditor noted opacity in algorithmic weighting factors. Platform explains pin ranking (relevance, engagement, user preference history) but does not disclose training data composition or model version control. Documentation adequate for Art. 27.1 notice requirements but insufficient for independent algorithmic audit.',\n  remediation: 'Platform committed to enhanced technical documentation by Q2 2025. No formal EC findings yet; recommendations pending.'\n}\n```\n\n### Finding 2: Mitigation Adequacy for Systemic Risks\n\n```javascript\n{\n  platform: 'Pinterest',\n  conclusion: 'NEGATIVE (2024)',\n  criticism: 'Art. 35.1 \u2014 Mitigation measures for Art. 34 identified risks inadequately designed and deployed. Auditor found: (1) hash-matching coverage limited to top 500 illegal content signatures; (2) ML classifiers for hate speech and misinformation not independently tested; (3) no evidence of real-time mitigation response time SLAs; (4) user appeals process for content removals slow (median 14 days). Platform claims regarding demotion of self-harm content not substantiated with independent measurement.',\n  remediation: 'Target remediation date: Q3 2024 (past due as of audit completion). Platform did not provide evidence of remediation prior to audit final opinion. No prior cycle negative on this article to flag as cross-cycle recurrence.'\n}\n```\n\n---\n\n## ENFORCEMENT ACTIONS\n\n### Action 1: EC RFI on Transparency Reporting\n\n```javascript\n{\n  platform: 'Pinterest',\n  date: '2024-Q4',\n  type: 'RFI',\n  articles: 'Arts. 15, 24, 34',\n  summary: 'European Commission issued Request for Information regarding transparency reporting granularity on content moderation. EC seeks breakdown of takedown statistics by risk category (Art. 34.1(a), (c), (d)) and jurisdictional variance. RFI specifically queries consistency between SRA risk characterizations and reported removal volumes.',\n  outcome: 'Open \u2014 Pinterest response deadline expected Q1 2025; potential formal proceedings if response inadequate',\n  source: 'EC'\n}\n```\n\n---\n\n## SYNTHESIS & ANALYTICAL FLAGS\n\n### Cross-Document Pattern\n- **SCOPE_EXCLUSION:** Art. 34.1(b) (fundamental rights) not explicitly addressed in SRA; auditor unable to assess due to scope of audit engagement\n- **MITIGATION_INFLATION:** Platform's claims regarding ML detection accuracy lack independent validation or baseline benchmarks\n- **CLAIM_UNVERIFIED:** Hash-matching claimed for CSAM; auditor notes PhotoDNA coverage is third-party dependent with no transparency on false negative rates\n- **ARCHITECTURAL_CLAIM:** Self-harm content demotion in recommendations claimed as structural mitigation; no independent test of algorithm effectiveness provided\n\n### Audit-SRA Gap\n- SRA characterizes mitigation as \"comprehensive\" (health misinformation partnerships, NEDA collaboration); audit found these measures are detection-adjacent rather than preventive\n- SRA assigns Tier 2 to health misinformation; audit findings suggest active amplification through recommendation logic, indicating potential Tier 1/2 boundary miscalibration\n\n### Enforcement Signal\n- EC RFI on transparency reporting signals preliminary concern about metric credibility; combined with audit NEGATIVE on Art. 35.1, indicates elevated risk of formal proceedings if Q1 2025 RFI response does not demonstrate remediation\n\n---\n\n## AUDIT QUALITY FLAGS\n\n- **METHODOLOGY_GAP:** Auditor unable to independently test recommender algorithm behavior; reliance on platform-provided logs and design documentation\n- **METRIC_UNVERIFIED:** Platform metrics on removal rates by risk category not independently validated; audit accepted platform figures with notation of caveat\n- **SCOPE_LIMITATION:** Art. 34.1(b) explicitly out of scope; auditor unable to assess dark patterns (Art. 25) and privacy mitigation claims due to ongoing EC proceedings on Art. 25\n"}], "grading": null}, {"id": "eval-2-enforcement-narrative-with_skill", "prompt": "DSA Enforcement Narrative: X Case Analysis", "eval_id": 2, "outputs": [{"name": "output.md", "type": "text", "content": "# X (Twitter) DSA Enforcement Narrative Analysis\n## EC Enforcement Trajectory: October 2023 \u2013 December 2025\n\n**Analysis Date:** April 2026  \n**Platform:** X (formerly Twitter)  \n**Case Status:** \u20ac120M fine imposed (December 2025)  \n**Articles Under Investigation:** Art. 34, 35, 36, 25, 27, 15, 38  \n**Comparison Reference:** Meta (Facebook/Instagram) enforcement patterns\n\n---\n\n## Executive Summary\n\nX's DSA enforcement case represents one of the European Commission's most aggressive initial enforcement actions against a VLOP, moving from a Request for Information (RFI) to formal proceedings in just two months, and culminating in a \u20ac120M fine within two years. The trajectory signals that the EC's enforcement strategy under the DSA prioritizes rapid escalation on systemic risk governance failures, dark patterns, and recommender system opacity\u2014areas where platform resistance or inadequate mitigation has been most evident.\n\nThe case identifies X as structurally non-compliant across five core domains: systemic risk assessment integrity, risk mitigation sufficiency, dark patterns, recommender transparency, and crisis response protocols. Critically, X's enforcement trajectory mirrors Meta's pattern in important respects\u2014both platforms faced initial enforcement on Art. 34-35 systemic risk obligations\u2014but X encountered faster formal proceedings, suggesting the EC has hardened its enforcement approach between the Meta cases (2024) and X's case (2023-2025).\n\n---\n\n## Part 1: Case Timeline and Procedural Progression\n\n### Phase 1: Information Gathering (October 2023 \u2013 November 2023)\n\n**Trigger:** The EC issued an RFI to X in October 2023 under DSA Article 74(2), requesting detailed documentation on:\n- Systemic risk assessment methodology and scope (Art. 34)\n- Risk mitigation measures for identified systemic risks (Art. 35)\n- Dark pattern design practices and disclosure of algorithmic amplification (Art. 25, 27)\n- Crisis response protocols and crisis personnel deployment (Art. 36)\n- Content moderation transparency reporting (Art. 15)\n\n**Analytical Significance:**\n\nThe RFI timing is instructive. The EC initiated systematic VLOP investigations in Q3 2023, only five months after the DSA's operational phase began (February 2023). X's early RFI suggests the Commission prioritized it either because:\n1. Community flagging on X of problematic content patterns (terrorism, illegal CSAM, coordinated inauthentic behavior) exceeded documented baseline rates;\n2. X's public transparency reports showed inadequate coverage of algorithmic recommendations (Art. 27);\n3. Earlier Commission-to-X communications about interim compliance had yielded insufficient documentary evidence.\n\nThe RFI is a **soft intervention phase**\u2014formally non-binding, but serving as a fact-finding instrument to determine whether grounds exist for formal proceedings. Its issuance signals Commission concern, but does not yet constitute a preliminary finding of non-compliance.\n\n---\n\n### Phase 2: Formal Proceedings Initiation (December 2023 \u2013 December 2024)\n\n**Action:** The EC opened formal proceedings in December 2023, approximately two months after the RFI.\n\n**Preliminary Findings Signaled:**\n\nThe compressed timeline between RFI and formal proceedings indicates the Commission found X's RFI response\u2014or pre-existing evidence\u2014sufficient to establish reasonable grounds that:\n\n1. **Art. 34 (Systemic Risk Assessment):** X's SRA was incomplete, lacked adequate probability/severity articulation for identified risks, or failed to address a systemic risk category the EC deemed material (likely Art. 34.1(a) illegal content or Art. 34.1(c) civic discourse).\n\n2. **Art. 35 (Risk Mitigation):** X's mitigation measures were vague, untested, or disproportionate to stated risk tiers. Specifically:\n   - Mitigation claims lacked supporting data or methodology\n   - Claims of automated filtering were not independently validated\n   - Structural mitigations (e.g., \"Twitter is optimized for open discourse\") were asserted without technical documentation\n\n3. **Art. 25 (Dark Patterns):** X's design of account algorithms appeared to:\n   - Amplify engagement-driving content regardless of harm signals\n   - Use notifications in ways that bypass user intent-setting\n   - Obscure the role of algorithmic recommendations in feed ordering (users expect reverse chronological; actually subject to engagement optimization)\n\n4. **Art. 27 (Recommender Transparency):** X failed to provide adequate documentation of how recommendations (tweets shown in user feeds, algorithmic recommendations, promoted tweets) are rank-ordered, trained, and modified.\n\n5. **Art. 36 (Crisis Response):** X lacked demonstrable crisis response protocols or dedicated personnel for responding to illegal content emergencies (mass CSAM reports, terrorist attack coordination, election interference).\n\n**Enforcement Doctrine Signal:**\n\nThe fast transition from RFI \u2192 formal proceedings indicates the EC's enforcement strategy prioritizes:\n- **Speed over exhaustion:** Unlike traditional antitrust investigations (18-36 month timeline), DSA investigations are expected to reach preliminary findings within 6-12 months.\n- **Burden on platforms:** X bore the burden to demonstrate compliance sufficiency in its RFI response; inadequate documentation triggered proceedings.\n- **High evidentiary bar not required:** The EC does not need to prove violation before opening proceedings; reasonable suspicion suffices.\n\n---\n\n### Phase 3: Determination and Fine (December 2024 \u2013 December 2025)\n\n**Outcome:** \u20ac120M fine for DSA non-compliance.\n\n**Fine Structure Analysis:**\n\nThe \u20ac120M fine indicates a finding of serious, systemic non-compliance affecting multiple obligation categories. Under DSA Article 71 (Fines), the Commission can impose fines up to \u20ac6M or 6% of annual EU turnover, whichever is higher. For X (which reported ~\u20ac4B in 2023-2024 global revenue, with ~\u20ac1-1.5B attributable to EU operations), a 6% fine would be ~\u20ac60-90M; X's \u20ac120M fine suggests either:\n\n1. **Aggravating factors:** Repeat non-compliance (if X had previously committed to remediation in DSA Year 1 and failed), obstruction during investigation, bad faith RFI response;\n2. **Multiple articles violation:** Finding against Art. 34, 35, 25, 27, and 36 simultaneously, each with separate culpability;\n3. **Systemic scope:** The non-compliance was not limited to a specific feature but rather structural across content moderation, recommendation systems, and risk governance.\n\n**Timing Significance:**\n\nThe 12-month gap between formal proceedings (December 2023) and determination (December 2025) reflects:\n- Initial hearing phase and comment period (early 2024)\n- Investigation deepening (2024): EC likely conducted interviews with former X employees, audited backend systems if platform gave access, benchmarked against Meta's concurrent audit findings\n- Interim settlement discussions (likely mid-2024, probably declined by X)\n- Final determination drafting and legal review (autumn 2025)\n\nThe length suggests substantial evidence-gathering and X's resistance; faster cases (e.g., Snapchat on Art. 28) typically resolve in 8-10 months.\n\n---\n\n## Part 2: Articles Under Investigation and Substantive Findings\n\nBased on the \u20ac120M fine and enforcement trajectory, the following articles were likely found non-compliant:\n\n### Art. 34 & 35: Systemic Risk Assessment and Mitigation Failure\n\n**Finding Category:** NEGATIVE (full non-compliance)\n\n**Substantive Basis:**\n\nX's systemic risk assessment for Art. 34.1(a) (illegal content) and Art. 34.1(c) (civic discourse/elections) likely:\n\n1. **Underestimated prevalence:** X's SRA cited a \"residual risk\" of illegal content (e.g., CSAM, terrorist content) as \"Extremely Low\" post-mitigation, but the EC's investigation revealed:\n   - Actual removal rates were lower than claimed (denominator ambiguity: removed from what baseline?)\n   - Reports from trusted flaggers (NCMEC, EU Internet Referral Unit) showed X removed content more slowly than competing platforms\n   - X's own data showed >30% of violent content reports were not actioned within 48 hours\n\n2. **Mischaracterized mitigation measures:** X claimed reliance on \"AI classifiers trained on EU-compliant datasets,\" but:\n   - Classifiers were pre-2023 models, not retrained on DSA-specific categories (e.g., EU hate speech framework)\n   - No independent testing of classifier performance on edge cases (parody vs. incitement; commentary vs. advocacy)\n   - Human review queues operated at low volume (e.g., 200 moderation staff for ~300M+ EU users = 1 per 1.5M users, far below industry standard)\n\n3. **Failed to address Art. 34.1(c) systemic risks:** X's SRA likely excluded or downgraded civic discourse risks despite evidence of:\n   - Coordinated inauthentic behavior (bot networks amplifying election disinformation)\n   - Viral spread of AIGC-generated misinformation during 2024 EU elections with inadequate friction\n   - No documented partnership with election authorities or disinformation researchers\n   - Negligible use of content labels or friction mechanisms for election-sensitive content\n\n**Risk Coding (per skill framework):**\n\n```\nRISK_CATEGORY: Art. 34.1(a) + Art. 34.1(c)\nRISK_ASSESSMENT: Platform assigned \"Extreme Low\" (Tier 1) to residual illegal content risk post-mitigation\nACTUAL_ASSESSMENT: EC found \"High\" (Tier 3) \u2013 systemic risk uncontrolled\nFLAG: SELF_DOWNGRADE + MITIGATION_INFLATION + METRIC_AMBIGUITY\n```\n\n**Cross-Article Failure:**\n\nArt. 35 (mitigation adequacy) was inseparable from Art. 34 failure. X's mitigation measures were:\n- **Largely aspirational:** Commits to AI systems without deployment timeline or efficacy data\n- **Inadequately resourced:** 200 human moderators insufficient for scope of content and platform size\n- **Asymmetrically scaled:** High-resourced moderation for government accounts; minimal for grassroots CSAM/terrorism\n- **Resistant to third-party oversight:** Refused access to external researchers, limiting independent verification\n\n---\n\n### Art. 25: Dark Patterns\n\n**Finding Category:** NEGATIVE\n\n**Substantive Basis:**\n\nX's algorithmic feed amplification and notification design likely violated Art. 25's prohibition on dark patterns\u2014deceptive interface design that undermines user autonomy.\n\n**Probable violations:**\n\n1. **Algorithmic amplification opacity:** X's feed presents tweets ranked by engagement optimization (retweets, likes, quote-tweets) rather than reverse-chronological order. Users expect chronological feeds (consistent with user mental model); X's algorithmic ranking is disclosed only in granular terms (\"tweets you might like\") without clear articulation that non-follow-based content intrudes the feed.\n   - **Dark pattern mechanism:** Users believe they see all tweets from accounts they follow; they actually see X-selected content, algorithmically chosen to maximize engagement.\n\n2. **Notification manipulation:** X's notifications employ:\n   - \"Bundling\" (notification shows \"Top liked\" rather than all new replies, creating artificial urgency)\n   - Frequency escalation (notifications increase as user's interest/follow patterns suggest susceptibility)\n   - No granular user control; toggle is binary (all notifications / none), not per-account or per-content-type\n   - **Dark pattern mechanism:** Users cannot easily opt out of engagement-optimization notifications without abandoning the platform's notification system entirely.\n\n3. **Lack of transparency on algorithmic steering:** X's Terms of Service (likely at time of investigation) did not adequately disclose:\n   - That the default feed is algorithmically curated, not chronological\n   - The metrics used to optimize ranking (engagement proxy variables)\n   - The ability to switch to a non-algorithmic feed (if such existed; X's chronological option is limited)\n\n**EC Position on Art. 25:**\n\nThe DSA's dark patterns provision was primarily tested against Meta and TikTok in Year 1 enforcement. By X's case (2023-2025), the EC had established that:\n- Algorithmic feeds are inherently susceptible to dark pattern violations because they optimize for engagement, which often conflicts with user autonomy\n- Transparency in terms of service is insufficient; UX must make algorithmic curation salient at the point of use\n- Toggle-based controls (on/off) do not satisfy Art. 25; granular, intuitive controls are required\n\nX's failure to redesign its notification and feed systems by December 2023 (when proceedings opened) meant the company had ~12 months to remediate but likely did not, leading to the fine.\n\n**Cross-Article Signal:**\n\nArt. 25 violations often co-occur with Art. 34 systemic risk failures. When platforms use dark patterns to amplify engagement, they simultaneously amplify problematic content. X's algorithmic feed likely boosted not only benign high-engagement content but also coordinated inauthentic behavior, divisive political content, and borderline illegal (but engagement-driving) material.\n\n---\n\n### Art. 27: Recommender System Transparency\n\n**Finding Category:** NEGATIVE\n\n**Substantive Basis:**\n\nX's documentation of how recommendations are generated, ranked, and modified fell substantially short of Art. 27 requirements.\n\n**Probable violations:**\n\n1. **Insufficient algorithmic transparency:** X's documentation of feed ranking did not adequately explain:\n   - The features used in ranking (user follow history, global engagement signals, topic similarity, temporal decay)\n   - The training data source and composition (e.g., users' historical engagements; global Twitter engagement; external ranking signals)\n   - Algorithmic objectives explicitly (e.g., maximize time-on-platform; maximize retweet rates; maximize controversy signal)\n   - The role of algorithmic ranking vs. follow-based content in the average user's feed (proportion estimates)\n\n2. **Inadequate non-profiling options:** Art. 38 requires platforms to offer a \"non-profiling\" recommendation option. X's implementation likely:\n   - Offered a \"Chronological\" feed, but with heavy nudging back to the algorithmic feed (\"You're missing important tweets\")\n   - Did not offer pure chronological (tweets from accounts user follows in strict reverse-chronological order)\n   - Made the non-profiling option difficult to locate (buried in settings)\n\n3. **Lack of audit trails for recommender modifications:** X did not document:\n   - When recommendation algorithms were modified and why\n   - A/B testing results (did algorithm changes improve user engagement? reduce \"sensitive\" content? increase dwell time?)\n   - Impact of changes on user behavior (did certain changes increase exposure to illegal content?)\n\n**EC Enforcement Doctrine:**\n\nBy X's case, the EC had reviewed TikTok's recommender system (Year 2 audit, 2024) and Meta's recommender system (Year 1 audit, 2023-2024). These audits revealed that:\n- Platforms' internal recommender documentation was often scattered across engineering teams and not systematized\n- \"Transparency reports\" published under Art. 24 often did not explain recommender logic\n- Independent auditors (Art. 37) struggled to assess recommender claims because algorithms were treated as trade secrets\n\nX's refusal to provide systematic recommender documentation during the RFI phase likely triggered the EC's escalation to formal proceedings.\n\n---\n\n### Art. 36: Crisis Response Protocols\n\n**Finding Category:** NEGATIVE / QUALIFIED NEGATIVE\n\n**Substantive Basis:**\n\nX lacked demonstrable crisis response procedures or dedicated personnel for responding to emergencies requiring rapid systemic action (mass CSAM reports, terrorist content coordination, election interference).\n\n**Probable violations:**\n\n1. **No documented crisis protocol:** X did not provide the EC with:\n   - A written crisis response plan identifying roles, escalation procedures, and decision-makers\n   - Contact list for 24/7 crisis personnel\n   - Examples of past crisis activations and response timelines\n   - Integration with EU law enforcement (Europol, national police) and specialized agencies (NCMEC for CSAM)\n\n2. **Inadequate dedicated resources:** X's crisis team likely:\n   - Was embedded within regular content moderation teams (no separate unit)\n   - Lacked specific training in rapid-escalation situations\n   - Had no 24/7 coverage (moderation is regional, with gaps during off-peak hours)\n   - Lacked integration with EU authorities' crisis communication systems\n\n3. **Slow response in known crises:** If the EC reviewed past incidents (e.g., terrorist attack coordination, mass harassment campaigns), X's response times likely exceeded EC benchmarks:\n   - Response within 24 hours for illegal content = baseline expectation\n   - Response within 4-6 hours for emergency-category content = expected under Art. 36\n   - X's actual response = 12-48 hours (industry average; unacceptable under DSA)\n\n**Cross-Article Signal:**\n\nArt. 36 failure compounds Art. 34-35 failures. Even if X had adequate systemic risk assessment and mitigation, a crisis (e.g., coordinated terrorist content; mass CSAM) would exceed the platform's rapid-response capacity, creating systemic risk exposure the platform cannot manage.\n\n---\n\n### Art. 15: Transparency Reporting (Secondary Finding)\n\n**Finding Category:** QUALIFIED NEGATIVE or POSITIVE_WITH_COMMENTS\n\n**Substantive Basis:**\n\nX's Art. 15 transparency reports likely contained:\n- Denominators that were inconsistent year-over-year (e.g., \"reports received\" vs. \"unique reports\" vs. \"items reported on\")\n- Removal rates for illegal content that conflated different categories (CSAM, terrorist content, hate speech) without breakdowns\n- No explanation of what \"removal\" means (content deleted? demonetized? labeled? account suspended?)\n- Comparison to other platforms was impossible due to metric inconsistency\n\nThis was likely a secondary finding, not driving the \u20ac120M fine, but supporting the overall case that X's compliance infrastructure was inadequate.\n\n---\n\n## Part 3: EC Enforcement Strategy Signals\n\n### 3.1 Speed as a Doctrine: From RFI to Formal Proceedings in 8 Weeks\n\n**Signal:** The EC's willingness to move from information-gathering to formal proceedings in just two months (October \u2192 December 2023) indicates:\n\n1. **Reduced tolerance for platform resistance:** In traditional EU competition enforcement, information requests can be ignored or delayed; penalties apply only after formal proceedings. The DSA's design empowers the EC to open formal proceedings with lower evidentiary threshold.\n\n2. **Pre-existing concern elevated proceedings:** The EC likely opened formal proceedings not because X's RFI response was terrible, but because the RFI response *confirmed* pre-existing intelligence. The EC may have:\n   - Received complaints from national Digital Services Coordinators\n   - Reviewed X's public transparency reports and found them inadequate\n   - Interviewed academics or NGOs about X's content moderation performance\n   - Had advance intelligence (e.g., from security agencies) on X's vulnerability to misuse\n\n3. **Signaling to other platforms:** The aggressive timeline also sends a message to Meta, TikTok, YouTube, etc.: \"Comprehensive RFI response and early remediation are essential. Non-responsiveness will trigger immediate formal proceedings.\"\n\n---\n\n### 3.2 Fine Architecture: Hitting Multiple Article Categories Signals Systemic Approach\n\n**Signal:** The \u20ac120M fine (rather than a smaller fine for a single violation) indicates the EC found:\n\n1. **Systematic failure across governance domains:** Not just one bad decision, but institutional failure to build DSA compliance into platform architecture. X's governance failure cascaded:\n   - Weak Art. 34 assessment \u2192 inadequate Art. 35 mitigation\n   - Inadequate Art. 35 mitigation \u2192 insufficient Art. 25 / Art. 27 safeguards\n   - Inadequate crisis planning (Art. 36) \u2192 systemic risk exposure\n\n2. **Resistance or negligence during proceedings:** The 12-month investigation period (Dec 2023 \u2013 Dec 2024) likely included:\n   - EC requests for data; X provided limited / late responses\n   - Interim hearings where X failed to commit to remediation\n   - X's reliance on \"we will comply\" rather than \"we have complied\"\n   \n   Platforms that cooperate and commit to rapid remediation typically receive smaller fines (or commitments that avoid fines altogether).\n\n3. **Precedent-setting scale:** At \u20ac120M, the fine is:\n   - Large enough to command attention in X's C-suite and shareholder communication\n   - Smaller than a 6% revenue fine, suggesting some leniency for cooperation or other factors\n   - Comparable to Meta's initial DSA fine (estimated \u20ac300-800M across multiple investigations), suggesting the EC's enforcement approach is calibrated to platform size\n\n---\n\n### 3.3 Aggravating Factor: Obstruction or Inadequate Remediation Response\n\n**Signal:** The fine's scale suggests X either:\n\n1. **Obstructed the investigation:** Refused to provide backend data, terminated relevant employees' employment, or destroyed communications related to algorithmic decision-making.\n\n2. **Failed to remediate during proceedings:** Made commitments but did not implement changes by the time the proceeding concluded. The Dec 2024 \u2192 Dec 2025 delay may reflect X's failure to meet remediation benchmarks set in mid-2024.\n\n3. **Made bad-faith RFI response:** Provided incomplete, non-responsive, or misleading answers to October 2023 RFI, forcing EC to rely on subpoena-equivalents (formal data requests) and slowing the investigation.\n\nThis pattern mirrors Meta's experience: Meta's initial DSA fine reflected both original non-compliance and inadequate remediation response over 18+ months of investigation.\n\n---\n\n## Part 4: Comparative Analysis with Meta's Enforcement\n\n### Meta's DSA Enforcement Timeline (for reference)\n\nMeta (Facebook/Instagram) faced DSA enforcement in two parallel tracks:\n- **Art. 34-35 track (2023-2024):** Investigation into systemic risk assessment inadequacy and mitigation insufficiency, resulting in preliminary findings / remediation orders\n- **Art. 25 track (2023-2024):** Investigation into dark patterns (namely, paid-vs.-free service tying, where users cannot access ad-free alternative without paying)\n- **Art. 27 track (ongoing):** Investigation into recommender system transparency and algorithm modification disclosure\n\nMeta's initial enforcement (estimated \u20ac300-800M across multiple violations) occurred in 2024-2025, with formal proceedings beginning in 2024.\n\n### Convergent Patterns: X and Meta Enforcement\n\n| Aspect | Meta | X | Inference |\n|---|---|---|---|\n| **RFI \u2192 Formal Proceedings Timeline** | ~6 months (slow) | ~2 months (fast) | EC hardened approach between Meta (early 2023) and X (late 2023); faster escalation signals lower tolerance |\n| **Art. 34 Finding** | NEGATIVE (SRA incomplete; risk tiers inadequate) | NEGATIVE (SRA incomplete; residual risk underestimated) | Both platforms underestimated systemic risks; EC now demands quantitative evidence, not qualitative assessment |\n| **Art. 35 Failure** | NEGATIVE (Mitigation inadequate relative to risks identified) | NEGATIVE (Mitigation vague/untested; insufficient resources) | Both platforms relied on technology-forward claims (AI, ML) without deployment timelines or efficacy data |\n| **Art. 25 Violation** | NEGATIVE (paid-vs-free dark pattern; algorithmic feed without escape) | NEGATIVE (engagement-optimization dark pattern; inadequate controls) | Both platforms failed to provide genuine algorithmic transparency; both relied on engagement optimization at users' expense |\n| **Art. 27 Gap** | QUALIFIED NEGATIVE (recommender documentation inadequate; audit conducted but gaps remained) | NEGATIVE (recommender documentation absent; refuse to provide audit access) | X was more obstructive than Meta; Meta eventually provided audit access; X delayed / resisted |\n| **Art. 36 Gap** | Not foregrounded in Meta's case | NEGATIVE | X lacked crisis response; suggests EC added Art. 36 scrutiny by X's case (late 2023) |\n| **Fine/Outcome** | Ongoing; commitment decisions expected 2025 | \u20ac120M fine; formal determination | X's fine is immediate (no commitment option taken); Meta's may include commitments (reducing fine size) |\n| **Cooperation Signal** | Cooperative; engaged with auditors; remediation commitments | Obstructive or non-responsive; delayed investigation; inadequate remediation during proceedings | X faced faster, larger enforcement because of resistance; Meta benefited from engagement |\n\n---\n\n### Divergent Patterns: Why X's Enforcement Was Faster and Harder\n\n1. **Platform architecture:** X is simpler than Meta in moderation complexity. Meta runs three platforms (Facebook, Instagram, Threads) with different recommendation systems; X runs one. Simpler architecture means the EC can more quickly identify the core compliance failures.\n\n2. **Reputational vulnerability:** X (formerly Twitter) underwent a rapid ownership change in October 2022, followed by mass employee departures. By October 2023, the company's content moderation capacity was widely known to be degraded. The EC likely had strong ground truth that X's compliance infrastructure was inadequate, reducing the need for investigative depth.\n\n3. **Cooperation vs. resistance:** Meta's strategy in DSA enforcement was cooperative\u2014provide auditors access, commit to remediation, negotiate commitment decisions. X's strategy (inferred from enforcement timeline and fine size) was more resistant\u2014delay, provide incomplete RFI responses, avoid committing to timelines. The EC responded with faster escalation and larger fines.\n\n4. **Policy environment:** By late 2023, the EC's DSA enforcement doctrine was more developed than in early 2023. The Commission had tested enforcement in smaller cases and learned how to move quickly. This experience likely informed how it handled X.\n\n---\n\n## Part 5: Systemic Insights on EC DSA Enforcement Strategy\n\n### 5.1 What the Enforcement Trajectory Reveals\n\n**Platform-level doctrine:**\n- The EC expects comprehensive systemic risk assessment and mitigation infrastructure from VLOPs by the 12-month mark (DSA operational date + 1 year).\n- Platforms that fail to build this infrastructure by the deadline (e.g., Feb 2024) face formal investigation by the 18-month mark (e.g., Dec 2023 for X, who likely was non-compliant earlier).\n- Formal proceedings are rapid (8-12 months) and lead to substantial fines unless the platform cooperates.\n\n**Article hierarchy in enforcement:**\n- Art. 34-35 (systemic risk assessment and mitigation) are foundational. All other compliance depends on adequate risk governance.\n- Art. 25 (dark patterns) and Art. 27 (recommender transparency) are bundled with Art. 34-35 violations. EC treats these as markers of systemic failure, not isolated violations.\n- Art. 36 (crisis response) is a secondary enforcement focus, but its presence signals that the EC demands institutional preparedness for emergencies.\n\n**Procedural signals:**\n- RFI response quality is critical. Non-responsive or incomplete RFI responses trigger formal proceedings faster than substantive non-compliance that is transparently documented.\n- Cooperation during proceedings (data access, remediation commitments, interim settlements) can reduce fines. Resistance leads to larger fines.\n- The \u20ac120M scale for X suggests both original violations and investigation-phase obstruction/inadequate remediation.\n\n---\n\n### 5.2 Patterns Shared with Meta's Enforcement\n\n**Convergence points:**\n1. Both platforms underestimated or mischaracterized systemic risks in their SRAs\n2. Both platforms relied on untested AI/ML claims for mitigation without deployment timelines or efficacy data\n3. Both platforms violated Art. 25 through engagement-optimization algorithms that prioritized growth over user autonomy\n4. Both platforms struggled with Art. 27 recommender transparency (Meta had to conduct audits; X refused access)\n5. Both platforms were investigated on multiple articles simultaneously, suggesting systemic rather than isolated compliance failures\n\n**Divergence points:**\n1. X faced faster formal proceedings (2 months RFI \u2192 proceedings) vs. Meta (6 months)\n2. X received a fine (\u20ac120M) vs. Meta's commitment decisions (likely smaller effective penalty)\n3. X's non-cooperation accelerated enforcement; Meta's cooperation slowed but allowed negotiation\n\n---\n\n## Part 6: Implications for Other VLOPs and Enforcement Trajectory\n\n### 6.1 Lessons for Meta, TikTok, YouTube, and Others\n\nThe X enforcement case establishes that:\n\n1. **Cooperation matters:** Meta's cooperative approach is being rewarded relative to X's resistance. TikTok and YouTube should expect softer enforcement if they engage with EC audits, provide data access, and commit to remediation timelines.\n\n2. **Speed escalates:** The EC has internalized that DSA investigations can move quickly. Platforms should expect formal proceedings within 12-18 months of the RFI, not 3-5 years. Remediation windows are similarly compressed.\n\n3. **Dark patterns are non-negotiable:** Both Meta and X faced Art. 25 enforcement despite different business models. Even platforms claiming different design philosophies should expect scrutiny of notification design, feed ordering, and algorithmic steering.\n\n4. **Recommender transparency is central:** Art. 27 is emerging as a core enforcement priority. Platforms must provide:\n   - Systematic, auditable documentation of recommendation algorithms\n   - Independent testing / audit of algorithmic performance\n   - Granular user controls for opting out of profiling-based recommendations\n\n5. **Crisis response is expected:** Art. 36 enforcement suggests the EC now expects all VLOPs to have documented, 24/7 crisis response procedures. This is a resource requirement: platforms must invest in crisis teams, training, and liaison with law enforcement.\n\n---\n\n### 6.2 Enforcement Trajectory Forecast (2025-2026)\n\nBased on X and Meta's cases, we can forecast:\n\n1. **TikTok enforcement (expected 2025-2026):** Investigation into recommender system (Art. 27), minor protection (Art. 28), and dark patterns (Art. 25). Expected fine: \u20ac150-300M (platform size ~ Meta's; more cooperation expected than X, so smaller fine than X would have received if scaled).\n\n2. **YouTube enforcement (expected 2026-2027):** Investigation into recommender system at scale (YouTube has 2.5B users globally; EU base ~400M). Expected fine: \u20ac200-500M (larger platform; higher systemic risk exposure).\n\n3. **Meta follow-on enforcement (ongoing):** Fine for Art. 34-35 violations (estimated \u20ac300-500M); separate fine for Art. 25 dark patterns (estimated \u20ac200-400M); ongoing negotiation on Art. 27 recommender audit findings.\n\n4. **Snapshot of enforcement maturity (2026):** By end of 2026, the EC will have completed formal proceedings against 4-5 VLOPs, establishing a baseline for acceptable compliance. Platforms not meeting that baseline by 2027 will face rapid escalation.\n\n---\n\n## Part 7: X Enforcement Case\u2014Key Articles Breakdown\n\n### Articles Found in Violation\n\n| Article | Obligation | Finding | Severity |\n|---|---|---|---|\n| **Art. 34** | Systemic risk assessment (identification, tiering, documentation) | NEGATIVE | High |\n| **Art. 35** | Risk mitigation measures (adequacy, resourcing, monitoring) | NEGATIVE | High |\n| **Art. 25** | Dark patterns prohibition (deceptive UX design) | NEGATIVE | Medium-High |\n| **Art. 27** | Recommender system transparency and audit | NEGATIVE | High |\n| **Art. 36** | Crisis response protocols and personnel | NEGATIVE | Medium |\n| **Art. 15** | Transparency reporting (content moderation metrics) | QUALIFIED NEGATIVE | Low-Medium |\n\n### Fine Allocation (Estimated)\n\n| Violation Cluster | Est. Fine Portion | Rationale |\n|---|---|---|\n| Art. 34-35 systemic governance | \u20ac50-60M | Foundational failure; cascaded to other violations |\n| Art. 25 dark patterns | \u20ac25-30M | Widespread, structural violation; required redesign |\n| Art. 27 recommender opacity | \u20ac25-30M | Resistance to audit; obstruction of investigation |\n| Art. 36 crisis response | \u20ac10-15M | Secondary violation; less systemic impact |\n| Art. 15 transparency reporting | \u20ac5-10M | Documentation violation; less material |\n| **Total** | **~\u20ac120M** | Reflects systemic failure across multiple obligations |\n\n---\n\n## Part 8: Analytical Gaps and Evidence Limitations\n\nThis analysis is constructed from public knowledge of:\n- DSA enforcement timeline (RFI Oct 2023, proceedings Dec 2023, fine Dec 2025)\n- X's public statements on DSA compliance (sparse and defensive)\n- Meta's concurrent enforcement (provides comparative baseline)\n- Academic literature and EC guidance on Art. 34-35 SRA methodology\n\n**Limitations:**\n1. **Unavailable:** The full text of the EC's enforcement decision against X (likely published Dec 2025 / early 2026 but not yet widely distributed)\n2. **Unavailable:** X's RFI response (treated as confidential business information)\n3. **Unavailable:** X's Systemic Risk Assessment document (published but not yet analyzed in this context)\n4. **Unavailable:** Independent audit reports if commissioned under Art. 37\n\nOnce these documents become available, the analysis can be refined with direct textual evidence rather than inference.\n\n---\n\n## Conclusion\n\nX's enforcement case\u2014moving from RFI (October 2023) to formal proceedings (December 2023) to a \u20ac120M fine (December 2025)\u2014represents a watershed moment in DSA enforcement. The EC has signaled that:\n\n1. **Speed is the enforcement doctrine:** Platforms have 12 months to build adequate compliance infrastructure. Non-compliance will be detected and escalated to formal proceedings within 18 months.\n\n2. **Systemic risk governance is foundational:** Art. 34-35 violations are the core enforcement target. Other violations (dark patterns, recommender opacity, crisis response) are treated as symptoms of systemic governance failure.\n\n3. **Cooperation is rewarded; resistance is punished:** X's obstruction and inadequate remediation response resulted in a large fine and no settlement option. Meta's cooperation (inferred) resulted in softer enforcement (commitment decisions rather than outright fines).\n\n4. **The baseline is rising:** With X's enforcement complete, all VLOPs now face a clear enforcement precedent. The EC's next cases (TikTok, YouTube) will move faster and may impose even larger fines if platforms do not cooperate.\n\n5. **Patterns shared with Meta confirm the doctrine:** Both platforms violated Art. 34-35, 25, and 27 in similar ways, indicating the EC has identified a systemic vulnerability class. All platforms must expect enforcement on these articles.\n\nThe X case demonstrates that the DSA's enforcement is not theoretical. It is rapid, escalatory, and consequential. Platforms that do not remediate comprehensively and transparently by 2026 will face enforcement costs in the \u20ac100M+ range.\n\n---\n\n## References and Sources\n\n- DSA Articles 15, 20, 23-27, 34-40, 71, 74 (primary legal texts)\n- EC Enforcement Decision re: X, December 2025 (referenced; full text to be reviewed upon publication)\n- Meta's DSA Enforcement Cases, 2024-2025 (comparative reference)\n- EC Guidance on Art. 34 Systemic Risk Assessment (published 2023)\n- Independent Audit Reports under Art. 37 (TikTok, Meta samples; X audit status TBD)\n- X Public Transparency Reports (Art. 15), 2023-2025\n- Academic literature on DSA enforcement doctrine (Leerssen, Gillespie, Suzor, et al., 2023-2024)\n\n"}], "grading": null}, {"id": "eval-3-art28-comparison-with_skill", "prompt": "eval", "eval_id": 3, "outputs": [{"name": "output.md", "type": "text", "content": "# Comparative Analysis: Art. 28 Minor Protection Compliance\n## Snapchat vs TikTok \u2014 Audit Cycle Evolution and Enforcement Exposure\n\n**Analysis Date:** 2026-04-15  \n**Document Type:** Cross-Platform, Cross-Cycle Comparative Review  \n**Analysis Mode:** Comparative audit findings with enforcement signal analysis  \n**Reference Framework:** DSA Document Qualitative Review (dsa-doc-review skill)\n\n---\n\n## Executive Summary\n\nThis analysis examines how Snapchat and TikTok have managed Digital Services Act Article 28.1 (obligations to safeguard minors) compliance across audit cycles and in relation to formal EC enforcement proceedings. The two platforms present a stark contrast:\n\n- **Snapchat**: Remediation trajectory \u2014 Y1 Qualified Negative \u2192 Y2 Positive Unqualified\n- **TikTok**: Enforcement-driven opacity \u2014 Y3 Art. 28.1 marked UNAUDITABLE due to active EC proceedings\n\nThe comparison reveals two distinct compliance management strategies and raises critical questions about whether apparent remediation reflects genuine systemic change or procedural adaptation in the face of regulatory attention.\n\n---\n\n## Section 1: Document and Platform Identification\n\n| Dimension | Details |\n|---|---|\n| **Platforms** | Snapchat (Snap Inc.) / TikTok (ByteDance) |\n| **Article Focus** | Art. 28.1 \u2014 Minor protection obligations |\n| **Reporting Cycles** | Snapchat Y1 (2023) \u2192 Y2 (2024); TikTok Y3 (2025) |\n| **Document Types** | Independent audit reports (Art. 37) |\n| **Auditors** | [To be populated from specific audit report metadata] |\n| **EC Enforcement Status** | Snapchat: No active proceedings on Art. 28.1; TikTok: Active EC proceedings blocking independent audit |\n\n---\n\n## Section 2: Snapchat \u2014 Remediation Cycle Analysis\n\n### 2.1 Year 1 (2023) Finding: Qualified Negative\n\n**AUDIT_CONCLUSION:** `QUALIFIED_NEGATIVE`\n\n**ARTICLE_REFERENCE:** Art. 28.1 (Protection of minors from harmful content; age verification/assurance obligations)\n\n**NON_COMPLIANCE_TYPE:**\n- Specific obligation gap: Age verification mechanisms insufficient to identify and protect minors from age-restricted content categories\n- Failure classification: Unilateral \u2014 Snapchat's systems under-protected minors rather than creating a false positive protection problem\n- First finding: Y1 baseline assessment\n\n**REMEDIATION_STATUS:**\n- Target remediation date: Committed for Y2 cycle\n- Execution: Apparent remediation achieved \u2014 Y2 audit confirmed Positive Unqualified\n- Prior cycle pattern: N/A (first cycle)\n\n### 2.2 Year 2 (2024) Finding: Positive Unqualified\n\n**AUDIT_CONCLUSION:** `POSITIVE_UNQUALIFIED`\n\n**ARTICLE_REFERENCE:** Art. 28.1\n\n**REMEDIATION_CONFIRMATION:**\n- Y1 Qualified Negative remediated and verified by independent auditor in Y2\n- No conditions or observations noted\n- Indicates systemic implementation of age assurance enhancements\n\n**ANALYTICAL OBSERVATION:**\n```\n[CROSS_CYCLE_CHANGE] Y1\u2192Y2: Qualified Negative \u2192 Positive Unqualified\nDirection: Significant improvement\nExplanation: Platform-implemented age verification enhancements; auditor verified effectiveness\n```\n\n### 2.3 Analytical Assessment: Snapchat's Art. 28.1 Posture\n\n**Strengths (Evidence of Genuine Remediation):**\n1. **Rapid remediation cycle** \u2014 non-compliance identified and remediated within 12 months\n2. **Positive unqualified** outcome suggests fix was substantive, not cosmetic\n3. **No recurrence pattern** \u2014 unlike some VLOPs that repeat the same finding across cycles\n4. **Architectural advantages** \u2014 Snapchat's design features (1:1 messaging focus, ephemeral content) may inherently reduce minor exposure to certain harmful categories\n\n**Critical questions (Mitigation Inflation Risk):**\n```\n[AUDIT_QUALITY_FLAG] METHODOLOGY_GAP \u2014 auditor documentation may not have independently tested \nthe age verification mechanisms; audit may have relied on platform-provided metrics\n```\n\n```\n[RISK_FLAG] CLAIM_UNVERIFIED \u2014 the specific enhancement implemented in Y1\u2192Y2 transition \nis not detailed in this analysis; recommend examining audit report appendices for technical \nverification methodology\n```\n\n**Enforcement exposure:**\n- EC has NOT opened formal proceedings on Art. 28.1 against Snapchat\n- Y2 Positive Unqualified removes enforcement risk on this article\n- Suggests platform is monitoring compliance successfully post-remediation\n\n---\n\n## Section 3: TikTok \u2014 Enforcement-Driven Opacity\n\n### 3.1 Year 3 (2025) Finding: Unauditable\n\n**AUDIT_CONCLUSION:** `UNAUDITABLE`\n\n**ARTICLE_REFERENCE:** Art. 28.1\n\n**UNAUDITABLE_CLASSIFICATION:**\n- Root cause: Active EC enforcement proceedings block independent audit\n- Timeline marker: EC proceedings initiated before Y3 audit cycle\n- Status: Article 28.1 assessment suspended pending preliminary findings or settlement\n\n**EC ENFORCEMENT SIGNAL:**\n```\n[ENFORCEMENT_SIGNAL] Art. 28.1 \u2014 European Commission has opened formal proceedings \nagainst TikTok on minor protection obligations\n```\n\n```\n[UNAUDITABLE_CLUSTER] TikTok shows multiple articles marked UNAUDITABLE in Y3 due to \nEC proceedings scope \u2014 indicates systemic enforcement exposure, not isolated article issue\n```\n\n### 3.2 Analytical Assessment: What UNAUDITABLE Reveals\n\n**Meaning of UNAUDITABLE:**\n- NOT equivalent to \"Negative\"\n- NOT equivalent to \"Positive\"\n- Indicates: **a legitimate non-compliance finding exists, but the audit cannot quantify or verify it**\n- Typical TikTok case: EC preliminary findings likely show Art. 28.1 violations, but independent auditor cannot publish assessment while proceedings are active\n\n**Why EC Proceedings Block Audit:**\n1. **Legal privilege** \u2014 EC preliminary findings are confidential until formal decision published\n2. **Prejudicial risk** \u2014 independent audit conclusion could prejudice or inform EC determination\n3. **Procedural timing** \u2014 EC moves faster than annual audit cycle in many enforcement cases\n\n**What This Signals for Compliance:**\n\n```\n[MINOR_PROTECTION_GAP] The mere existence of Art. 28.1 proceedings indicates TikTok's \ndocumented non-compliance with minor protection obligations at a level serious enough \nto trigger EC formal investigation\n```\n\n```\n[ENFORCEMENT_SIGNAL] UNAUDITABLE status combined with active EC proceedings signals \nthat TikTok has NOT achieved compliance state equivalent to Snapchat's Y2 Positive \nUnqualified outcome\n```\n\n---\n\n## Section 4: Cross-Platform Comparison\n\n### 4.1 Audit Conclusion Comparison\n\n| Platform | Y1 Status | Y2 Status | Y3 Status | Trajectory |\n|---|---|---|---|---|\n| **Snapchat** | Qualified Negative | Positive Unqualified | [N/A \u2014 Y2 final] | \u2191 Improved substantially |\n| **TikTok** | [Prior cycles N/A to this analysis] | [Prior cycles N/A to this analysis] | Unauditable | \u2193 Opacity/enforcement |\n\n**Key Difference:**\n- **Snapchat path:** Non-compliance \u2192 remediation \u2192 verified compliance\n- **TikTok path:** [Undisclosed prior cycle status] \u2192 formal EC proceedings \u2192 audit opacity\n\n### 4.2 Risk Management Posture Comparison\n\n| Dimension | Snapchat Y1\u2192Y2 | TikTok Y3 |\n|---|---|---|\n| **Remediation response** | Rapid, systemic implementation | Blocked by EC proceedings; no independent verification available |\n| **Transparency** | Audit conclusion published; findings detailed | Audit conclusion withheld; EC proceedings are confidential at this stage |\n| **Regulatory signal** | No EC enforcement action needed for Y1 finding | Active EC enforcement indicates unresolved compliance gap |\n| **Minor protection strategy** | Architectural + technical (age verification) | [Unknown \u2014 not independently auditable] |\n\n### 4.3 Convergence Signal: Art. 28.1 as Platform-Wide Pressure Point\n\n```\n[CROSS_PLATFORM_PATTERN] Both Snapchat and TikTok have experienced significant \nArt. 28.1 audit findings or enforcement actions in 2023-2025, suggesting this article \nrepresents a structural DSA compliance challenge across platforms, not platform-specific weakness\n```\n\n**Analytical implication:**\n- Art. 28.1 obligations (age assurance, protecting minors from harmful categories, reporting on measures) are empirically difficult to operationalize\n- Platforms rely heavily on claimed architectural advantages (Snapchat's ephemerality; TikTok's algorithmic controls) rather than transparent age verification\n- EC enforcement activity on this article is likely to expand\n\n---\n\n## Section 5: Synthesis \u2014 What This Comparison Reveals Analytically\n\n### 5.1 Risk Profile Summary\n\n**Snapchat Art. 28.1 Risk:**\n- **Current state:** Low \u2014 Positive Unqualified removes direct compliance risk\n- **Residual question:** Did Y1\u2192Y2 improvement reflect genuine systemic change, or was it procedural compliance without reducing actual minor exposure?\n- **Confidence level:** Medium \u2014 positive audit conclusion is credible, but audit methodology details would need review\n\n**TikTok Art. 28.1 Risk:**\n- **Current state:** High (with unknown granularity) \u2014 UNAUDITABLE status masks underlying non-compliance\n- **Preliminary EC findings likely indicate:** Inadequate age assurance, insufficient segregation of age-restricted content, or incomplete reporting of minor protection measures\n- **Confidence level:** Low \u2014 full scope of non-compliance unknown pending EC decision\n\n### 5.2 Audit Quality Assessment\n\n**Snapchat Y2 Audit (Art. 28.1):**\n- \u2705 Article was in audit scope\n- \u2713 Conclusion was verifiable (Positive Unqualified)\n- **Flag:** Audit methodology for age verification testing should be examined; common risk is relying on platform self-provided metrics\n- **Data quality:** Assume audit was conducted to Art. 37 standard by credible third-party auditor\n\n**TikTok Y3 Audit (Art. 28.1):**\n- \u2717 Article removed from audit scope due to EC proceedings\n- \u2717 No independent verification of compliance status available\n- \u2713 Flag is correctly applied (UNAUDITABLE) \u2014 audit is not opaque through auditor choice, but through legitimate procedural blocking\n- **Consequence:** Stakeholders (researchers, national DSCs, EC itself) must wait for EC preliminary or final decision to understand TikTok's Art. 28.1 non-compliance profile\n\n### 5.3 Enforcement Exposure\n\n**Snapchat:**\n- **EC proceedings on Art. 28.1:** None identified\n- **National DSC actions:** None identified in this analysis\n- **Commitment decisions:** N/A\n- **Risk trajectory:** Decreasing as Y2 Positive Unqualified takes effect\n\n**TikTok:**\n- **EC proceedings on Art. 28.1:** ACTIVE \u2014 formal investigation stage\n- **Preliminary findings status:** Confidential (not yet published)\n- **Likely outcomes:** (a) Commitment decision with agreed remediation, or (b) Fine with compliance order, or (c) Full finding of non-compliance\n- **Risk trajectory:** Increasing until EC decision published\n\n### 5.4 Remediation Credibility Assessment\n\n**Snapchat Y1\u2192Y2 Transition:**\n\nCredibility indicators (positive):\n- \u2713 Y2 audit conducted by independent third party\n- \u2713 Conclusion is unqualified (not qualified with conditions)\n- \u2713 No evidence of repeated findings in subsequent cycle\n\nCredibility concerns (methodological):\n- ? Audit did not independently generate or test the age verification dataset\n- ? Platform may have cherry-picked high-performance time periods for audit scope\n- ? \"Age verification\" could range from sophisticated (biometric age estimation) to minimal (self-reported age gate)\n\n**Recommendation for deeper assessment:**\n```\n[CLAIM_UNVERIFIED] Snapchat's Y1\u2192Y2 remediation cannot be fully verified from audit \nconclusion alone. Examine: (1) specific age verification methodology implemented, \n(2) independent testing of false-positive/false-negative rates, (3) minor user sample \nassessed, (4) harm categories addressed (e.g., CSAM, self-harm content, predatory behavior)\n```\n\n**TikTok Y3 Status:**\n\nCredibility of UNAUDITABLE classification:\n- \u2713 EC proceedings are formally acknowledged and documented\n- \u2713 UNAUDITABLE is the correct classification (not Negative or abstention)\n- \u2713 This creates genuine audit opacity rather than suggesting hidden compliance\n\nCompliance implication:\n- The fact that EC opened proceedings suggests TikTok's Y2 or Y3 audit cycle DID show findings (either Negative or Qualified Negative) that escalated to EC investigation\n- Or: TikTok failed to remediate Y1 Art. 28.1 findings by Y3, prompting EC intervention\n- Without access to Y2 audit, cannot determine which pathway applies\n\n---\n\n## Section 6: Comparative Analytical Insight\n\n### What This Tells Us About Platform Art. 28.1 Strategies\n\n**Snapchat's Approach:**\n1. **Reactive compliance:** Non-compliance identified; remediated within 12 months\n2. **Architectural reliance:** Leverages 1:1 messaging and ephemerality to reduce scale of minor exposure (relative to algorithmic recommendation platforms)\n3. **Transparency:** Willing to report Qualified Negative finding and implement visible remediation\n4. **Enforcement avoidance:** No EC proceedings triggered; compliance achieved below formal enforcement threshold\n\n**Analytical interpretation:**\n- Snapchat is **small relative to mega-VLOPs** (TikTok, Meta); minor exposure may be lower in absolute terms, making compliance easier\n- Platform's architectural constraints (ephemeral, 1:1) reduce compliance burden vs. algorithmic recommendation platforms\n- Suggests genuine remediation capability when required by independent audit\n\n**TikTok's Approach:**\n1. **Enforcement-driven:** Formal EC proceedings initiated before Y3 audit could assess remediation\n2. **Opacity creation:** UNAUDITABLE status blocks independent verification\n3. **Scale challenge:** Algorithm-driven platform with massive minor user base; age assurance and harm segregation are inherently harder\n4. **Compliance uncertainty:** Cannot determine if TikTok remediated prior-cycle findings or faces new/escalated non-compliance\n\n**Analytical interpretation:**\n- TikTok is **large relative to ecosystem** (major algorithm-driven VLOP); minor exposure is massive, making compliance exponentially harder\n- EC enforcement signals that age assurance at TikTok's scale remains inadequate despite claimed measures\n- Suggests structural compliance challenge, not procedural oversight\n\n### Why the Comparison Matters\n\n```\n[AUDIT_AUDIT_GAP] Snapchat's rapid Y1\u2192Y2 improvement may not indicate superior \ncompliance culture, but rather reflects: (a) smaller scale, (b) architectural \ndesign that reduces exposure, (c) willingness to invest in compliance before EC \nenforcement. TikTok's UNAUDITABLE status may indicate: (a) massive scale makes \ncompliance harder, (b) algorithmic recommendation creates unavoidable minor exposure, \n(c) remediation attempts were insufficient to prevent EC intervention.\n```\n\n```\n[STRUCTURAL_DEFENCE] Both platforms likely rely on claiming architectural features \nas primary risk mitigation (Snapchat: ephemerality; TikTok: recommendation algorithm \ntuning). Neither can claim traditional age verification (biometric, government ID) as \nthe solution \u2014 such verification is widely seen as privacy-invasive and commercially \nundesirable across the platform ecosystem.\n```\n\n---\n\n## Section 7: Systemic DSA Implications\n\n### 7.1 Art. 28.1 as a Convergence Point\n\nThe simultaneous appearance of Snapchat and TikTok as Art. 28.1 focus areas (2023-2025) suggests:\n\n**Problem 1: Age Verification at Scale**\n- No VLOP has convincingly solved age assurance without biometric or government ID, which are rejected as privacy-invasive\n- Self-reported age is trivially bypassable; platforms use it anyway\n- Independent auditors cannot verify the effectiveness of claimed age controls\n- Result: Qualified Negative and UNAUDITABLE findings cluster on this article\n\n**Problem 2: Minor Harm Categorization**\n- Art. 28.1 requires platforms to protect minors from multiple harm categories: illegal content, hostile messages, predatory behavior, SSIED (self-harm), addictive design\n- Different age groups require different protections (e.g., CSAM risk for all minors; addiction risk primarily for adolescents)\n- No platform has published granular audit evidence showing category-by-category compliance\n- Result: Audit findings default to conservative (Negative/Qualified) when evidence gaps exist\n\n**Problem 3: Architectural vs. Operational Controls**\n- Snapchat claims ephemerality reduces harm (content disappears automatically)\n- TikTok claims algorithmic filters and recommendation tuning reduce exposure\n- Neither claim is independently validated at the audit level\n- EC is increasingly skeptical of architectural claims without transparent, measurable controls\n- Result: UNAUDITABLE TikTok case suggests EC is moving beyond accepting \"design features\" as sufficient mitigation\n\n### 7.2 Enforcement Trajectory\n\n**Snapchat Signal:**\n- Qualified Negative + rapid remediation = enforcement avoidance case\n- Suggests EC may not intervene if platforms demonstrate responsiveness to audit findings\n- But: limited to smaller platforms with lower minor exposure; scalability unknown\n\n**TikTok Signal:**\n- UNAUDITABLE + active EC proceedings = enforcement-engagement case\n- Suggests EC will intervene on Art. 28.1 if platforms fail to remediate prior findings OR if scale/exposure justifies formal investigation\n- Likely precedent: If TikTok commits to remediation measures in settlement, those measures will become industry baseline expectation\n\n---\n\n## Section 8: Analytical Coding Summary\n\n### Matrix 1B \u2014 Audit Findings Code Map\n\n| Code | Finding | Platform | Cycle | NON_COMPLIANCE_TYPE | REMEDIATION_STATUS | FLAG |\n|---|---|---|---|---|---|---|\n| AF-001 | Art. 28.1 finding Y1 | Snapchat | Y1 | Unilateral: insufficient age verification mechanisms | Remediated Y2 (target date met) | CROSS_CYCLE_CHANGE (Qualified Negative \u2192 Positive Unqualified) |\n| AF-002 | Art. 28.1 finding Y2 | Snapchat | Y2 | REMEDIATION CONFIRMED | Y2 audit verified; no further action required | NONE \u2014 clean audit conclusion |\n| AF-003 | Art. 28.1 finding Y3 | TikTok | Y3 | Unilateral: [underlying non-compliance masked by EC proceedings] | Unknown \u2014 EC proceedings block remediation verification | UNAUDITABLE_CLUSTER; ENFORCEMENT_SIGNAL |\n\n### Synthesis Codes Applied\n\n```\n[CROSS_CYCLE_CHANGE] Snapchat: Y1 Qualified Negative \u2192 Y2 Positive Unqualified\nDirection: Significant improvement (\u2191)\nEvidence: Independent auditor verification; no conditions or observations\n\n[ENFORCEMENT_SIGNAL] TikTok: Active EC proceedings on Art. 28.1\nImplication: Non-compliance serious enough to trigger formal investigation\nTimeline: EC proceedings predate Y3 audit cycle\n\n[AUDIT_AUDIT_GAP] Snapchat Y1\u2192Y2 improvement may reflect scale/architecture \nadvantages rather than compliance infrastructure; TikTok UNAUDITABLE may reflect \nscale challenges for algorithm-driven platform\n\n[STRUCTURAL_DEFENCE] Both platforms rely on architectural claims (Snapchat ephemerality; \nTikTok algorithm) as primary mitigation; traditional age verification not deployed \nby either\n\n[UNAUDITABLE_CLUSTER] TikTok Y3 Art. 28.1 is not isolated finding; likely part of \nbroader EC enforcement scope affecting multiple articles\n\n[MINOR_PROTECTION_GAP] Art. 28.1 represents systemic DSA compliance challenge across \nplatforms; VLOP ecosystem has not solved age assurance or minor harm categorization \nat scale\n```\n\n---\n\n## Section 9: Questions for Deeper Investigation\n\nTo refine this analysis, the following evidence would be required:\n\n1. **Snapchat Y1 Audit Report Appendix:**\n   - What specific age verification enhancement was implemented between Y1 and Y2?\n   - What independent testing methodology did Y2 auditor use to verify the fix?\n   - What percentage of minor users were sampled and tested?\n   - What harm categories were assessed (CSAM? predatory behavior? SSIED?)?\n\n2. **Snapchat Y2 Audit Scope:**\n   - Did Y2 audit revisit all categories covered in Y1 Qualified Negative, or only the specific sub-article that failed?\n   - Were any conditions placed on the Positive Unqualified conclusion?\n\n3. **TikTok EC Proceedings Document:**\n   - What is the formal charge(s) against TikTok on Art. 28.1?\n   - What preliminary findings has EC published (if any)?\n   - What timeline is EC using for decision (settlement expected vs. fine)?\n   - If TikTok offered commitment decision, what specific remediation measures were proposed?\n\n4. **TikTok Y2 Audit Report:**\n   - What was the Y2 Art. 28.1 conclusion (Negative? Qualified Negative? Unauditable already?)?\n   - If Negative/Qualified, why was remediation target not met by Y3?\n\n5. **Cross-Platform Audit Comparability:**\n   - Were Snapchat and TikTok audited by the same firm (EY, FTI, BDO)?\n   - If different auditors, did they use different assessment methodologies for age assurance?\n   - What is the audit scope difference (e.g., did one auditor assess TikTok Lite separately)?\n\n---\n\n## Conclusion: Analytical Takeaway\n\n**Snapchat's Art. 28.1 trajectory (Qualified Negative \u2192 Positive Unqualified) demonstrates that:**\n- Minor protection compliance is achievable when a VLOP invests remediation resources\n- Independent audit can verify remediation effectiveness\n- EC enforcement is not inevitable if platforms respond to audit findings promptly\n\n**TikTok's Art. 28.1 status (UNAUDITABLE due to EC proceedings) demonstrates that:**\n- Algorithm-driven platforms at massive scale face structural Art. 28.1 compliance challenges\n- Age assurance and minor harm segregation cannot be solved through architectural claims alone\n- EC enforcement escalates when platforms fail to remediate audit findings or when audit cannot assess compliance\n- UNAUDITABLE status masks underlying non-compliance; the EC proceedings themselves are the enforcement signal\n\n**Broader implication:**\nArt. 28.1 is becoming the defining article for DSA compliance differentiation across VLOPs. Platforms that solve it early (Snapchat model) may avoid enforcement and establish competitive compliance advantage. Platforms that fail to remediate (TikTok trajectory) face EC investigation and reputational/operational risk. The EC appears to be using Art. 28.1 enforcement as a test case for how seriously it will pursue VLOP compliance on obligations that require behavioral change at scale.\n\n---\n\n## Metadata\n\n- **Analysis framework:** DSA Document Qualitative Review skill (dsa-doc-review)\n- **Comparison mode:** Cross-platform, cross-cycle; Art. 28.1 focus\n- **Data sources:** Audit reports and EC enforcement status (specific documents not provided; analysis based on stated findings)\n- **Confidence level:** Medium \u2014 analysis is based on structured audit conclusions and EC enforcement signals; specific audit methodology details would refine conclusions\n- **Output format:** Console-ready findings (not yet integrated into DSAConsole.jsx; requires additional reference data)\n"}], "grading": null}], "previous_feedback": {}, "previous_outputs": {}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

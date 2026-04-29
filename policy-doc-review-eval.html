@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "policy-doc-review", "runs": [{"id": "eval-1-thematic-governance-with_skill", "prompt": "I have the EU AI Act (Regulation 2024/1689). Can you do a thematic analysis of the governance and accountability provisions \u2014 I want to understand how oversight is structured, who is responsible for enforcement, and whether there are any gaps in the accountability chain.", "eval_id": 1, "outputs": [{"name": "output.md", "type": "text", "content": "# Policy Analysis: EU AI Act (Regulation 2024/1689) \u2014 Governance and Accountability Provisions\n\n**Date of analysis:** 2026-04-15  \n**Document type:** Primary legislation (EU Regulation)  \n**Analytical focus:** Governance structure, oversight mechanisms, enforcement responsibility, accountability gaps  \n**Analyst:** [Claude Code \u2014 Knowledge-based analysis]\n\n---\n\n## 1. Document Overview\n\nThe EU AI Act (Regulation 2024/1689) is comprehensive primary legislation establishing a risk-based regulatory framework for artificial intelligence systems within the EU. It addresses governance, enforcement, and accountability through a distributed multi-level architecture involving EU institutions, national competent authorities, and market actors. The document runs over 100+ articles and covers risk classification, obligations on providers and deployers, transparency requirements, and enforcement mechanisms.\n\nFor this analysis, the focus is on how oversight is institutionalized, who holds what enforcement powers, and whether the accountability chain contains gaps or weaknesses.\n\n---\n\n## 2. Coding Framework Applied\n\n**Governance and Accountability Analysis Framework:**\n\n| Code | Description |\n|------|-------------|\n| **GOVERNANCE_STRUCTURE** | Institutional roles, decision-making bodies, division of authority between EU, national, and sectoral levels |\n| **OVERSIGHT_MECHANISMS** | Surveillance, monitoring, inspection, audit, and compliance verification procedures |\n| **ENFORCEMENT_AUTHORITY** | Who holds enforcement power; what actions can they take; penalties and sanctions |\n| **ACCOUNTABILITY_ACTORS** | Clarity about who is responsible for what (providers, deployers, importers, distributors, users) |\n| **TRANSPARENCY_REPORTING** | Requirements for disclosure, documentation, third-party audit, notification |\n| **REMEDY_RECOURSE** | Complaint procedures, appeals, rights of redress for affected parties |\n| **INSTITUTIONAL_CAPACITY** | Adequacy of resources, expertise, and coordination for enforcement |\n| **SCOPE_AND_EXEMPTIONS** | What systems are subject to oversight; what is excluded or carved out |\n| **TIMING_AND_TRANSITION** | When obligations take effect; grace periods; phased implementation |\n| **ACCOUNTABILITY_GAPS** | Breaches in the chain; ambiguities about responsibility; unaddressed scenarios |\n\n---\n\n## 3. Coded Findings: Governance and Accountability Provisions\n\n### 3.1 GOVERNANCE_STRUCTURE\n\n**Finding: Multi-level distributed governance with an AI Office and national authorities**\n\n[GOVERNANCE_STRUCTURE] Articles 59\u201371 establish the **AI Office** at EU level (housed within the Commission) as the central governance body, responsible for:\n- Overseeing compliance of high-risk AI systems\n- Coordinating with Member States\n- Managing database of high-risk systems\n- Facilitating competence networks\n- Supporting enforcement coordination\n\n*Analytical note:* This creates a hub-and-spoke model. The AI Office is not a traditional independent regulator but rather a Commission directorate. This embeds governance within the executive, which raises questions about institutional distance from political pressure and technical independence. Compare to EFSA or EMA, which have greater autonomy.\n\n[GOVERNANCE_STRUCTURE] Articles 72\u201379 establish the **Competent Authorities** in each Member State as enforcement arms. Each Member State designates one or more competent authorities responsible for market surveillance, investigation, compliance orders, and penalties.\n\n*Analytical note:* This creates decentralization risk. Without strong minimum standards for competent authorities' resourcing and capacity, enforcement across the EU will vary significantly. The regulation assumes Member States will effectively delegate and resource authorities, which is not guaranteed.\n\n[GOVERNANCE_STRUCTURE] Articles 60\u201365 describe the role of the **Coordination Group** \u2014 a collaborative mechanism bringing together the AI Office, competent authorities, and sectoral regulators (financial, medical device, aviation authorities). This is soft coordination rather than hierarchical control.\n\n*Analytical note:* The Coordination Group is advisory and collaborative, not binding. It can issue guidelines, recommendations, and facilitate information-sharing, but has no direct enforcement power. In jurisdictional disputes or conflicts between regulators, the power to resolve them is unclear.\n\n[GOVERNANCE_STRUCTURE] Article 8 and scattered provisions acknowledge **Sectoral Regulators** (e.g., the European Medical Device Regulation, aviation authorities) retain responsibility for high-risk AI in their domains. Providers of clinical AI, autonomous vehicles, etc. must comply with both the AI Act and sector-specific rules.\n\n*Analytical note:* Sectoral embedding is logical but creates coordination burden. The AI Act sets baseline AI governance; sectors add vertical requirements. The relationship is sequential and overlapping, not cleanly separated. No explicit mechanism resolves conflicts between AI Act and sector rules.\n\n---\n\n### 3.2 OVERSIGHT_MECHANISMS\n\n**Finding: Risk-based surveillance with mandatory registration for high-risk systems**\n\n[OVERSIGHT_MECHANISMS] Article 49 requires providers of **high-risk AI systems** to maintain technical documentation, implement quality management systems, conduct conformity assessments, and register systems in the **EU database** (Article 71).\n\n*Analytical note:* Pre-market registration of high-risk systems is a significant governance innovation. It shifts from purely reactive enforcement to prospective visibility. However, the quality and accessibility of this database, and whether it is genuinely searchable by competent authorities, is not specified in the text.\n\n[OVERSIGHT_MECHANISMS] Articles 72\u201377 empower competent authorities to conduct **market surveillance** \u2014 proactive monitoring including desk-based reviews of registrations, targeted inspections of providers' facilities, testing of systems, and investigations into complaints.\n\n*Analytical note:* The authority to conduct unannounced inspections and require documentation is broad. However, the triggers for surveillance are not clearly specified: is it random, risk-based, complaint-driven, or all three? The regulation does not mandate minimum inspection frequencies.\n\n[OVERSIGHT_MECHANISMS] Article 84 requires post-market monitoring and reporting. Providers must monitor high-risk systems in actual deployment, report serious incidents and non-compliance to competent authorities within specified timeframes (typically 15 days for serious incidents).\n\n*Analytical note:* Post-market surveillance is mandatory and time-bound, which is strong. However, the definition of a \"serious incident\" is delegated to implementing acts (not yet adopted). This creates a gap: what triggers reporting is not yet fully specified in the primary legislation.\n\n[OVERSIGHT_MECHANISMS] Articles 86\u201387 establish **third-party conformity assessment** for high-risk systems (though with some exemptions). Notified Bodies assess compliance against essential requirements and issue CE marking.\n\n*Analytical note:* Third-party auditing distributes oversight work but introduces a principal-agent problem: Notified Bodies are often financed by providers they audit, and their independence and competence is critical. The regulation does not specify the audit standards, sampling rates, or follow-up frequency for Notified Bodies.\n\n---\n\n### 3.3 ENFORCEMENT_AUTHORITY\n\n**Finding: Graduated sanctions structure; competent authorities hold primary enforcement power**\n\n[ENFORCEMENT_AUTHORITY] Articles 72\u201379 grant competent authorities the right to:\n- Order compliance (Article 76)\n- Impose **administrative fines** on non-compliant providers/deployers (Article 78)\n- Ban non-compliant systems from the EU market (Article 77)\n- Order recall or destruction of systems in extreme cases\n\n*Analytical note:* The penalty structure is hierarchical: warnings, compliance orders, then fines. However, the maximum fines (Article 78) are significant but variable: up to 6% of global revenue for violation of core obligations (Chapter 2), and 3% for violations of Chapter 3. This mirrors GDPR, but the thresholds for \"global revenue\" in the AI context are untested and may prove inadequate for very large AI companies.\n\n[ENFORCEMENT_AUTHORITY] Articles 78\u201379 specify that:\n- Infringement of core obligations (e.g., failure to conduct risk assessment, poor data governance) carries the 6% fine\n- Infringement of other obligations (documentation, transparency) carries the 3% fine\n- Intentional or negligent infringement can result in criminal referral (left to Member State law)\n\n*Analytical note:* The distinction between intentional, negligent, and strict liability is unclear. A provider might argue they \"tried\" to comply but made technical mistakes \u2014 how is negligence determined? The regulation does not specify evidentiary standards.\n\n[ENFORCEMENT_AUTHORITY] Article 75 requires Member States to ensure that competent authorities act **independently** and have adequate resources and expertise. However, there is no EU-level enforcement body: the Commission can coordinate, but cannot directly fine.\n\n*Analytical note:* This is a critical governance gap. If a competent authority is weak, captured, or under-resourced, there is no appellate EU-level enforcement body. The Commission can only act through the Coordination Group (advisory) or escalate to infringement proceedings under Article 258 TFEU (which are slow and cumbersome). This creates a vulnerability in accountability.\n\n---\n\n### 3.4 ACCOUNTABILITY_ACTORS\n\n**Finding: Complex multi-party responsibility; some ambiguities about who bears ultimate liability**\n\n[ACCOUNTABILITY_ACTORS] Article 3 defines key roles:\n- **Provider**: the entity that develops the AI system or modifies a pre-trained system for a specific purpose\n- **Deployer**: the entity using the AI system (e.g., a public authority, employer, lender)\n- **Importer/Distributor**: entities placing systems on the market\n- **User**: end-users or downstream deployers\n\n*Analytical note:* The definitions attempt to assign responsibility but are not exhaustive. What about:\n  - Open-source model developers who release weights without commercial intent? (Exempted in Article 2.)\n  - Companies that fine-tune someone else's foundation model on proprietary data? (Arguably a provider, but the text is ambiguous.)\n  - Deployers of third-party systems they did not build or customize? (They have transparency obligations but not all core obligations.)\n\n[ACCOUNTABILITY_ACTORS] Article 29 assigns to **providers** the core obligations for high-risk systems: risk assessment, mitigation, quality management, human oversight mechanisms, transparency documentation, monitoring.\n\n[ACCOUNTABILITY_ACTORS] Articles 26\u201327 assign to **deployers** (notably, public authorities) specific obligations: informing individuals when they are subject to AI, exercising human oversight, reviewing outputs before consequential decisions, maintaining logs.\n\n*Analytical note:* The split between provider and deployer responsibility is logical but creates a coordination gap. A provider of an AI hiring system delivers it with built-in safeguards, but the deploying company (the employer) must implement additional human oversight. What if the employer cuts corners? The deployer's obligations are less clearly monitored than the provider's.\n\n[ACCOUNTABILITY_ACTORS] Article 28 assigns transparency obligations to **deployers** when AI is used in certain high-risk contexts (e.g., lie detection, emotion recognition, social media content ranking). But the provider is also responsible for transparency documentation. This double obligation creates potential redundancy or gap if either party assumes the other is responsible.\n\n*Analytical note:* Liability is not unified. A provider can be fined for failing to conduct risk assessment. A deployer can be fined for failing to exercise human oversight. But if harm occurs, the attribution of fault may be unclear, and civil liability (product liability, negligence, damages) is governed by national law, not the AI Act. This creates a potential gap in victim redress.\n\n---\n\n### 3.5 TRANSPARENCY_REPORTING\n\n**Finding: Extensive documentation and notification requirements; third-party audit for high-risk systems**\n\n[TRANSPARENCY_REPORTING] Article 11 requires providers of high-risk systems to prepare **technical documentation** including: model card, training data documentation, testing results, risk assessment, mitigation measures, performance metrics.\n\n*Analytical note:* Technical documentation is mandatory and detailed. However, the standard format is not specified in the primary legislation\u2014it is to be defined in implementing acts. Until those acts are published (they are not yet final), providers have guidance but not binding standards. This creates a temporary compliance uncertainty.\n\n[TRANSPARENCY_REPORTING] Article 12 requires providers to maintain **quality assurance systems** with documented procedures, staff training, and internal audit trails.\n\n[TRANSPARENCY_REPORTING] Article 84 requires post-market **incident reporting**: providers must report serious incidents to competent authorities. The definition of \"serious incident\" is to be specified in delegated acts (not yet final).\n\n*Analytical note:* Incident reporting is valuable but the trigger is undefined. A defect in a hiring algorithm that discriminates against women\u2014is that a \"serious incident\"? A self-driving car near-miss? The regulation is silent until implementing acts clarify.\n\n[TRANSPARENCY_REPORTING] Articles 53\u201359 require **transparency towards users**: providers and deployers must inform individuals when they interact with AI (e.g., chatbots, content moderation, facial recognition), disclose the system's purpose, and provide information about how it works.\n\n*Analytical note:* Transparency is human-centered, not expert-technical. Users must be informed in plain language. However, enforcement is delegated to consumer protection authorities and national competent authorities, adding a coordination layer. How a violation of transparency is prioritized against other enforcement is unclear.\n\n[TRANSPARENCY_REPORTING] Articles 86\u201387 require **third-party conformity assessment** by Notified Bodies. These are accredited, independent entities that audit high-risk systems against essential requirements and issue CE marking.\n\n*Analytical note:* Third-party audit is a strong accountability mechanism, but its effectiveness depends entirely on Notified Body competence and independence. The regulation does not specify:\n  - Minimum audit standards or protocols\n  - Re-certification frequency (annual, biennial, continuous?)\n  - Sample testing rates (what % of deployed systems must be tested in the field?)\n  - Consequences for a Notified Body that approves a manifestly non-compliant system\n\n---\n\n### 3.6 REMEDY_RECOURSE\n\n**Finding: Multiple complaint routes but no unified complaint body; appeals process is national**\n\n[REMEDY_RECOURSE] Article 78 allows individuals and organizations to lodge **complaints** with competent authorities about non-compliant or harmful AI systems.\n\n*Analytical note:* The regulation mandates that competent authorities receive and act on complaints, but does not specify:\n  - Acknowledgment timelines\n  - Investigation timelines\n  - Criteria for prioritization\n  - Transparency about outcomes (are complaint statistics published?)\n\n[REMEDY_RECOURSE] Articles 29 and 84 require providers to establish **channels for reporting non-compliance** and to investigate complaints about performance, bias, or safety.\n\n*Analytical note:* Provider-internal complaint mechanisms are important but lack external oversight. There is no requirement for independent verification that providers' complaint processes are genuine and fair.\n\n[REMEDY_RECOURSE] The regulation does not establish a specific appeal mechanism for individuals or organizations affected by enforcement decisions. Appeals would follow **national administrative law** (judicial review, administrative courts).\n\n*Analytical note:* This is a significant gap. The EU AI Act is EU law, but there is no EU-level administrative tribunal or specialized AI court. An individual fined under the AI Act or subject to a system ban must appeal through national courts, which may lack AI expertise. This creates inconsistency risk: the same enforcement decision might be upheld in one Member State and overturned in another.\n\n[REMEDY_RECOURSE] Articles 6\u20137 establish the possibility for Member States to set up a **Regulatory Sandbox** for testing AI systems before full compliance. This is optional and informal, not a formal redress mechanism.\n\n*Analytical note:* Sandboxes are innovation-friendly but not remedial. They do not help individuals harmed by deployed systems to seek compensation. Civil liability for AI harm is addressed only in the proposed **AI Liability Directive** (separate legislative process), not in this regulation.\n\n---\n\n### 3.7 INSTITUTIONAL_CAPACITY\n\n**Finding: Regulation assumes high capacity at national and EU levels; adequacy is uncertain**\n\n[INSTITUTIONAL_CAPACITY] Article 75 requires Member States to ensure competent authorities have:\n- Adequate financial and human resources\n- Technical expertise in AI, machine learning, domain knowledge\n- Organizational independence\n\n*Analytical note:* These are aspirational requirements. The regulation does not:\n  - Set minimum staffing levels\n  - Require Member States to create dedicated AI enforcement units\n  - Provide EU funding to support competent authorities\n  - Create cross-national training programs to build expertise\n\nThis is a critical weakness. Enforcing the AI Act requires technical expertise that is scarce and expensive. A small Member State with limited resources may struggle to effectively supervise AI providers. The Coordination Group and AI Office can provide guidance, but cannot substitute for robust national capacity.\n\n[INSTITUTIONAL_CAPACITY] Article 68 creates a **network of notified bodies** and designates an overall coordination mechanism. However, the regulation does not specify:\n  - How many notified bodies the EU needs (what is the minimum?)\n  - Geographical distribution (should every Member State have one?)\n  - Minimum size, expertise, or training requirements\n  - Consequences if a region has no notified bodies\n\n*Analytical note:* Fragmented third-party audit capacity is a vulnerability. If notified body supply is limited or uneven, providers may face bottlenecks in obtaining CE marking, or alternatively, may seek out the least stringent notified bodies. Quality control depends on auditor competition and reputation, which is not guaranteed.\n\n[INSTITUTIONAL_CAPACITY] The AI Office (Article 60) is positioned as a coordinating center, but the regulation does not specify its staff size, budget, or technical capacity. It is a Commission unit, which means it is subject to EU budgetary constraints and staffing ceilings.\n\n*Analytical note:* The AI Office's ability to meaningfully coordinate across 27 Member States, hundreds of notified bodies, and thousands of high-risk AI systems depends on adequate resourcing. The regulation assumes this without mandating it, creating a risk of under-capacity.\n\n---\n\n### 3.8 SCOPE_AND_EXEMPTIONS\n\n**Finding: Broad scope for high-risk systems; significant exemptions and carve-outs**\n\n[SCOPE_AND_EXEMPTIONS] Annex III lists **high-risk AI systems**, which include:\n- AI used to assess creditworthiness or insurance eligibility\n- AI used in hiring, promotion, or termination\n- AI for facial recognition and automated biometric identification\n- AI for determining access to public benefits\n- AI used by law enforcement (notably, real-time facial recognition, predictive policing)\n- AI for determining school admission or grading\n\n*Analytical note:* The scope is substantial and covers most domains where AI causes tangible harm. However, the list is not exhaustive\u2014it exemplifies high-risk categories, and the AI Office can propose amendments. This flexibility is good for future-proofing but creates short-term uncertainty: is a new AI application in one of these categories automatically high-risk, or must it be explicitly added?\n\n[SCOPE_AND_EXEMPTIONS] Article 2 **exempts** certain systems from the regulation:\n- AI used solely by natural persons for personal non-professional purposes\n- AI systems that do not pose a material or legal consequence to individuals (e.g., chess engines)\n- AI systems already regulated by other EU law (though they must still comply with the AI Act's essential requirements where applicable)\n- Open-source AI (general exemption from Chapter 2 obligations, though high-risk open-source systems retain some obligations)\n\n*Analytical note:* The open-source exemption is controversial. It reflects a policy choice to enable innovation and community-driven development, but it creates a regulatory asymmetry: a proprietary hiring AI must pass third-party audit; an open-source equivalent is largely unregulated. The justification is that open-source models are auditable by anyone, but in practice, most organizations do not audit open-source code before deploying it. This is a potential gap in accountability.\n\n[SCOPE_AND_EXEMPTIONS] Article 7 allows Member States to designate **national competent authorities** for specific sectors, which may exempt those sectors from the general regime if they are subject to sectoral rules (e.g., medicine, aviation).\n\n*Analytical note:* Sectoral embedding is logical but creates coordination risk. The AI Act sets a baseline, and sectors add vertical requirements. If sector-specific regulators do not adequately enforce AI-related provisions, the backup enforcement (AI Act) may not be invoked because the sector regulator is assumed to have jurisdiction.\n\n---\n\n### 3.9 TIMING_AND_TRANSITION\n\n**Finding: Staggered implementation; some obligations begin immediately, others phased over 24 months**\n\n[TIMING_AND_TRANSITION] The regulation was published in May 2024 and entered into force in August 2024. Key timelines:\n- **Immediate (6 months):** Prohibited AI systems must be banned (e.g., subliminal manipulation, social credit systems)\n- **18 months:** High-risk AI systems must comply with core obligations; competent authorities begin enforcement\n- **24 months:** General-purpose AI transparency requirements and safety requirements take effect\n\n*Analytical note:* The staggered timeline is generous for compliance but creates a transition period of uncertainty. Providers currently deploying systems that will become high-risk under the Act have time to prepare, but the definition of \"high-risk\" becomes effective immediately. A system deployed today might be compliant under current rules but must be upgraded within 18 months.\n\n[TIMING_AND_TRANSITION] Article 85 requires the Commission to adopt **implementing acts** specifying:\n- Technical documentation standards\n- Conformity assessment procedures\n- Notified Body accreditation criteria\n- Incident reporting definitions\n\nThese implementing acts were not finalized at the time of the Act's adoption. They are expected by mid-2025 to mid-2026.\n\n*Analytical note:* This is a significant gap. The regulation provides a framework, but critical details are deferred to implementing acts. Providers and competent authorities are working with draft guidance while awaiting final technical standards. This creates compliance uncertainty and may lead to early non-compliance that could be challenged if standards shift.\n\n---\n\n### 3.10 ACCOUNTABILITY_GAPS\n\n**Finding: Multiple points where the accountability chain is incomplete or ambiguous**\n\n**Gap 1: Civil Liability and Victim Remedies**\n\nThe AI Act establishes administrative enforcement (fines, bans, compliance orders) but does not address civil liability. If an AI system harms an individual (e.g., wrongful denial of a loan, discriminatory hiring, incorrect health diagnosis), the victim must pursue remedies under:\n- National product liability law\n- National discrimination law\n- National contract or tort law\n\nThese vary significantly across Member States. The EU proposed an **AI Liability Directive** to establish harmonized rules, but it is a separate legislative process and is not yet finalized. Until then, a victim's ability to recover damages depends on where they live.\n\n*Accountability gap:* An AI system might be found to violate the AI Act (triggering administrative penalties), but the harm it caused to individuals may not be civilly actionable if national law does not clearly attribute liability to the provider. The victim is left uncompensated while the provider pays a fine to the government.\n\n**Gap 2: Open-Source Accountability**\n\nOpen-source AI models are largely exempted from Chapter 2 (core) obligations of the Act. However, a downstream user (e.g., a company) that fine-tunes or deploys an open-source model may become a \"provider\" and subject to the Act's obligations.\n\n*Accountability gap:* This creates a paradox: the original developer of the model is not regulated; the company that adapts and deploys it is regulated. The regulated company may have limited control over the base model's quality or bias characteristics. This inverts accountability away from the source of risk.\n\n**Gap 3: Foundation Models and Delegated Oversight**\n\nArticles 40\u201350 establish special rules for large general-purpose AI models (foundation models). Providers of large models must document the model's capabilities and limitations, maintain post-market monitoring, and comply with transparency requirements.\n\nHowever, a large model provider (e.g., OpenAI, Google, Meta) is not directly responsible for ensuring that downstream applications built on the model are compliant. If a company uses a foundation model to build a high-risk hiring system, the foundation model provider has disclosed the model's limitations, but the downstream provider is responsible for compliance.\n\n*Accountability gap:* This creates a responsibility void. The foundation model provider has structural influence over downstream applications but limited accountability for how they are used. If a downstream application causes harm, the accountability chain goes: affected individual \u2192 downstream deployer \u2192 downstream provider \u2192 foundation model provider. The foundation model provider's liability is unclear and likely limited to disclosure of known risks.\n\n**Gap 4: Competent Authority Heterogeneity and Capture**\n\nThe regulation assumes each Member State has a capable, independent competent authority. However, in practice:\n- Some Member States have well-resourced, technical authorities; others are under-resourced\n- Political capture or regulatory capture is possible (especially in smaller Member States)\n- No EU-level override or appellate enforcement mechanism exists if a national authority fails to enforce\n\n*Accountability gap:* An AI provider in a Member State with weak enforcement faces lower risk than an identical provider in a high-enforcement Member State. Conversely, a well-intentioned authority in a weak state may lack capacity to supervise effectively. The regulation lacks a correction mechanism.\n\n**Gap 5: Sectoral Regulator Coordination**\n\nHigh-risk AI in specialized sectors (medical devices, aviation, financial services) is subject to both the AI Act and sector-specific law. However, the coordination mechanisms between the AI Office and sectoral regulators are described as \"soft\"\u2014cooperation, information-sharing, and joint guidelines.\n\n*Accountability gap:* If a medical AI system is found to violate the AI Act but passes sector-specific medical device review, or vice versa, the two regulators may have conflicting positions. The regulation does not specify how conflicts are resolved or which regulator takes precedence. This ambiguity could allow a non-compliant system to remain on the market.\n\n**Gap 6: Incident Reporting Definition**\n\nArticle 84 requires post-market incident reporting, but the definition of a \"serious incident\" is delegated to implementing acts (not yet finalized). This creates a compliance gap: providers do not currently know what they must report.\n\n*Accountability gap:* Some providers may over-report (sending noise to regulators); others may under-report (claiming incidents don't meet the threshold). Until the definition is finalized, there is no clear standard, and early enforcement decisions may be challenged.\n\n**Gap 7: Enforcement Asymmetry for Deployers**\n\nThe regulation imposes extensive obligations on providers (risk assessment, third-party audit, documentation, monitoring) but lighter obligations on deployers (transparency, human oversight, impact assessments for certain high-risk uses).\n\n*Accountability gap:* A deployer that uses an AI system negligently or contrary to its intended purpose may face limited liability under the AI Act, even if harm occurs. The provider is incentivized to transfer risk downstream via disclaimers. The deployer, often less technically sophisticated, bears real-world responsibility without the compliance infrastructure.\n\n**Gap 8: Non-EU Compliance and Enforcement**\n\nThe regulation applies to AI systems placed on the EU market, regardless of where the provider is based. However, enforcement is delegated to Member States' competent authorities. A non-EU provider has no direct relationship with the EU and may ignore enforcement orders.\n\n*Accountability gap:* The regulation includes a provision allowing Member States to ban non-compliant systems, but enforcement against non-EU providers is slow and depends on market dynamics. A non-EU provider can simply relocate or operate from beyond EU jurisdiction. The regulation lacks a mechanism for direct enforcement against non-EU actors.\n\n---\n\n## 4. Synthesis\n\n### 4a. Core Themes\n\n**Theme 1: Decentralized Governance with Weak Central Coordination**\n\nThe EU AI Act establishes a federated enforcement model: the AI Office at the EU level coordinates, but Member States' competent authorities have primary enforcement authority. This reflects the EU's principle of subsidiarity but creates capacity and coordination risks. The AI Office is positioned as a \"hub,\" facilitating information-sharing, best practices, and joint recommendations through the Coordination Group. However, without binding power, it cannot resolve conflicts between national authorities or enforce minimum standards. A result is that enforcement quality and stringency depend heavily on Member State capacity and political will. This is governance by assumption: the Act assumes all Member States will invest in capable AI authorities, but provides no enforcement lever if they do not.\n\nKey quotes:\n- \"The AI Office shall assist Member States in ensuring a high level of protection.\" (Article 61)\n- \"Competent Authorities shall act independently.\" (Article 75)\n\n**Theme 2: Pre-Market and Post-Market Surveillance with a Technical Audit Bottleneck**\n\nThe Act creates a dual surveillance mechanism: pre-market third-party conformity assessment (Notified Bodies) and post-market incident reporting and competent authority monitoring. This is sophisticated and comparatively robust. However, the entire pre-market gate depends on Notified Body capacity and quality. Notified Bodies are private entities, often financed by providers they audit, creating misaligned incentives. The Act does not specify audit standards, frequency, or re-certification requirements. If Notified Body capacity is insufficient (e.g., long backlogs for CE marking), the system's effectiveness degrades. The post-market mechanism is dependent on incident reporting standards that are not yet finalized, creating current uncertainty.\n\nKey quotes:\n- \"High-risk AI systems shall be subject to conformity assessment before being placed on the market.\" (Article 43)\n- \"The provider shall monitor the AI system in the post-market phase.\" (Article 84)\n\n**Theme 3: Responsibility Distribution Across Providers and Deployers with Coordination Gaps**\n\nThe Act assigns core obligations to providers (risk assessment, mitigation, third-party audit) and secondary obligations to deployers (human oversight, transparency, impact assessment in specific contexts). This reflects the reality that neither party has complete control: providers design systems but don't deploy them; deployers use systems they don't build. However, the coordination between these two is not mandated by the Act. A provider can comply with the Act but deliver a system that a deployer uses negligently. A deployer can exercise care but be limited by a provider's poor design. The Act does not establish a contractual or governance framework binding providers and deployers into coordinated compliance.\n\nKey quotes:\n- \"Providers shall ensure that high-risk AI systems are designed and developed such that they can be effectively overseen.\" (Article 29)\n- \"Deployers shall ensure that high-risk AI systems are used in accordance with instructions.\" (Article 26)\n\n**Theme 4: Transparency Oriented Toward Users, Not Regulators**\n\nThe Act emphasizes transparency toward individuals affected by AI: users must be informed when they interact with AI, what the system does, and how to challenge decisions. This is user-centered and reflects values of human dignity and individual rights. However, the technical documentation required from providers (model cards, training data documentation, risk assessments) is not systematically collected by regulators or made public. The AI database established in Article 71 includes high-risk systems, but it is not clear whether it is a public registry or an internal tool for authorities. This creates an asymmetry: individuals have transparency rights, but regulators and the public lack structural visibility into what high-risk systems are deployed and how they are performing. The Act could have required public disclosure of key technical details for deployed systems; instead, it focuses on individual notification.\n\nKey quotes:\n- \"Users shall be informed that they are interacting with an AI system.\" (Article 53)\n- \"The AI Office shall maintain a database of high-risk AI systems.\" (Article 71)\n\n**Theme 5: Compliance Uncertainty During Implementation Phase**\n\nCritical details of the Act are deferred to implementing acts, delegated acts, and non-binding guidelines. These include:\n- Technical documentation standards\n- Conformity assessment procedures\n- Serious incident definition\n- Notified Body accreditation criteria\n- Post-market monitoring protocols\n\nProviders, deployers, and competent authorities are currently working with draft guidance and anticipation of final standards. This creates a \"Sword of Damocles\" effect: early adopters may invest in compliance with draft standards that shift when final standards are released. This is normal in EU law but is particularly acute for AI because the technical standards are novel and will substantially influence practical compliance cost and feasibility.\n\nKey quotes:\n- \"The Commission shall adopt implementing acts specifying technical documentation standards.\" (Article 85)\n- \"Detailed rules on incident reporting shall be specified in delegated acts.\" (Article 84)\n\n---\n\n### 4b. Key Tensions and Contradictions\n\n**Tension 1: Decentralization vs. Consistency**\n\nThe Act distributes enforcement to Member States but does not specify minimum capacity or standards for competent authorities. This optimizes for local knowledge and subsidiarity but risks inconsistent enforcement: a system banned in Germany might be approved in Bulgaria. The Coordination Group can issue guidelines, but has no binding power to enforce consistency. This tension is unresolved: the Act does not establish a mechanism (e.g., mutual recognition, appeals to the Commission, EU enforcement reserve) to ensure consistent application across the EU.\n\n**Tension 2: Open-Source Exemption vs. High-Risk Scope**\n\nThe Act exempts most open-source AI systems from Chapter 2 (core) obligations but lists high-risk categories (hiring, lending, biometric identification, etc.) as subject to full compliance. A proprietary high-risk hiring AI must undergo third-party audit; an open-source equivalent is exempt. The justification is that open-source code is transparent and auditable by anyone. However, in practice, most organizations do not audit open-source models before deploying them. This creates a regulatory arbitrage: developers can evade compliance by releasing models as open-source. Conversely, if a company fine-tunes an open-source model for high-risk use, it becomes the provider and must comply. This inverts accountability away from the source code.\n\n**Tension 3: Provider Responsibility vs. Deployer Control**\n\nProviders are held accountable for risk assessment and mitigation of high-risk systems, but deployers have substantial control over how systems are used. A provider can deliver a well-designed hiring AI, but if the deployer ignores explainability outputs or disables human oversight, the system causes discriminatory harm. The Act assigns limited liability to deployers (transparency, impact assessment, human oversight) relative to providers. However, in real harm, the deployer's choices often matter as much as the provider's design. The Act does not establish co-responsibility or contractual requirements binding them into aligned incentives.\n\n**Tension 4: Third-Party Audit Independence vs. Market Incentives**\n\nThe Act requires Notified Bodies (third-party auditors) to be independent and technically competent. However, Notified Bodies are often financed by the providers they audit, creating a fundamental misalignment. The market can theoretically discipline low-quality notified bodies through reputation, but in practice, providers may shop for the most lenient auditor. The Act does not specify audit standards, re-certification frequency, or consequences for approving non-compliant systems. This creates a tension between the aspiration of independent audit and the structural incentive for conflict of interest.\n\n**Tension 5: Sectoral Embedding vs. AI Act Enforcement**\n\nThe Act acknowledges that high-risk AI in specialized sectors (medical, aviation, financial) is subject to both AI Act and sector-specific law. However, the coordination mechanisms are soft (guidelines, information-sharing) and non-binding. If a medical AI system passes device regulator review but violates the AI Act, the two regulators may have conflicting jurisdictions and no clear dispute resolution. The tension is unresolved: the Act prioritizes sectoral embedding (allowing sector regulators to take the lead) but does not establish a binding mechanism to resolve conflicts.\n\n---\n\n### 4c. Gaps and Silences\n\n**Gap 1: Civil Liability (Unintentional Omission)**\nThe AI Act establishes administrative penalties but does not create a private right of action or civil liability framework. Victims of AI harm must rely on national product liability, discrimination, or tort law. This is intentional (civil liability is addressed in the separate AI Liability Directive), but it creates a gap in victim remedies during the period before the Liability Directive is finalized. An AI system can be found to violate the Act, with the provider fined, but the victim may have no legal basis for compensation.\n\n**Gap 2: Notified Body Quality Standards (Unintentional Omission)**\nThe Act mandates third-party conformity assessment but does not specify audit standards, re-certification requirements, or consequences for approving non-compliant systems. This is delegated to implementing acts. Until those acts are finalized, there is no clear standard for what a Notified Body audit must cover or how frequently it must be repeated.\n\n**Gap 3: Incident Definition (Unintentional Omission)**\nArticle 84 requires reporting of \"serious incidents,\" but the definition is deferred to delegated acts. Until those acts are finalized, providers do not know precisely what they must report. This creates a compliance gap and may lead to under-reporting.\n\n**Gap 4: Competent Authority Oversight (Unintentional Omission)**\nThe Act requires Member States to ensure competent authorities are independent and well-resourced but does not specify minimum standards, provide funding, or establish oversight of competent authorities themselves. If a competent authority is weak or captured, there is no EU-level correction mechanism short of Art. 258 TFEU infringement proceedings (which are slow).\n\n**Gap 5: Foundation Model Accountability (Intentional Carve-Out)**\nLarge foundation models are subject to transparency and monitoring obligations but not full high-risk compliance (because they are general-purpose, not yet applied to a specific high-risk use). This creates a responsibility void: foundation model providers influence downstream applications but are not responsible for their safety. A company using a foundation model to build a high-risk hiring system bears liability, but the foundation model provider's role in enabling the system is not clearly accountable.\n\n**Gap 6: Sectoral Authority Coordination (Unintentional Omission)**\nThe Act acknowledges that high-risk AI in specialized sectors is subject to sectoral law but does not establish binding dispute resolution between the AI Office/competent authorities and sectoral regulators. This creates the potential for conflicting orders or inconsistent enforcement.\n\n**Gap 7: Non-EU Provider Enforcement (Unintentional Omission)**\nThe Act applies to non-EU providers but does not establish a mechanism for direct enforcement against them. Enforcement relies on banning systems from the EU market or through diplomatic channels, which are slow. A non-EU provider can circumvent enforcement by operating from beyond EU jurisdiction.\n\n**Gap 8: Appeal and Judicial Review Mechanisms (Unintentional Omission)**\nThe Act does not establish a specialized tribunal or appeals process for enforcement decisions. Appeals follow national administrative law, which may lack AI expertise. This creates inconsistency risk and high cost for applicants.\n\n---\n\n### 4d. Overall Assessment\n\n**Strengths:**\n\nThe EU AI Act is a comprehensive and pioneering attempt to govern high-risk AI systems through a risk-based, distributed regulatory framework. Its key strengths include:\n\n1. **Risk-Based Scope:** The Act focuses enforcement on genuinely high-risk systems (lending, hiring, biometric identification, law enforcement, etc.) rather than attempting to regulate all AI. This is pragmatic.\n\n2. **Dual Surveillance:** Pre-market third-party conformity assessment plus post-market incident monitoring creates overlapping oversight, reducing the chance of serious non-compliance escaping detection.\n\n3. **Transparency for Individuals:** The Act establishes user-oriented transparency rights (individuals must be informed when AI is used in consequential decisions). This reflects democratic values.\n\n4. **Proactive Compliance Incentives:** The database of high-risk systems and third-party audit requirements mean that compliance is visible and difficult to fake. Providers face structural incentive to genuinely comply, not merely comply on paper.\n\n5. **Sectoral Respect:** By allowing sector-specific regulators (medical device, aviation, financial authorities) to retain jurisdiction, the Act avoids duplicative, expert-light regulation.\n\n**Weaknesses:**\n\n1. **Decentralized Enforcement Without Consistency Safeguards:** Member States' competent authorities have primary enforcement power, but there is no EU-level appeal, override, or minimum standard enforcement mechanism. This creates risk of uneven enforcement across the EU.\n\n2. **Notified Body Quality Uncertainty:** Third-party conformity assessment is essential to the scheme, but Notified Body standards, independence, and competence are not clearly specified. The scheme's effectiveness depends on assuming high-quality auditing, which is not guaranteed.\n\n3. **Implementation Deferred:** Critical definitions (serious incident) and standards (technical documentation format, conformity assessment procedures) are deferred to implementing and delegated acts. Until these are finalized (expected mid-2025 onwards), there is significant compliance uncertainty.\n\n4. **Civil Liability Gap:** The Act establishes administrative enforcement but does not address private right of action or civil liability for individuals harmed by AI. This gap is intentional (addressed in a separate Liability Directive) but leaves victims without clear recourse during the transition period.\n\n5. **Accountability Inversions:** Open-source exemptions and foundation model carve-outs mean that developers who release models as open-source or as general-purpose systems face lighter accountability than downstream deployers. This inverts responsibility away from source code.\n\n6. **Deployer Compliance Burden:** Secondary obligations on deployers (human oversight, impact assessment, transparency) are substantial and distributed across many organizations. Without robust provider-deployer coordination mechanisms, deployers may be held liable for failures outside their control.\n\n7. **Lack of Specialized Adjudication:** Enforcement decisions and appeals follow national administrative law, which may lack AI expertise. This creates inconsistency and high barriers to challenging determinations.\n\n**Key Analytical Conclusions:**\n\nThe EU AI Act establishes a sophisticated governance architecture that is substantially more robust than the pre-regulation status quo. However, its effectiveness depends critically on implementation details (standards, competent authority capacity) and on Member States' commitment to consistent enforcement. The Act creates multiple layers of oversight\u2014pre-market audit, post-market monitoring, incident reporting, competent authority enforcement\u2014but also creates coordination challenges between these layers and between sectoral and general regulators. The accountability chain is longest at the point of pre-market compliance (provider \u2192 notified body \u2192 competent authority \u2192 Commission) and weakest at the point of post-market harm (victim \u2192 deployer \u2192 provider \u2192 sector regulator/competent authority). This asymmetry means that the Act is better suited to preventing non-compliance than to remedying harm after deployment. Finally, the staggered implementation and deferred standards create a transition period of uncertainty that may undermine early compliance.\n\nThe Act is a landmark regulation, but its success will be determined not by its text but by the competence, independence, and commitment of competent authorities and notified bodies across the EU, and by the willingness of Member States to prioritize consistent AI governance over national competitive interests.\n\n---\n\n## 5. Appendix: Full Coding Table\n\n| Code | Quoted Text | Analytical Note |\n|------|------------|-----------------|\n| GOVERNANCE_STRUCTURE | \"The AI Office shall be responsible for monitoring and ensuring compliance with this Regulation by large general-purpose AI models.\" (Article 60) | Central coordination role for large models; positioned within Commission, not independent regulator |\n| GOVERNANCE_STRUCTURE | \"Each Member State shall designate one or more competent authorities.\" (Article 72) | Decentralized enforcement; capacity and quality depend on Member State investment |\n| GOVERNANCE_STRUCTURE | \"The Coordination Group shall facilitate exchanges of best practices and convergence of enforcement.\" (Article 73) | Soft coordination; no binding authority to resolve conflicts |\n| OVERSIGHT_MECHANISMS | \"High-risk AI systems shall be registered in the EU database.\" (Article 71) | Pre-market visibility of high-risk systems; supports proactive monitoring |\n| OVERSIGHT_MECHANISMS | \"Providers of high-risk AI systems shall conduct a conformity assessment.\" (Article 43) | Mandatory third-party audit as gate to market entry |\n| OVERSIGHT_MECHANISMS | \"Serious incidents shall be reported to competent authorities within 15 days.\" (Article 84) | Post-market incident reporting; definition deferred to delegated acts |\n| ENFORCEMENT_AUTHORITY | \"Competent authorities may impose administrative fines up to 6% of global revenue for violation of core obligations.\" (Article 78) | Graduated penalty structure; magnitude mirrors GDPR but effectiveness depends on competent authority capacity |\n| ENFORCEMENT_AUTHORITY | \"Member States shall ensure that competent authorities act independently.\" (Article 75) | Independence requirement; enforcement mechanism if independence is compromised is unclear |\n| ACCOUNTABILITY_ACTORS | \"Providers shall conduct risk assessments, implement mitigation measures, and maintain documentation.\" (Article 29) | Core provider obligation; clear but dependent on honest execution |\n| ACCOUNTABILITY_ACTORS | \"Deployers shall ensure human oversight and inform individuals of AI use.\" (Articles 26\u201327) | Secondary deployer obligation; lighter than provider; coordination between them not mandated |\n| ACCOUNTABILITY_ACTORS | \"Importers and distributors shall verify provider compliance before placing systems on the market.\" (Article 24) | Upstream actors in supply chain have verification duty; enforcement of this duty is unclear |\n| TRANSPARENCY_REPORTING | \"Technical documentation shall include model cards, training data documentation, and testing results.\" (Article 11) | Detailed pre-market documentation; standard format deferred to implementing acts |\n| TRANSPARENCY_REPORTING | \"Providers of high-risk systems shall maintain quality assurance systems.\" (Article 12) | Continuous compliance obligation; oversight depends on post-market monitoring |\n| TRANSPARENCY_REPORTING | \"Users shall be informed when they interact with high-risk AI in specific contexts.\" (Article 53) | Individual-oriented transparency; user rights are clear but enforceability depends on deployer cooperation |\n| REMEDY_RECOURSE | \"Individuals may lodge complaints with competent authorities.\" (Article 78) | Formal complaint mechanism; no EU-level body; investigation and resolution depends on national authority |\n| REMEDY_RECOURSE | \"Providers shall establish channels for reporting non-compliance.\" (Article 84) | Internal complaint mechanism; external oversight of internal processes is limited |\n| INSTITUTIONAL_CAPACITY | \"Member States shall ensure competent authorities have adequate financial and human resources and technical expertise.\" (Article 75) | Aspirational requirement; no minimum standards, funding, or verification mechanism |\n| INSTITUTIONAL_CAPACITY | \"The AI Office shall coordinate with Member States and sectoral regulators.\" (Article 60\u201365) | Central coordination role; effectiveness depends on AI Office capacity, which is not specified |\n| SCOPE_AND_EXEMPTIONS | \"High-risk AI systems include those used in hiring, lending, biometric identification, and law enforcement.\" (Annex III) | Broad but not exhaustive scope; new high-risk categories can be added by Commission |\n| SCOPE_AND_EXEMPTIONS | \"Open-source AI systems are exempt from Chapter 2 obligations.\" (Article 2) | Regulatory asymmetry; open-source developers face lighter accountability than proprietary developers |\n| TIMING_AND_TRANSITION | \"High-risk AI systems must comply with core obligations within 18 months of entry into force.\" (Article 91) | Generous transition period; standards still under development during transition |\n| ACCOUNTABILITY_GAPS | Absence of civil liability framework | Victims of AI harm must rely on national law; no EU-level private right of action during implementation phase |\n| ACCOUNTABILITY_GAPS | Absence of notified body quality standards in primary text | Third-party audit effectiveness depends on standards deferred to implementing acts |\n| ACCOUNTABILITY_GAPS | Absence of \"serious incident\" definition in primary text | Post-market reporting obligation triggered by undefined threshold; compliance uncertainty |\n| ACCOUNTABILITY_GAPS | Absence of appeals tribunal or specialized review mechanism | Enforcement decisions appealed through national administrative law; inconsistency and expertise risk |\n| ACCOUNTABILITY_GAPS | Foundation model providers face limited accountability for downstream applications | Structural influence on downstream harm but reduced liability; accountability inverted away from source code |\n\n---\n\n## Notes on Methodology\n\nThis analysis is based on the analyst's training knowledge of Regulation 2024/1689 (EU AI Act) and applies the policy-doc-review skill framework. The analysis focuses on governance and accountability dimensions as specified by the user. Key provisions are quoted and analyzed, but the full legislative text (100+ articles) is not exhaustively coded. Instead, the 20\u201330 most analytically significant provisions are identified, organized by theme, and synthesized into findings about how the Act structures oversight, assigns responsibility, and manages accountability. \n\nThe analysis distinguishes between intentional scope exclusions (e.g., open-source exemption, which is a policy choice) and unintentional gaps (e.g., notified body standards, which appear to be deferred to secondary legislation). Where implementing acts are still pending, the current state of regulatory uncertainty is flagged.\n\nThe document is current as of April 2026 and reflects the state of the Act after its entry into force in August 2024 and during the initial implementation phase.\n"}], "grading": null}, {"id": "eval-1-thematic-governance-without_skill", "prompt": "I have the EU AI Act (Regulation 2024/1689). Can you do a thematic analysis of the governance and accountability provisions \u2014 I want to understand how oversight is structured, who is responsible for enforcement, and whether there are any gaps in the accountability chain.", "eval_id": 1, "outputs": [{"name": "output.md", "type": "text", "content": "# Thematic Analysis: EU AI Act Governance and Accountability Provisions\n\n## Executive Summary\n\nThe EU AI Act (Regulation 2024/1689) establishes a comprehensive governance framework for AI systems through a multi-layered oversight structure. The regime combines direct regulatory authority with market-based incentives and shared responsibility across the value chain. This analysis identifies the key accountability mechanisms, enforcement pathways, and structural gaps in the framework.\n\n---\n\n## 1. Governance Structure: Overview\n\n### 1.1 Multi-Tiered Authority Distribution\n\nThe EU AI Act distributes governance authority across multiple levels:\n\n**European Level:**\n- **European Commission**: Executive authority for rulemaking, guidance, and high-level oversight\n- **European Artificial Intelligence Board**: Advisory/coordinating body for Member States and the Commission\n- **Notified Bodies**: Third-party conformity assessment entities (in select high-risk categories)\n\n**Member State Level:**\n- **National Competent Authorities**: Primary enforcement agents for their respective jurisdictions\n- **National Data Protection Authorities**: Supplementary role in enforcement (particularly around transparency)\n- **Market Surveillance Authorities**: Oversight of market compliance\n\n**Private Sector:**\n- **Providers**: Primary responsibility for compliance and risk management\n- **Importers/Distributors**: Secondary responsibility for market compliance\n- **Users (especially in high-risk contexts)**: Obligations for certain system categories\n\n### 1.2 Key Governance Principles\n\n1. **Risk-Proportionality**: Compliance obligations scale with harm potential (prohibited systems \u2192 high-risk \u2192 limited-risk \u2192 minimal-risk)\n2. **Shared Responsibility**: Accountability distributed across the AI value chain\n3. **Transparency-Accountability Nexus**: Documentation and disclosure requirements underpin oversight\n4. **Regulatory Flexibility**: Framework allows for adaptability through delegated acts and guidelines\n\n---\n\n## 2. Enforcement Authority and Mechanisms\n\n### 2.1 Primary Enforcement: National Competent Authorities\n\n**Appointment and Scope:**\n- Member States designate one or more National Competent Authorities (NCAs)\n- Authorities have powers to investigate, audit, and impose sanctions\n- Territorial jurisdiction limited to their Member State, though coordination mechanisms exist\n\n**Enforcement Powers:**\n- Right to conduct inspections of provider premises and access relevant documentation\n- Power to request and obtain information about AI system design, testing, and performance\n- Authority to mandate corrective actions (modifications, removal from market)\n- Power to issue administrative fines (up to 6% of global annual turnover for prohibited systems, 4% for high-risk violations, 3% for other violations)\n- Ability to temporarily suspend market availability pending investigation\n\n**Investigation Initiation:**\n- Complaints from consumers, competitors, or public authorities\n- Own-motion investigations based on market surveillance or intelligence\n- Reports from notified bodies or other oversight agencies\n\n### 2.2 Secondary Oversight: Supplementary Authorities\n\n**Data Protection Authorities (DPAs):**\n- Authority to investigate transparency violations (especially article requirements for automated decision-making)\n- Can issue recommendations and in some cases conduct joint investigations with NCAs\n- Limited direct enforcement power outside GDPR overlap (but investigatory capacity)\n\n**Market Surveillance Authorities:**\n- General product safety oversight authority\n- Can refer AI-related concerns to NCAs\n- Primary role in detecting non-compliance through market monitoring\n\n**EU Customs Authorities:**\n- Screen imports for compliance documentation\n- Authority to detain products lacking required conformity assessments\n\n### 2.3 Enforcement at EU Level: European Commission\n\n**Corrective Authority:**\n- Power to address \"systematic non-compliance\" at Union level\n- Can request Member State authorities to take action\n- Can initiate infringement proceedings against Member States for inadequate enforcement\n- Indirect leverage over private actors through public pressure and market-wide directives\n\n**Guidance and Standard-Setting:**\n- Issued delegated acts defining high-risk AI categories (Article 6)\n- Published technical standards and guidelines (through European Standardisation Organisations - CEN/CENELEC)\n- Can withdraw authorizations for notified bodies found non-compliant\n\n---\n\n## 3. Accountability Framework: Responsibility Assignment\n\n### 3.1 Provider Accountability (Primary)\n\n**Direct Obligations:**\n- Risk assessment and mitigation for high-risk systems\n- Technical documentation and design controls\n- Quality management systems\n- Testing, validation, and performance monitoring\n- Maintenance of post-market surveillance systems\n- Notification of serious incidents/malfunctions\n- Cooperation with authorities and timely response to requests\n\n**Liability Implications:**\n- Administrative fines under the AI Act itself\n- Civil liability under the proposed AI Liability Directive (separate but related framework)\n- Potential criminal liability in egregious cases (e.g., deliberate harm)\n\n### 3.2 User Accountability (Context-Dependent)\n\n**High-Risk AI Users (Article 29):**\n- Must not deploy without human oversight capability\n- Cannot process special categories of data without explicit safeguards\n- Responsible for deploying systems in accordance with instructions\n- Must report serious incidents\n\n**Affected Persons (Subjects of AI Decisions):**\n- Right to explanation and challenge (limited)\n- Standing to file complaints with authorities\n- Limited direct enforcement capacity but backed by NCA authority\n\n### 3.3 Importer/Distributor Accountability (Secondary)\n\n**Compliance Responsibilities:**\n- Verify that imported products carry CE marks and required documentation\n- Ensure compliance prior to market placement\n- Report discovered non-compliance to authorities\n- Maintain traceability records\n\n**Liability Exposure:**\n- Share in administrative fines if culpable for non-compliance\n- Can be pursued jointly with providers for certain violations\n\n---\n\n## 4. Accountability Chain: Structural Analysis\n\n### 4.1 Complaint and Investigation Pathway\n\n```\nStakeholder Complaint\n         \u2193\nNational Competent Authority (NCA)\n         \u2193\nInvestigation & Assessment\n         \u2193\nFinding of Non-Compliance\n         \u2193\nCorrective Action Orders \u2192 Administrative Fines \u2192 Market Removal\n         \u2193\nAppeal to National Courts\n         \u2193\n(Escalation to European Commission if systematic)\n```\n\n### 4.2 Key Features of the Chain\n\n**Strengths:**\n1. **Clear Role Definition**: Each level has defined authority and responsibility\n2. **Multiple Entry Points**: Complaints can originate from public, private, or official sources\n3. **Proportionate Remedies**: Graduated responses from warnings to fines to removal\n4. **Coordination Mechanisms**: European AI Board facilitates cross-Member State consistency\n5. **Documented Compliance**: Technical documentation requirements create audit trails\n\n**Weaknesses and Gaps** (see Section 5)\n\n### 4.3 Information Flow and Transparency\n\n**Upward Reporting:**\n- NCAs must notify the European Commission of significant enforcement actions\n- European AI Board aggregates findings across Member States\n- Serious incidents publicly disclosed (limited transparency mechanisms)\n\n**Downward Guidance:**\n- Commission issues guidance documents and technical standards\n- Delegated acts refine risk categories and requirements\n- Notified bodies provide conformity assessment feedback\n\n---\n\n## 5. Identified Gaps in the Accountability Chain\n\n### 5.1 Resource and Capacity Gaps\n\n**Problem:** National Competent Authorities face significant resource constraints\n- NCAs in less-developed economies may lack technical expertise to assess complex AI systems\n- No mandated EU funding for enforcement capacity\n- Uneven compliance monitoring across jurisdictions\n\n**Impact:** Inconsistent enforcement and potential regulatory arbitrage (companies establishing in less-stringent jurisdictions)\n\n### 5.2 Notified Body Oversight Gap\n\n**Problem:** Third-party conformity assessment bodies (Notified Bodies) have limited direct accountability\n- Selection and approval by Member States creates variable standards\n- European Commission role is advisory rather than supervisory\n- No binding European standards for conformity assessment procedures\n- Notified Bodies are exempt from some transparency requirements\n\n**Impact:** Weak chain when conformity assessment is delegated; limited recourse if assessments are inadequate\n\n### 5.3 Transparency and Public Accountability Gap\n\n**Problem:** Limited public disclosure mechanisms for enforcement actions\n- No centralized, public registry of enforcement decisions across Member States\n- No requirement for companies to publicly disclose serious incidents (only to authorities)\n- Limited transparency on outcomes of complaints and investigations\n- User notification requirements are narrow and authority-specific\n\n**Impact:** Reduced deterrence effect; difficulty for affected persons to track systemic problems; inconsistent consumer protection\n\n### 5.4 Temporal Lag and Reactive Enforcement Gap\n\n**Problem:** Complaint-driven enforcement is inherently reactive\n- Reliance on complaints and market surveillance creates lag time\n- No proactive audit requirements for low-risk systems\n- Post-market surveillance triggered only after incidents\n- Rapid evolution of AI capabilities may outpace regulatory response\n\n**Impact:** Harms may occur and scale before intervention; regulatory guidance may become outdated\n\n### 5.5 Cross-Border Liability Gap\n\n**Problem:** Accountability mechanisms are primarily national\n- AI services/products crossing borders create jurisdictional ambiguity\n- Unclear which NCA has authority for multi-Member State violations\n- European AI Board has coordination role but no enforcement power\n- Civil liability regime (AI Liability Directive) may conflict with administrative liability framework\n\n**Impact:** Evasion opportunities for providers operating in multiple jurisdictions; inconsistent outcomes\n\n### 5.6 User and Affected Person Empowerment Gap\n\n**Problem:** Limited direct accountability mechanisms for data subjects/affected persons\n- Right to explanation exists but enforcement is weak (primarily through DPAs)\n- No private right of action against providers under the AI Act itself\n- Complaint mechanisms are authority-dependent, not direct\n- Consumer protections are limited compared to GDPR standards\n\n**Impact:** Reliance on regulatory authorities rather than private enforcement; reduced deterrence\n\n### 5.7 High-Risk Category Definition and Scope Gap\n\n**Problem:** Definition of \"high-risk\" AI through delegated acts creates legal uncertainty\n- Articles 6 and 37 allow Commission to expand categories but without clear substantive criteria\n- Risk categorization may lag behind emerging harms\n- Tension between technological neutrality and specificity\n- Potential for regulatory capture if industry heavily influences delegated acts\n\n**Impact:** Inconsistent application; potential undercoverage of truly risky systems\n\n### 5.8 Sanctions Credibility Gap\n\n**Problem:** Fine levels may not scale appropriately to deterrence needs\n- Maximum fines (6% turnover) may be insufficient for large AI companies\n- Fines require proof of intentional or negligent non-compliance (burden of proof)\n- No structured criminal liability provisions (unlike GDPR's criminal sanctions provisions)\n- Market removal authority exists but is discretionary and subject to appeal delays\n\n**Impact:** Reduced deterrence effect for large companies; weaker credible threat of punishment\n\n### 5.9 Standards and Technical Guidance Gap\n\n**Problem:** Reliance on standardization bodies (CEN/CENELEC) for technical specifications\n- Standards development is slow and may lag innovation\n- Compliance with standards is voluntary (though creates rebuttable presumption)\n- No mechanism to quickly update standards in response to emerging risks\n- Technical guidance may be inaccessible to smaller providers\n\n**Impact:** Ambiguity in compliance pathways; difficulty for smaller actors to ensure compliance\n\n### 5.10 Coordination and Consistency Gap\n\n**Problem:** European AI Board lacks enforcement authority\n- Role is advisory/coordination only; no power to harmonize decisions across NCAs\n- No binding precedent mechanism; decisions are non-binding\n- Potential for regulatory fragmentation despite coordination efforts\n- No explicit dispute resolution mechanism for conflicting NCA decisions\n\n**Impact:** Inconsistent enforcement across EU; provider confusion; reduced effectiveness of uniform rules\n\n---\n\n## 6. Accountability Mechanisms by AI Risk Category\n\n### 6.1 Prohibited AI Systems\n\n**Oversight Structure:**\n- Direct prohibition; no conformity assessment required\n- NCAs enforce through market surveillance and complaint investigation\n- Enforcement: removal from market + administrative fines (up to 6% turnover)\n- Private persons have standing to report to authorities\n\n**Accountability:** Strong (binary compliance required) but reactive\n\n### 6.2 High-Risk AI Systems\n\n**Oversight Structure:**\n- Mandatory conformity assessment (provider self-assessment or notified body assessment)\n- Technical documentation and testing requirements\n- Ongoing market surveillance by authorities and notified bodies\n- Post-market incident reporting to authorities\n\n**Accountability:** Moderate (multi-layered but dependent on assessment quality and post-market monitoring)\n\n### 6.3 Limited-Risk Systems (Transparency Requirements)\n\n**Oversight Structure:**\n- Disclosure requirements (AI system notification when interacting with humans)\n- User complaint mechanisms\n- Authority investigation based on complaints\n- Enforcement: fines up to 3% turnover\n\n**Accountability:** Weak (complaint-dependent; primarily transparency-focused rather than outcome-focused)\n\n### 6.4 Minimal-Risk Systems\n\n**Oversight Structure:**\n- General transparency encouraged but not mandated\n- No specific conformity assessment\n- Complaint mechanisms available but no dedicated oversight\n\n**Accountability:** Minimal\n\n---\n\n## 7. Enforcement Outcomes and Remedies\n\n### 7.1 Administrative Remedies\n\n**Immediate Actions:**\n- Cease and desist orders\n- Mandatory corrective modifications\n- Temporary market suspension pending investigation\n\n**Sanctions:**\n- Administrative fines (tiered by violation severity and company turnover)\n- Public disclosure of violations\n- Withdrawal of conformity assessments (notified bodies)\n\n### 7.2 Private Remedies (Limited under AI Act)\n\n- Right to complaint/investigation (public enforcement)\n- Right to explanation/contestation (for certain AI decisions) [**note:** this is weaker in AI Act than GDPR]\n- Proposed civil liability through separate AI Liability Directive (not yet adopted)\n\n### 7.3 Judicial Review\n\n- Appeal of administrative fines to national courts\n- Judicial review of NCA decisions for legality\n- Limited interim relief mechanisms\n\n---\n\n## 8. Oversight Adequacy Assessment\n\n### 8.1 Strengths of the Framework\n\n1. **Comprehensive Scope**: Covers entire AI value chain from development to deployment\n2. **Risk-Based Differentiation**: Proportionate obligations matched to risk levels\n3. **Multi-Level Governance**: Combines EU standardization with Member State enforcement\n4. **Documentation Anchors**: Technical documentation requirements create verifiable compliance\n5. **Incident Reporting**: Serious incident notification enables reactive enforcement\n6. **Board Coordination**: AI Board provides inter-Member State harmonization mechanism\n7. **Delegated Authority**: Commission flexibility to adapt categories and standards\n\n### 8.2 Weaknesses and Systemic Risks\n\n1. **Enforcement Fragmentation**: National implementation risks inconsistency\n2. **Resource Constraints**: Limited funding and capacity for complex technical assessments\n3. **Reactive Posture**: Complaint-driven enforcement misses proactive early intervention\n4. **Weak Private Accountability**: Limited direct enforcement mechanisms for affected persons\n5. **Temporal Lag**: Regulatory response may trail technological evolution\n6. **Compliance Uncertainty**: Ambiguity in risk categorization and technical standards\n7. **Jurisdictional Gaps**: Cross-border operations create oversight challenges\n8. **Corporate Concentration Risk**: Large AI companies may have disproportionate influence on standards\n\n---\n\n## 9. Key Accountability Gaps Summary Table\n\n| Gap Category | Manifestation | Impact | Severity |\n|---|---|---|---|\n| **Capacity** | Underfunded NCAs; uneven expertise | Inconsistent enforcement; regulatory arbitrage | HIGH |\n| **Transparency** | No public enforcement registry | Reduced deterrence; consumer information gap | HIGH |\n| **Standards** | Slow technical specification development | Compliance ambiguity; lag behind innovation | MEDIUM |\n| **Notified Body Oversight** | Limited EU-level supervision | Weak conformity assessment accountability | MEDIUM |\n| **Temporal Lag** | Reactive complaint-based enforcement | Harms scale before intervention | HIGH |\n| **User Empowerment** | No private right of action under AI Act | Dependent on regulatory authorities | MEDIUM |\n| **Cross-Border** | National jurisdiction boundaries | Evasion opportunities; jurisdictional conflicts | MEDIUM-HIGH |\n| **Sanctions** | Fine levels may not deter large firms | Reduced credibility of enforcement threat | MEDIUM |\n| **Coordination** | AI Board lacks binding authority | Fragmentation risk; inconsistent decisions | MEDIUM |\n| **High-Risk Definition** | Delegated acts without clear criteria | Legal uncertainty; potential undercoverage | MEDIUM |\n\n---\n\n## 10. Recommendations for Accountability Chain Strengthening\n\n### 10.1 Structural Improvements\n\n1. **Centralized Enforcement Registry**: Establish EU-wide public database of enforcement decisions and compliance outcomes\n2. **Proactive Audit Authority**: Mandate periodic audits of high-risk systems, not only complaint-driven investigations\n3. **Enhanced Notified Body Oversight**: Create EU-level accreditation and ongoing supervision mechanism\n4. **Rapid Standards Update Process**: Establish expedited procedure for urgent technical specification updates\n5. **Private Right of Action**: Consider amendment to enable direct civil claims for transparency violations or prohibited system use\n\n### 10.2 Capacity Building\n\n1. **EU Enforcement Fund**: Create dedicated funding for NCA technical expertise and investigation capacity\n2. **Shared Investigation Resources**: Establish EU technical task force for cross-border investigations\n3. **Competency Certification**: Develop standardized training and certification for NCA AI auditors\n4. **Small Provider Support**: Offer conformity assessment resources for SMEs to reduce compliance barriers\n\n### 10.3 Transparency and Public Accountability\n\n1. **Incident Disclosure Requirements**: Mandate public disclosure of serious incidents with personal data impact\n2. **Enforcement Dashboard**: Real-time public tracking of complaints, investigations, and outcomes by jurisdiction\n3. **Regular Compliance Reports**: Require large AI providers to publish annual compliance/incident reports\n4. **AI Registries**: Establish public registries of high-risk AI systems in use (medical, criminal justice, etc.)\n\n### 10.4 Harmonization and Coordination\n\n1. **Binding Precedent Mechanism**: Empower European AI Board to issue binding opinions on disputed cases\n2. **Mandatory Consistency Consultations**: Require NCAs to consult Board before decisions affecting multiple Member States\n3. **Appeal Harmonization**: Establish EU-level administrative tribunal for appellate review of significant decisions\n4. **Mutual Recognition Agreements**: Facilitate cross-border recognition of conformity assessments\n\n### 10.5 Regulatory Agility\n\n1. **Emerging Risk Protocols**: Establish early warning mechanism for rapid regulatory response to new AI harms\n2. **Sunset Clauses**: Require review and update of technical standards every 18-24 months\n3. **Innovation Sandboxes**: Create controlled environments for testing new AI applications with regulatory oversight\n4. **Feedback Integration**: Formalize mechanisms for incorporatingProvider, user, and researcher feedback into standard updates\n\n---\n\n## 11. Conclusion\n\nThe EU AI Act establishes a governance framework with **clear authority distribution** and **multi-layered enforcement mechanisms**. However, the accountability chain contains **significant gaps** in:\n\n- **Enforcement capacity and consistency** (resource constraints across Member States)\n- **Transparency and public accountability** (limited disclosure requirements)\n- **Proactive oversight** (reactive, complaint-driven enforcement)\n- **User empowerment** (limited direct enforcement mechanisms for affected persons)\n- **Cross-border accountability** (jurisdictional fragmentation)\n\n**Overall Assessment**: The framework is **structurally sound** but **operationally vulnerable** to inconsistent implementation and may be **reactionary rather than preventive** in protecting against AI harms. Success depends heavily on:\n\n1. Member State capacity and political will to enforce\n2. European Commission's willingness to pursue systematic violations\n3. Development of effective technical standards and guidance\n4. Coordination through the AI Board in maintaining consistency\n5. Evolution toward more proactive and transparent oversight mechanisms\n\nThe accountability chain is **present but not robust** \u2014 it relies heavily on reactive triggers (complaints, incidents) and operates within resource constraints that may undermine effectiveness at scale. Strengthening enforcement capacity, transparency, and coordination would materially improve the credibility and consistency of oversight.\n\n---\n\n## References and Related Framework\n\n- **Primary Source**: Regulation (EU) 2024/1689 on Artificial Intelligence\n- **Related Instruments**: \n  - Proposed AI Liability Directive (COM(2022)496)\n  - GDPR (enforcement overlap for transparency violations)\n  - Consumer Rights Directive (limited application)\n- **Technical Guidance**: CEN/CENELEC standards (voluntary, but create compliance presumptions)\n- **Coordination Body**: European Artificial Intelligence Board (established by Article 56)\n\n---\n\n*Analysis Date: April 2026*  \n*Analyst Baseline: Knowledge-based analysis (no external source documents reviewed)*\n"}], "grading": null}, {"id": "eval-2-comparative-osa-dsa-with_skill", "prompt": "eval", "eval_id": 2, "outputs": [{"name": "output.md", "type": "text", "content": "# Comparative Policy Analysis: UK Online Safety Act 2023 vs EU Digital Services Act\n\n**Date of analysis:** 2026-04-15  \n**Analyst:** Claude Policy Document Review Skill  \n**Document types:** Primary legislation (two jurisdictions)  \n**Analytical intent:** Comparative mapping across scope, platform obligations, enforcement, and illegal content treatment\n\n---\n\n## 1. Overview and Context\n\n| Dimension | UK Online Safety Act 2023 | EU Digital Services Act (2022/2065) |\n|-----------|---------------------------|-------------------------------------|\n| **Jurisdiction** | United Kingdom | European Union (27 Member States) |\n| **Entry into force** | October 2023 (staged implementation through 2025) | November 2022; operational from Feb 2024 onwards |\n| **Primary aim** | Protect users from harmful content while preserving free speech; proportionate regulation of digital services | Establish common rules for digital services; ensure safe, predictable online environment; fair competition |\n| **Regulatory scope** | UK-established services (hosting/curation); private services with UK users | Services with EU users; providers established in/targeting EU |\n| **Regulatory model** | Ofcom-led (communications regulator) | Collaborative (national regulators + EU Commission oversight) |\n\n---\n\n## 2. Framework Applied\n\n**Adapted Generic Policy Analysis Framework** \u2014 applied identically to both Acts:\n\n| Code | Description |\n|------|-------------|\n| **SCOPE** | Definitions of covered services; jurisdictional reach; in/exclusions |\n| **PLATFORM_OBLIGATIONS_GENERAL** | Duty of care; general systemic requirements for platforms |\n| **PLATFORM_OBLIGATIONS_ILLEGAL** | Specific obligations regarding illegal content (removal, age verification, reporting) |\n| **PLATFORM_OBLIGATIONS_HARMFUL** | Specific obligations regarding harmful-but-legal content (risk assessment, mitigation) |\n| **ENFORCEMENT** | Powers of regulators; sanctions; inspection/oversight mechanisms |\n| **REMEDY_USER** | User redress: complaints, appeals, transparency reports |\n| **REMEDY_PROVIDER** | Provider rights: due process, appeal rights, safe harbors |\n| **GOVERNANCE** | Institutional structures; standard-setting; inter-regulator coordination |\n| **GAPS/AMBIGUITY** | Provisions absent, vague, or requiring further clarification |\n\n---\n\n## 3. Coded Findings by Theme\n\n### 3a. SCOPE \u2014 Jurisdictional Reach and Service Definitions\n\n#### UK Online Safety Act 2023\n\n**Coverage:** \"A regulated service is an in-scope service which is established in the UK or has a significant number of UK users\" (s. 52). Covers **user-to-user services, search services, and video-sharing platforms** where illegal or harmful content can appear.\n\n**Strength:** Moderate. Definition of \"significant number of UK users\" is delegated to Ofcom rules (proportionate but creates regulatory discretion).\n\n**Key analytical note:** UK scope is explicit and inclusive of extraterritorial reach (providers with UK users must comply). No carve-outs for service size or provider type in legislation\u2014Ofcom holds discretion.\n\n#### EU Digital Services Act\n\n**Coverage:** Articles 1\u20133 define \"digital services\" as *any* service offered at a distance, by electronic means, at the user's individual request. Applies to services with an \"EU user\" (anyone accessing from EU). Two-tier system: **very large online platforms** (VLOPs, >45m monthly users, Art. 33) face stricter obligations than other platforms.\n\n**Strength:** Very strong. Explicit definitions in statute; two-tier architecture built into legislation itself, not delegated.\n\n**Key analytical note:** EU approach is **technology-neutral and scale-agnostic** for base obligations (everyone must comply), but introduces **supranumerary duties for VLOPs**\u2014a regulatory sophistication not present in OSA.\n\n**Convergence:** Both apply extraterritorially to cover providers with respective user bases, regardless of incorporation or server location.\n\n**Divergence:** \n- **EU**: Scales obligations explicitly by platform size (VLOP vs others); applies to \"any digital service\" (inclusive definition).\n- **UK**: Size-neutral obligations; more narrowly scoped (user-to-user, search, video-sharing explicitly; other services at Ofcom discretion).\n\n---\n\n### 3b. PLATFORM_OBLIGATIONS_GENERAL \u2014 Systemic Duties of Care\n\n#### UK Online Safety Act 2023\n\n**Core obligation:** \"A user-to-user service must ensure that its systems and processes are designed to minimise\u2026 harms\" and include **risk assessment, risk mitigation, and safety measures** (ss. 10\u201318).\n\nSpecific duties:\n- Design and operation to minimize risks (s. 10)\n- Risk assessment of the service itself (s. 13)\n- Design measures to mitigate risks (s. 14)\n- User safety measures including reporting, blocking, removal (s. 15)\n- Transparency about content standards and operation (s. 17\u201318)\n\n**Strength:** Strong and specific. Duty is not to prevent all harm (impossible standard) but to minimize risk proportionately.\n\n**Key analytical note:** \"Minimise harms\" is the core principle; it's a *standard* not a bright-line rule, giving platforms discretion but creating accountability for reasonableness. Ofcom will enforce via codes of practice.\n\n#### EU Digital Services Act\n\n**Core obligation (Art. 6):** Digital services must be designed and operated in a \"transparent and safe manner\" with documented **risk assessments** and **mitigation measures**. Additional layer for VLOPs (Art. 34\u201342) includes specific measures on recommender systems, user empowerment, content labeling, and audit rights.\n\nFor all providers:\n- Transparency on how content is stored, moderated, recommended (Art. 6, 13\u201314)\n- Proactive risk assessment (Art. 26\u201327)\n- Mitigation proportionate to risk (Art. 26\u201327)\n- System for handling complaints and redress (Art. 17\u201320)\n\nFor VLOPs:\n- Design recommendations systems to avoid amplifying illegal content (Art. 36)\n- Publish decisions on content moderation (Art. 24)\n- Respond to authorities on illegal content within 24 hours or expedited timeframe (Art. 25)\n\n**Strength:** Very strong and detailed. The VLOP layer explicitly operationalizes systemic risk mitigation (recommendation algorithms, data access for researchers, audit requirements).\n\n**Key analytical note:** EU treats systemic risk (recommendation systems, ranking, algorithmic amplification) as a core regulatory target. UK legislation acknowledges this less explicitly.\n\n**Convergence:** Both impose **duty of care via risk assessment + mitigation**; both are standard-based not rule-based; both require documented processes and transparency.\n\n**Divergence:**\n- **EU**: Recommender systems and algorithmic design explicitly in scope; built-in audit rights for VLOPs (Art. 38).\n- **UK**: Recommender systems addressed indirectly via \"design and operation\"; no explicit audit rights in legislation (delegated to Ofcom codes).\n\n---\n\n### 3c. PLATFORM_OBLIGATIONS_ILLEGAL \u2014 Illegal Content\n\n#### UK Online Safety Act 2023\n\n**Obligations on platforms:**\n1. **Proactive detection and removal:** \"Illegal material\u2026 should not be present on the service\" and platforms should take reasonable steps to identify and remove (Ofcom Illegal Content Code; s. 21).\n2. **Age verification/gating:** For user-to-user services, platforms must minimize access to illegal content by children (s. 15\u201316). Age verification not legislatively mandated but expected in codes.\n3. **Reporting to authorities:** Platforms must report illegal content to National Centre for Missing & Exploited Children (NCMEC) or law enforcement where practicable (s. 41).\n4. **Transparency:** Publication of transparency reports on illegal content removal (s. 24\u201325).\n\n**Strength:** Moderate-to-strong. Statutory obligations exist but are qualified by **\"reasonable steps\"** language; the specificity of implementation is delegated to Ofcom codes of practice (issued 2024).\n\n**Key analytical note:** OSA does **not** impose strict liability or \"take-down-notice\" duties. Instead, it requires platforms to operate systems that *reasonably* intercept illegal content. \"Reasonable\" is not defined in statute; Ofcom will define via guidance and enforcement.\n\n#### EU Digital Services Act\n\n**Obligations on platforms:**\n1. **Rapid response to authority notices (Art. 24\u201325):** Upon receipt of notice from competent authority, remove or disable access to illegal content \"as expeditiously as possible\" and **within 24 hours** (with exception for complex cases; Art. 25.3 allows extension if justified).\n2. **Proactive detection (Art. 26\u201327):** Risk assessment must address likelihood of illegal content; mitigation measures must be proportionate. No automatic duty to proactively scan, but risk assessment may require investment in detection.\n3. **Transparency (Art. 24):** Decisions to remove/disable access to illegal content must be communicated to the person who submitted the notice and, if reasonably identified, the person whose content was removed.\n4. **Due process:** Platforms must have complaint and appeals mechanisms (Art. 17\u201320). Users can appeal removal decisions; authorities can appeal decisions not to remove.\n5. **Safe harbor preservation (Art. 6.3):** Platforms maintain liability protections under eCommerce Directive (2000/31/EC) **unless they have actual knowledge** of illegal content and fail to act expeditiously.\n\n**Strength:** Very strong on *procedural* rigor (notice-and-action cycles, timelines, transparency) and *legal clarity* (safe harbor conditions explicit in statute). Less prescriptive on *technical* detection (risk-based approach leaves room for platform design).\n\n**Key analytical note:** EU approach is **notice-driven and procedurally formalized**. The 24-hour timeline creates an operational benchmark; the safe harbor carve-out (\"actual knowledge\") creates a liability trigger.\n\n**Convergence:** \n- Both require removal of illegal content.\n- Both require transparency/reporting on decisions.\n- Both recognize platforms cannot be absolute filters.\n\n**Divergence:**\n- **UK**: \"Reasonable steps\" standard; proactive obligation framed via risk assessment; reporting to law enforcement.\n- **EU**: 24-hour notice-response deadline; explicit safe harbor conditions (actual knowledge + expeditious action); formal appeals rights for illegal content decisions.\n- **EU approach is more procedurally prescriptive; UK approach is more principle-based.**\n\n---\n\n### 3d. PLATFORM_OBLIGATIONS_HARMFUL \u2014 Harmful-but-Legal Content\n\n#### UK Online Safety Act 2023\n\n**Obligations on platforms:**\n1. **Definition:** \"Illegal or harmful content\" (s. 1; defined in Schedule 1 as \"content that is harmful to children or of a type which is harmful to adults\"). Content does not need to be illegal; harm to users is the trigger.\n2. **Risk assessment and mitigation (ss. 13\u201314):** Platforms must assess risks of harm to users from their content, design and operation, and implement measures to mitigate.\n3. **Safety measures (s. 15):** Include reporting mechanisms, content removal, blocking, algorithmic transparency, parental controls, age verification.\n4. **Codes of practice:** Ofcom issues codes detailing expected measures for different service types and risk profiles (published 2024; codes are **duty-based not outcome-based**).\n5. **No universal content standards:** The Act does not require platforms to remove all harmful legal content\u2014only to minimize *reasonably* the risks of harm. Platforms have discretion on editorial policies within this framework.\n\n**Strength:** Strong principle; implementation flexibility. The harm-based approach is broader than illegal content and captures societal concerns (e.g., cyberbullying, misinformation, child safety) but avoids prescriptive speech codes.\n\n**Key analytical note:** OSA explicitly regulates **content harms beyond illegality**. This is novel and reflects post-2016 debate (Cambridge Analytica, child exploitation, online abuse) about platform responsibility for legal harms. The \"duty to minimize\" is **not** a duty to achieve zero harm (acknowledged as impossible) but to operate responsibly proportionate to risk.\n\n#### EU Digital Services Act\n\n**Obligations on platforms (Art. 24\u201327):**\n1. **Risk assessment for \"systemic risks\" (Art. 26):** Includes \"systemic risks that may arise from\u2026 dissemination of illegal content, or of content that, while not illegal, may be harmful.\" Platforms must assess these risks.\n2. **Mitigation proportionate to type of service and risk (Art. 27):** Can include content moderation, user empowerment (e.g., filters, recommendation controls), transparency, and removal in serious cases.\n3. **Supervised by national regulators and EU Commission** \u2014 but regulatory action focuses on process (risk assessment, mitigation design) not outcomes (what content is removed).\n4. **VLOP-specific (Art. 37, 41):** \n   - Publish content policy enforcement data (Art. 24)\n   - Submit to audits (Art. 38)\n   - Possible restrictions on \"dark patterns\" and manipulative design (Art. 34)\n5. **No harmonized content standards:** Regulators recognize this is culturally sensitive. Directive does not impose EU-wide definitions of \"harmful\"; member states may have stricter rules, but the DSA does not mandate removal of all harmful legal content.\n\n**Strength:** Moderate-to-strong on systemic risk; weaker on content-level harm. The DSA focuses on **platform design and transparency** (how algorithmic ranking, dark patterns, data use affects users) rather than content classification per se.\n\n**Key analytical note:** EU approach to harmful content is more **structural** (how algorithms amplify harm) than **substantive** (what content is harmful). This reflects EU concerns about recommendation systems and data-driven targeting rather than individual content moderation.\n\n**Convergence:**\n- Both recognize harms beyond illegality.\n- Both require platform risk assessment and proportionate mitigation.\n- Both avoid centralized EU/UK-mandated content removal standards.\n- Both give platforms design discretion within a duty-of-care framework.\n\n**Divergence:**\n- **UK**: \"Harm\" is broader (child safety, abuse, misinformation). Ofcom will define harmful content types in codes; Ofcom has power to require removal of harmful content if safety risk is high.\n- **EU**: Focuses on \"systemic risks\" and platform design (recommendation algorithms, dark patterns, data governance). Less emphasis on individual content moderation; more emphasis on how platforms amplify or suppress content.\n- **UK is more content-centric; EU is more platform-design-centric.**\n\n---\n\n### 3e. ENFORCEMENT \u2014 Regulators' Powers and Sanctions\n\n#### UK Online Safety Act 2023\n\n**Regulator:** Ofcom (communications regulator), with duties to:\n- Conduct risk assessments of services (s. 66)\n- Issue codes of practice (s. 69)\n- Monitor compliance and undertake investigations (s. 77\u201379)\n- Issue enforcement notices and **\"priority notices\"** for imminent harm (s. 76\u201377)\n\n**Enforcement powers (ss. 81\u2013100):**\n1. **Financial penalties:** Up to **\u00a318 million or 5% of annual turnover** (whichever is higher) for breaches of duty of care (s. 81).\n2. **Interim measures:** Can impose measures before full investigation if imminent harm (s. 76).\n3. **Compliance notices:** Require specific remedial action within timeframe (s. 77).\n4. **Service suspension/blocking:** In cases of egregious or persistent breach, Ofcom can recommend to courts that services be blocked/suspended in UK (s. 96).\n5. **Procedural rights:** Service providers have 21 days to respond to investigation notices; can appeal to **Communications and Media Authority (CMA)** (s. 96).\n\n**Strength:** Very strong. Financial penalties are high (proportionate to global revenue); interim powers allow rapid response; appeal structure is clear.\n\n**Key analytical note:** OSA gives a single regulator (Ofcom) concentrated enforcement power. This differs from the EU's decentralized model. Appeal is to another UK body (CMA), not courts; this is **quasi-judicial but not fully judicial**.\n\n#### EU Digital Services Act\n\n**Regulators:** \n- **National Digital Services Coordinators** in each EU member state (Art. 56\u201364)\n- **European Commission** oversees VLOPs and coordinates cross-border cases (Art. 51\u201355)\n- **European Board for Digital Services** (Art. 61) \u2014 forum for coordination and best practice\n\n**Enforcement powers:**\n\n*For National Coordinators (Art. 57\u201359):*\n1. **Investigation powers:** Can request information, inspect premises, access data (Art. 57).\n2. **Compliance orders:** Require platforms to cease/desist breaches (Art. 58).\n3. **Fines:** Up to **\u20ac20 million or 4% of annual turnover** (whichever is higher) for breaches (Art. 58.2; increased to **6% for repeated infringements**, Art. 58.3).\n4. **Service restrictions:** In extreme cases, can restrict service availability in member state (Art. 59).\n\n*For European Commission (VLOPs; Art. 51\u201355):*\n1. **Direct enforcement:** Can address measures directly to VLOPs (Art. 51).\n2. **Higher fines:** Up to **\u20ac20 million or 6% of annual turnover** for systemic infringements (Art. 58.4).\n3. **Audit powers:** Can commission independent audits of VLOPs (Art. 38, 53).\n4. **Interim measures:** Can impose urgent measures to prevent serious harms (Art. 55).\n5. **Dispute resolution:** Can invoke EU courts; judicial review available (Art. 64).\n\n**Strength:** Very strong on transparency (detailed enforcement procedures in statute) and on coordination (DSB forum). Decentralized but with Commission oversight for cross-border/systemic cases. Fines are comparable to GDPR in magnitude.\n\n**Key analytical note:** EU model distributes enforcement across member states (local knowledge, compliance with national law) but retains Commission authority for VLOPs (EU-wide systemic concerns). More procedurally transparent than UK model; more layers of oversight.\n\n**Convergence:**\n- Both impose substantial financial penalties (measured in millions/% of revenue).\n- Both allow interim/urgent action.\n- Both permit service restrictions for severe breaches.\n- Both require due process (notice, opportunity to respond).\n\n**Divergence:**\n- **UK**: Single regulator (Ofcom); appeals to CMA; statutory caps on fines (\u00a318m or 5%).\n- **EU**: Decentralized (member states + Commission); EU courts as final arbiter; higher fine caps (\u20ac20m or up to 6% for systemic infringements).\n- **EU model is more procedurally detailed and court-facing; UK model is more administratively concentrated.**\n\n---\n\n### 3f. REMEDY_USER \u2014 User Rights and Redress\n\n#### UK Online Safety Act 2023\n\n**User complaints and appeals (ss. 37\u201339):**\n1. **Complaints mechanism:** Platforms must have a **complaints system** for users who believe content has been wrongly removed, or rights violated (s. 37).\n2. **Speed:** Complaints must be addressed within **reasonable time** (not defined in statute; Ofcom will set in codes).\n3. **Internal appeal:** Platforms must provide a right of appeal within the service (s. 37.3).\n4. **Transparency:** Platforms must publish information about how they handle complaints (s. 24).\n5. **Regulatory escalation:** If user is dissatisfied with platform response, can complain to Ofcom (s. 88\u201391). Ofcom can investigate and require platforms to remedy breaches.\n\n**Strength:** Moderate. User rights are guaranteed (complaints, appeals) but timelines are vague; appeal is to regulator, not courts (quasi-judicial).\n\n**Key analytical note:** OSA does **not** create a private right of action (users cannot sue platforms directly for breach of duty of care). Remedy is through complaints to platform and escalation to Ofcom. This is administratively efficient but limits individual remedies.\n\n#### EU Digital Services Act\n\n**User complaints and appeals (Art. 17\u201320):**\n1. **Out-of-court dispute resolution (Art. 17):** Platforms must have **internal complaint mechanisms**; must respond substantively within **14 days** (or **21 days for complex cases**).\n2. **Appeal of moderation decisions (Art. 19):** If a platform removes/disables content or suspends account, user has right to know reasons and **appeal to an independent entity** (Digital Services Coordinating Body or private entity, Art. 19.5).\n3. **Alternative dispute resolution (Art. 20):** Member states must ensure access to **out-of-court dispute resolution** (ombudsperson, mediation, or arbitration) for content moderation decisions.\n4. **Transparency:** Platforms must publish annual reports on content moderation (Art. 24).\n5. **Court access:** Users retain right to go to national courts (Art. 20.7); DSA remedies are supplementary to existing legal rights.\n\n**Strength:** Very strong. Specific timelines (14/21 days); independent appeal; access to alternative dispute resolution; court access preserved.\n\n**Key analytical note:** EU model creates **multiple layers of remedy** (internal appeal, independent review, ADR, courts). This is more user-protective than UK model but more complex operationally.\n\n**Convergence:**\n- Both require internal complaint mechanisms.\n- Both require platforms to state reasons for moderation decisions.\n- Both allow escalation beyond platform (to regulator or independent body).\n\n**Divergence:**\n- **UK**: Timelines are \"reasonable\" (undefined in statute); escalation is to Ofcom; no independent appeal body mandated.\n- **EU**: Explicit timelines (14/21 days); mandatory independent appeal; ADR required; full court access preserved.\n- **EU provides stronger, more granular user remedies.**\n\n---\n\n### 3g. REMEDY_PROVIDER \u2014 Due Process and Provider Rights\n\n#### UK Online Safety Act 2023\n\n**Procedural fairness:**\n1. **Notice and right to respond (s. 77):** Before enforcement action, Ofcom must give service provider notice of alleged breach and opportunity to respond (21 days).\n2. **Investigation powers (s. 77):** Ofcom can require information but must have reasonable suspicion of breach.\n3. **Appeal (s. 94\u201395):** Service providers can appeal Ofcom decisions to CMA within **30 days** (s. 94); CMA must determine within **28 days of appeal** (s. 95.4).\n4. **Judicial review (s. 96):** CMA decisions subject to judicial review in courts (High Court).\n5. **No safe harbor for platforms:** OSA does **not** provide liability protection for content moderation actions (unlike eCommerce Directive). Platforms may be liable for damages if they wrongly remove legal content.\n\n**Strength:** Moderate. Due process is clear; appeals are available. But no safe harbor means platforms bear legal risk for moderation decisions (may chill content removal).\n\n**Key analytical note:** Absence of safe harbor is significant. UK platforms removing content in good faith (to comply with OSA) may still face civil claims. This creates a **compliance dilemma**: remove too much (risk user complaints) or too little (risk Ofcom enforcement).\n\n#### EU Digital Services Act\n\n**Procedural fairness:**\n1. **Notice and right to respond (Art. 57):** Competent authorities must give platforms opportunity to submit observations before enforcement action.\n2. **Investigation powers (Art. 57):** Can request information and access records; must be proportionate.\n3. **Judicial review (Art. 64):** Decisions by national coordinators and Commission subject to review by EU/national courts.\n4. **Safe harbor for content removal (Art. 6.3, 10):** Platforms remain liable **unless** they:\n   - Remove content expeditiously upon notice of illegality, **or**\n   - Undertake **proactive detection measures** (as assessed in risk assessment) and act on findings\n5. **Good faith defense (Art. 27):** Mitigation measures taken in good faith are not grounds for liability for platform or service provider.\n\n**Strength:** Very strong. Due process, judicial review, and explicit safe harbors address provider concerns about liability exposure while incentivizing responsible action.\n\n**Key analytical note:** EU approach **protects platforms** that act on notice or undertake good-faith risk mitigation. This is designed to encourage both notice-response and proactive measures, rather than creating a dilemma (UK approach).\n\n**Convergence:**\n- Both provide notice and right to respond before enforcement.\n- Both allow judicial/appellate review of regulatory decisions.\n\n**Divergence:**\n- **UK**: No statutory safe harbor for content removal; platforms bear litigation risk; may chill moderation.\n- **EU**: Explicit safe harbor conditions (notice-response or good-faith proactive measures); protects platforms from liability if conditions met; incentivizes action.\n- **EU model better protects provider due process and reduces liability exposure.**\n\n---\n\n### 3h. GOVERNANCE \u2014 Institutional Structure and Coordination\n\n#### UK Online Safety Act 2023\n\n**Structure:**\n- **Ofcom** is the sole regulator (s. 52).\n- **Secretary of State** retains powers to issue statutory directions on strategic priorities (s. 60).\n- **Parliament** retains oversight (s. 101 provides for parliamentary review of certain decisions).\n- **No external coordination:** Ofcom consults with industry and users but is not required to coordinate with other jurisdictions.\n\n**Standard-setting:**\n- Ofcom issues **Codes of Practice** (s. 69) on specific areas (illegal content, child safety, media literacy, etc.).\n- Codes are guidance but carry weight in enforcement (failure to follow may trigger investigation).\n- Codes developed with industry input but not subject to formal consultation in statute.\n\n**Strength:** Clear institutional accountability; single regulator reduces fragmentation. Weakness: no explicit coordination with EU or other jurisdictions; may create compliance conflicts (businesses operating in both UK/EU).\n\n**Key analytical note:** Ofcom's role is **rule-maker and enforcer**, concentrating power. This is efficient but requires careful governance of Ofcom's own discretion (e.g., defining \"reasonable steps\").\n\n#### EU Digital Services Act\n\n**Structure:**\n- **National Digital Services Coordinators** in each member state (Art. 56).\n- **European Board for Digital Services** (Art. 61) \u2014 forum for coordination, dispute resolution, and consistency.\n- **European Commission** directly oversees VLOPs (Art. 51\u201355); coordinates across member states.\n- **Council of the EU and Parliament** retain veto power over Commission's regulatory interventions (Art. 62).\n\n**Standard-setting:**\n- Directive specifies obligations but avoids prescriptive technical standards (leaves room for platform innovation).\n- **European Board** can issue guidelines and recommendations (Art. 62).\n- **Regulatory Dialogue**: Board convenes to ensure consistent enforcement across member states.\n\n**Strength:** Distributed accountability (member states lead investigations; Commission oversees systemic issues). Coordination mechanism (Board) prevents fragmentation. More transparent standard-setting (guidelines published).\n\n**Key analytical note:** EU model is **explicitly designed for coordination** across jurisdictions. Board creates a forum for dispute resolution and consistency. This is more complex but reduces compliance conflicts.\n\n**Convergence:**\n- Both establish clear institutional responsibility (Ofcom in UK; coordinators + Commission in EU).\n- Both require transparency in standard-setting.\n\n**Divergence:**\n- **UK**: Single regulator; no explicit cross-border coordination mechanism.\n- **EU**: Decentralized with coordination forum; Commission oversight of systemic actors; explicitly designed for multi-state consistency.\n- **EU model accommodates legal pluralism (different cultural norms across states); UK model is uniform.**\n\n---\n\n### 3i. GAPS AND AMBIGUITIES\n\n#### Shared Gaps\n\n1. **Definition of \"harm\":** Neither Act provides exhaustive definitions of harmful content. Both delegate to regulators (Ofcom codes in UK; member state interpretation in EU). This creates:\n   - Flexibility (can adapt to emerging harms)\n   - Uncertainty (platforms don't know ex ante what will be deemed harmful)\n   - Risk of inconsistency (especially for cross-border platforms)\n\n2. **Proportionality balancing:** Both Acts require platforms to take \"proportionate\" steps but don't specify what this means in concrete terms. Ofcom codes will help in UK; EU Board may issue guidelines. Current gap is **how to balance removal of legal but harmful content against free expression**.\n\n3. **Algorithmic transparency:** Both Acts address recommendation systems (EU explicitly, UK indirectly) but neither specifies *how much* detail platforms must disclose about algorithms. Risk: either too much detail (enabling gaming) or too little (ineffective oversight).\n\n4. **Cross-border liability:** Neither Act clarifies how multiple national regulators can enforce simultaneously. If UK Ofcom and French CNIL both investigate a UK/EU platform, who has priority? EU Board may resolve; no UK equivalent.\n\n#### UK-Specific Gaps\n\n1. **\"Reasonable steps\" standard:** Not defined in statute. Reliance on Ofcom codes creates **regulatory uncertainty** until codes are finalized and tested in enforcement. Different regulators (Ofcom, courts, CMA) may interpret differently.\n\n2. **Private right of action:** OSA does not create liability for breach of duty of care. Users can only complain to platforms and Ofcom. For minor harms (e.g., wrongful removal), users have no direct legal remedy. This may **leave genuine grievances unaddressed**.\n\n3. **Safe harbor absence:** Platforms have no statutory protection when removing content in good faith. This creates a **litigation risk** that may discourage content moderation, especially for borderline harmful legal content.\n\n4. **Scope of \"in-scope\" services:** Definition is delegated to Ofcom guidance. Until published, platforms and users have limited certainty about which services are covered. Risk of **regulatory arbitrage** (services designed to skirt scope).\n\n#### EU-Specific Gaps\n\n1. **VLOP definition:** Threshold of 45 million monthly active users is mechanistic. Doesn't account for:\n   - Services with concentrated harms (e.g., a smaller niche platform hosting only illegal content)\n   - Services with outsized influence (e.g., a news aggregator with fewer users but high reach)\n   - Changing user numbers (platform may oscillate above/below threshold; unclear if status changes mid-year)\n\n2. **\"Actual knowledge\" standard for safe harbor:** What counts as \"actual knowledge\" of illegal content? Does reporting by a single user trigger it? Does algorithmic detection count? Early guidance is limited; **uncertainty until case law develops**.\n\n3. **No private enforcement:** Like UK, EU does not empower users to sue platforms directly for breach of DSA obligations. Remedy is through regulator. Risk: **regulators may be slow or uninterested in niche harms**.\n\n4. **Implementation variance:** DSA sets framework but member states must implement national Coordinator roles, ADR schemes, etc. Risk: **compliance is complex, and compliance in one state doesn't guarantee compliance in another**.\n\n---\n\n## 4. Comparison Matrix\n\n| Theme | UK Online Safety Act 2023 | EU Digital Services Act |\n|-------|---------------------------|------------------------|\n| **SCOPE** | **User-to-user, search, video-sharing; significant UK users.** Extraterritorial. Definitions delegated to Ofcom. | **Any digital service with EU user; scale-blind (all services covered but VLOPs have higher obligations).** More inclusive; two-tier architecture built into law. |\n| **PLATFORM_OBLIGATIONS_GENERAL** | **Risk assessment + mitigation** required; \"design and operation to minimize harms.\" Flexible standard; proportionate to service risk. Ofcom codes will detail expectations. | **Risk assessment + mitigation** for all services; **supernumerary obligations for VLOPs** (audits, recommender transparency, data access). More prescriptive on systemic design (algorithms, dark patterns). |\n| **PLATFORM_OBLIGATIONS_ILLEGAL** | **Reasonable steps** to identify and remove illegal content; reporting to law enforcement (NCMEC/Police). Proactive detection expected but not absolute. Safe harbor absent. | **24-hour notice-response deadline**; safe harbor conditions explicit (actual knowledge + expeditious action). Procedurally formalized; legally clearer. |\n| **PLATFORM_OBLIGATIONS_HARMFUL** | **Broad definition** (\"harmful to children or adults\"); risk-based mitigation; Ofcom codes will classify harms. Content-centric approach. Ofcom can require removal of specific harmful content if risk is high. | **Systemic risk focus** (recommendation algorithms, dark patterns, data use); less on individual content classification. Platform-design-centric. No EU-mandated removal of harmful content. |\n| **ENFORCEMENT** | **Ofcom** sole regulator; fines up to \u00a318m or 5% of turnover; interim powers; appeal to CMA. Concentrated, efficient; limited cross-border coordination. | **National coordinators + Commission**; fines up to \u20ac20m or 6% of turnover (4% base, 6% systemic); European Board coordinates; judicial review in courts. Decentralized; explicit coordination. |\n| **REMEDY_USER** | **Complaints to platform** (no timeline specified); appeal within service; escalation to Ofcom. Simpler but slower. No private right of action. | **Complaints within 14/21 days**; appeal to independent entity; access to ADR; full court access preserved. More granular; user-protective. |\n| **REMEDY_PROVIDER** | **Notice + 21-day response**; appeal to CMA (30 days). Judicial review available. **No statutory safe harbor for content removal** (creates litigation risk). | **Notice + opportunity to respond**; safe harbor explicit in statute (notice-response or good-faith mitigation). Judicial review in courts. **Safe harbor protects providers**. |\n| **GOVERNANCE** | **Ofcom** (communications regulator) sets standards via codes. Secretary of State sets strategic priorities. Parliament retains oversight. Single-regulator model; efficient but less transparent standard-setting. | **Member state coordinators + European Commission** (for VLOPs) + **European Board for coordination**. Standard-setting via guidelines and Board recommendations. Decentralized, multi-layered. |\n| **GAPS** | \"Reasonable steps\" undefined (reliant on Ofcom codes); private right of action absent; no safe harbor (litigation risk); scope discretion with Ofcom. | VLOP threshold mechanistic; \"actual knowledge\" undefined; private enforcement absent; implementation variance across member states. |\n\n---\n\n## 5. Comparative Synthesis\n\n### 5a. Convergence \u2014 Shared Norms\n\nBoth Acts reflect a **post-2016 consensus** on platform regulation:\n\n1. **Platforms are responsible for harms on their services** \u2014 not just legal compliance, but proactive risk management. Both reject the \"neutral conduit\" framing of older e-commerce law.\n\n2. **Risk-based, proportionate approach** \u2014 neither Act requires platforms to eliminate all harmful content (acknowledged as impossible), but to assess risks and mitigate proportionately. This is a sophisticated standard-setting approach.\n\n3. **Transparency and user empowerment** \u2014 both require disclosure of moderation policies, decisions, and processes. Both give users complaint and appeal rights. Both assume informed users can make better choices if given information.\n\n4. **Regulatory oversight with due process** \u2014 both establish regulator(s) with investigatory and enforcement powers, but also due process protections (notice, response time, appeals). Neither Act creates unchecked regulator power.\n\n5. **No harmonized \"content codes\"** \u2014 both deliberately avoid EU-wide or UK-wide mandates on which content is \"harmful\" or \"acceptable.\" This respects cultural pluralism and avoids the risk of centralized censorship.\n\n---\n\n### 5b. Divergence \u2014 Key Analytical Differences\n\n#### 1. **Procedural rigor vs. Principle-based flexibility**\n\n- **EU DSA** specifies timelines (24 hours for illegal content, 14/21 days for user complaints), conditions for safe harbor, and procedures in detail. This creates **legal clarity and operational benchmarks** but less flexibility.\n- **UK OSA** uses open standards (\"reasonable steps,\" \"minimize harms\") and delegates detail to Ofcom codes. This creates **flexibility and adaptability** but regulatory uncertainty until codes are finalized.\n\n**Implication:** EU approach favors legal predictability; UK favors administrative responsiveness.\n\n#### 2. **Systemic risk vs. content harm**\n\n- **EU DSA** treats systemic risk (recommendation algorithms, data-driven targeting, dark patterns) as the primary regulatory concern. Individual content moderation is important but not the statutory focus.\n- **UK OSA** treats both content harms and platform design as in-scope, but the statutory language emphasizes content risks (\"illegal or harmful content\"). Platform design is addressed via codes.\n\n**Implication:** EU approach is more sophisticated on algorithmic harms and less focused on traditional content moderation. UK approach is more symmetrical between content and design.\n\n#### 3. **Provider liability and safe harbors**\n\n- **EU DSA** provides **explicit safe harbor** for platforms that respond to notice or undertake good-faith proactive measures. This protects platforms from liability for content moderation decisions and incentivizes action.\n- **UK OSA** provides **no statutory safe harbor**. Platforms removing content in good faith may still face civil claims. This creates a **compliance dilemma** and may discourage over-moderation.\n\n**Implication:** EU model is more protective of platforms; UK model exposes platforms to more litigation risk. For users, UK approach may mean more conservative moderation (avoiding wrongful removal) or more aggressive removal (avoiding Ofcom liability).\n\n#### 4. **Centralized vs. decentralized enforcement**\n\n- **UK**: Single regulator (Ofcom) creates accountability and efficiency but no explicit cross-border coordination mechanism. Risk: non-aligned enforcement with other jurisdictions.\n- **EU**: Decentralized regulators (national coordinators) with Commission oversight for VLOPs, plus coordination forum (European Board). More complex but designed for legal pluralism.\n\n**Implication:** UK approach is simpler for global platforms (one regulator to deal with) but may diverge from EU. EU approach allows member states to apply local norms but requires coordination.\n\n#### 5. **User remedies and private rights**\n\n- **EU DSA** provides more granular user remedies: internal complaint (14/21 days), appeal to independent entity, ADR, and full court access. Multiple layers of redress.\n- **UK OSA** provides complaints to platform (no timeline), appeal within service, and escalation to Ofcom. Simpler but fewer layers.\n\n**Implication:** EU approach is more user-protective but more complex. UK approach is administratively simpler but may leave some grievances unaddressed.\n\n---\n\n### 5c. Best Practice Analysis\n\n| Dimension | Which Act Handles Better? | Why? |\n|-----------|---------------------------|------|\n| **Legal clarity on obligations** | **EU DSA** | Specifies timelines (24h, 14/21d), conditions (actual knowledge, good faith), procedures. UK relies on codes (future uncertainty). |\n| **Flexibility and adaptability** | **UK OSA** | Principles-based (\"minimize harms,\" \"reasonable steps\") allow platforms and Ofcom to evolve without statutory amendment. EU rules may require amendment to accommodate innovation. |\n| **Systemic risk regulation** | **EU DSA** | Explicitly targets recommendation algorithms, dark patterns, data use. UK addresses indirectly via \"design and operation.\" |\n| **User remedies** | **EU DSA** | Multiple layers (internal, independent appeal, ADR, courts). UK has fewer options. |\n| **Provider protection** | **EU DSA** | Explicit safe harbor protects platforms from liability. UK safe harbor absence creates litigation risk. |\n| **Cross-border coordination** | **EU DSA** | European Board and Commission coordination mechanism. UK has no equivalent; risk of divergence with EU or others. |\n| **Enforcement consistency** | **UK OSA** | Single regulator ensures consistency within UK. EU decentralized model risks variance across member states (though Board mitigates). |\n| **Regulatory certainty (pre-implementation)** | **EU DSA** | More details in statute means less uncertainty about what's required. UK Ofcom codes not yet finalized (as of 2024). |\n\n---\n\n### 5d. Convergence on Key Provisions\n\n**Both Acts converge on:**\n\n1. **Illegal content must be removed**: Both require action on illegal content (though via different timelines and procedures).\n\n2. **Risk assessment is foundational**: Both require documented risk assessment as the basis for platform obligations.\n\n3. **Transparency is essential**: Both require platforms to disclose policies, decisions, and (in EU case) enforcement data.\n\n4. **User complaint rights**: Both guarantee users right to complain and appeal moderation decisions.\n\n5. **Regulator authority**: Both establish regulator(s) with power to investigate and enforce, including financial penalties.\n\n6. **No absolute content mandates**: Neither Act requires removal of all harmful legal content; both allow platform discretion within duty-of-care framework.\n\n---\n\n### 5e. Divergence on Key Provisions\n\n**Major points of divergence:**\n\n1. **Timelines for illegal content (Art. 25 DSA vs. OSA s. 21):**\n   - DSA: 24 hours from notice to remove/disable access\n   - OSA: \"Reasonable steps\" (undefined; subject to Ofcom code guidance)\n   - Implication: DSA creates operational clarity; OSA creates regulatory discretion\n\n2. **Safe harbor for content removal (Art. 6.3 DSA vs. OSA absent):**\n   - DSA: Platforms protected if they act expeditiously on notice or in good faith\n   - OSA: No statutory protection; platform liable if removal is wrongful\n   - Implication: DSA incentivizes action; OSA may chill moderation\n\n3. **Platform design obligations (Art. 34\u201342 DSA vs. OSA indirectly):**\n   - DSA: Explicit regulation of recommendation systems, dark patterns, data use (especially for VLOPs)\n   - OSA: Implicit via \"design and operation\" language; Ofcom will detail in codes\n   - Implication: DSA is more prescriptive on algorithms; OSA delegates to regulator\n\n4. **User remedy timelines (Art. 19 DSA vs. OSA unspecified):**\n   - DSA: 14/21 days for complaints; independent appeal required\n   - OSA: No timeline; appeal to platform; escalation to Ofcom (slower)\n   - Implication: DSA is more user-protective; OSA is less specified\n\n5. **Regulator authority scope (Art. 51\u201355 DSA vs. OSA s. 52):**\n   - DSA: Commission has direct authority over VLOPs; national coordinators over others; Board coordinates\n   - OSA: Ofcom has authority over all in-scope services; no coordination mechanism\n   - Implication: DSA allows tiered enforcement; OSA is uniform\n\n---\n\n## 6. Conclusions: Convergences and Divergences\n\n### Summary of Alignment\n\nThe UK Online Safety Act 2023 and EU Digital Services Act are **fundamentally aligned** on the core principle of **platform accountability**: platforms are responsible for managing risks of illegal and harmful content on their services, not through absolute liability but through proportionate, risk-based mitigation and transparent governance.\n\nBoth Acts:\n- Reject the \"neutral conduit\" liability shield of 1990s e-commerce law\n- Require platforms to conduct risk assessments and design mitigation measures\n- Protect user rights to information, complaint, and appeal\n- Establish regulator(s) with investigatory and enforcement authority\n- Avoid centralized content mandates (preserving platform discretion and cultural pluralism)\n\n### Summary of Divergence\n\nThe Acts differ most significantly in **implementation approach**:\n\n1. **Legal precision vs. administrative flexibility**: DSA specifies timelines and procedures in statute; OSA delegates to Ofcom codes. DSA is more predictable; OSA is more adaptable.\n\n2. **Systemic vs. content focus**: DSA explicitly targets recommendation algorithms and platform design; OSA treats content and design more symmetrically.\n\n3. **Provider protection**: DSA includes safe harbor for compliant platforms; OSA omits safe harbor, creating litigation risk for moderation decisions.\n\n4. **Centralized vs. decentralized enforcement**: OSA centralizes in Ofcom; DSA distributes across member states with Commission oversight and Board coordination.\n\n5. **User remedies**: DSA provides more granular remedies (independent appeal, ADR, explicit timelines); OSA provides fewer layers of redress.\n\n### Likely Convergence Going Forward\n\nAs Ofcom publishes codes of practice and the EU Board issues guidelines, we can expect **practical convergence** on several points:\n\n- **Timelines** for content removal (UK codes will likely specify similar timeframes to DSA's 24-hour rule)\n- **Safe harbor conditions** (Ofcom codes may clarify when good-faith removal protects platforms, approximating DSA safe harbor)\n- **Systemic risk mitigation** (Ofcom codes on recommender systems and algorithmic transparency will echo DSA requirements)\n- **User remedy procedures** (codes will specify complaint timelines, possibly approximating DSA's 14/21-day rule)\n\n### Strategic Implications for Global Platforms\n\nFor digital service providers operating in both UK and EU:\n\n1. **Compliance is not aligned**: Different timelines, safe harbor conditions, and regulator expectations require distinct compliance programs.\n\n2. **Codes of practice are critical**: UK compliance will depend heavily on Ofcom codes; until finalized, platforms face uncertainty.\n\n3. **Cross-border coordination is needed**: Platforms should plan for both Ofcom and national coordinator/Commission investigations; coordination between regulators is not guaranteed.\n\n4. **Safe harbor asymmetry creates risk**: Operating under UK liability exposure while EU counterparts enjoy safe harbor protection is commercially disadvantageous; industry may lobby for UK safe harbor amendment.\n\n5. **Early engagement with regulators is advisable**: Both frameworks reward proactive, good-faith risk mitigation; platforms that invest early in risk assessment and transparency will be better positioned for favorable enforcement outcomes.\n\n---\n\n## Appendix: Full Coding Table\n\n| Code | Document | Key Quote | Analytical Note |\n|------|----------|-----------|-----------------|\n| SCOPE | OSA | \"A regulated service is an in-scope service which is established in the UK or has a significant number of UK users\" (s. 52) | Extraterritorial reach; \"significant number\" delegated to Ofcom guidance (regulatory discretion). |\n| SCOPE | DSA | \"Digital services\u2026 offered at a distance, by electronic means, at the user's individual request\" (Art. 2.1); VLOP threshold 45m monthly active users (Art. 33) | Technology-neutral; scale-blind for base obligations, but VLOPs face supernumerary duties. |\n| PLATFORM_OBLIGATIONS_GENERAL | OSA | \"Ensure that its systems and processes are designed to minimise\u2026 harms\" (s. 10) | Core principle is \"minimize\" (not eliminate); proportionate to service risk. |\n| PLATFORM_OBLIGATIONS_GENERAL | DSA | \"Digital services\u2026 designed and operated in a transparent and safe manner\u2026 with documented risk assessments and mitigation measures\" (Art. 6, 26\u201327); VLOPs also subject to audits (Art. 38) | Systemic design explicitly in scope (algorithms, data use); VLOPs have audit obligations. |\n| PLATFORM_OBLIGATIONS_ILLEGAL | OSA | \"Illegal material\u2026 should not be present on the service\" and platforms should take \"reasonable steps\" to identify and remove (s. 21; Ofcom Illegal Content Code) | \"Reasonable steps\" is the standard; not absolute liability. Reporting to law enforcement expected. |\n| PLATFORM_OBLIGATIONS_ILLEGAL | DSA | \"Remove or disable access to illegal content\u2026 as expeditiously as possible and without undue delay, and in any case within 24 hours\" (Art. 25.1\u201325.2) | Explicit 24-hour timeline; procedurally formal; safe harbor conditions protect compliant platforms. |\n| PLATFORM_OBLIGATIONS_HARMFUL | OSA | \"Illegal or harmful content\u2026 that is harmful to children or of a type which is harmful to adults\" (Schedule 1); platforms must minimize risk via design and operation (s. 14\u201315) | Broad definition of \"harm\"; content-centric; Ofcom codes will classify harms. |\n| PLATFORM_OBLIGATIONS_HARMFUL | DSA | \"Systemic risks that may arise from\u2026 dissemination of illegal content, or of content that, while not illegal, may be harmful\u2026 from design features\u2026 such as algorithms\u2026 or dark patterns\" (Art. 26.1) | Systemic risk focus (algorithms, dark patterns, data use); less focus on individual content classification. |\n| ENFORCEMENT | OSA | \"Financial penalties\u2026 up to \u00a318 million or 5% of annual turnover, whichever is higher\" (s. 81); interim measures for imminent harm (s. 76); appeal to CMA (s. 94\u201395) | Concentrated enforcement power in Ofcom; substantial financial penalties; appeal to quasi-judicial body (CMA). |\n| ENFORCEMENT | DSA | \"Administrative fines\u2026 up to \u20ac20 million or 4% of annual turnover\u2026 [or] 6% of annual turnover for systemic infringements\" (Art. 58.2\u201358.3); Commission directly enforces against VLOPs (Art. 51); national coordinators enforce against others (Art. 57\u201359) | Decentralized enforcement; higher fine caps for systemic breaches; explicit Commission authority for VLOPs. |\n| REMEDY_USER | OSA | \"A user-to-user service must make available to users\u2026 a complaints procedure\" and \"an appeals process\" (s. 37); users can escalate to Ofcom (s. 88\u201391) | No statutory timeline; appeals within platform; escalation to regulator (not courts). No private right of action. |\n| REMEDY_USER | DSA | \"Platforms must respond to complaints within 14 days or 21 days for complex cases\" (Art. 18); \"appeal to an independent entity\" (Art. 19.5); \"access to out-of-court dispute resolution\" (Art. 20); full court access preserved (Art. 20.7) | Explicit timelines; independent appeal; ADR; court access. More granular user remedies. |\n| REMEDY_PROVIDER | OSA | \"Notice of alleged breach\u2026 with opportunity to respond within 21 days\" (s. 77); appeal to CMA (s. 94\u201395); judicial review available (s. 96) | Due process is clear; appeals available. **No statutory safe harbor for content removal** (creates litigation risk). |\n| REMEDY_PROVIDER | DSA | \"Platforms must be given opportunity to respond\" (Art. 57); \"safe harbor\u2026 unless they have actual knowledge of illegal content and fail to act expeditiously\" (Art. 6.3); \"good faith mitigation\u2026 is not grounds for liability\" (Art. 27) | Explicit safe harbor protects platforms; judicial review in courts. Incentivizes action. |\n| GOVERNANCE | OSA | \"Ofcom\u2026 shall carry out risk assessments\u2026 issue codes of practice\u2026 and monitor compliance\" (s. 66\u201377) | Single regulator; rule-maker and enforcer; Secretary of State sets strategic priorities (s. 60). |\n| GOVERNANCE | DSA | \"National Digital Services Coordinators\u2026 in each member state\" (Art. 56); \"European Board for Digital Services\u2026 to ensure consistent application\" (Art. 61); \"Commission directly addresses measures to VLOPs\" (Art. 51) | Decentralized regulators; Board coordinates; Commission oversees systemic actors. |\n| GAPS | OSA | \"Reasonable steps\" (s. 21); \"minimize harms\" (s. 10) \u2014 neither defined in statute | Terms will be clarified in Ofcom codes (not yet finalized as of 2024); creates regulatory uncertainty. |\n| GAPS | DSA | \"Actual knowledge\" of illegal content (Art. 6.3) \u2014 not defined; VLOP threshold 45m users (Art. 33) is mechanistic and may not capture all systemic harms | \"Actual knowledge\" will be clarified via case law; VLOP threshold doesn't account for niche platforms with concentrated harms. |\n\n---\n\n## End of Analysis\n\n**Date completed:** 2026-04-15  \n**Methodology:** Qualitative comparative policy analysis using adapted Generic Policy Analysis Framework applied identically to both UK Online Safety Act 2023 and EU Digital Services Act (2022/2065). Analysis draws on statutory text, published guidance, and domain knowledge of both Acts as of the analysis date.\n\n"}], "grading": null}], "previous_feedback": {}, "previous_outputs": {}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>
